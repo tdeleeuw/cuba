@@ -20,18 +20,20 @@ package com.haulmont.cuba.web.gui.components;
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.TestIdManager;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionDescriptor;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionValue;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.data.impl.DsContextImplementation;
 import com.haulmont.cuba.gui.data.impl.compatibility.CompatibleAccordionSelectedTabChangeListener;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.settings.Settings;
+import com.haulmont.cuba.gui.sys.TestIdManager;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.web.AppUI;
-import com.haulmont.cuba.web.WebWindowManager;
 import com.haulmont.cuba.web.gui.icons.IconResolver;
+import com.haulmont.cuba.web.sys.WebWindowManagerImpl;
 import com.haulmont.cuba.web.widgets.CubaAccordion;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.AbstractComponent;
@@ -320,7 +322,7 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion> implements
                     && ((BelongToFrame) childComponent).getFrame() == null) {
                 ((BelongToFrame) childComponent).setFrame(frame);
             } else {
-                frame.registerComponent(childComponent);
+                ((FrameImplementation) frame).registerComponent(childComponent);
             }
         }
 
@@ -486,7 +488,7 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion> implements
 
                 Window window = ComponentsHelper.getWindow(WebAccordion.this);
                 if (window != null) {
-                    ((DsContextImplementation) window.getDsContext()).resumeSuspended();
+                    ((DsContextImplementation) LegacyFrame.of(window).getDsContext()).resumeSuspended();
                 } else {
                     LoggerFactory.getLogger(WebAccordion.class).warn("Please specify Frame for Accordion");
                 }
@@ -572,8 +574,8 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion> implements
                     AppUI appUI = AppUI.getCurrent();
                     if (appUI.isPerformanceTestMode()) {
                         context.addPostInitTask((context1, window1) -> {
-                            Window.TopLevelWindow appWindow = appUI.getTopLevelWindow();
-                            ((WebWindowManager) appWindow.getWindowManager()).initDebugIds(window1);
+                            RootWindow appWindow = appUI.getTopLevelWindow();
+                            ((WebWindowManagerImpl) appWindow.getWindowManager()).initDebugIds(window1);
                         });
                     }
                 }

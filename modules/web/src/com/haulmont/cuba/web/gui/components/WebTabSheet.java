@@ -19,19 +19,20 @@ package com.haulmont.cuba.web.gui.components;
 import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.TestIdManager;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionDescriptor;
 import com.haulmont.cuba.gui.app.security.role.edit.UiPermissionValue;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.data.impl.DsContextImplementation;
-import com.haulmont.cuba.gui.data.impl.compatibility.CompatibleTabSheetSelectedTabChangeListener;
 import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.settings.Settings;
+import com.haulmont.cuba.gui.sys.TestIdManager;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.web.AppUI;
-import com.haulmont.cuba.web.WebWindowManager;
 import com.haulmont.cuba.web.gui.icons.IconResolver;
+import com.haulmont.cuba.web.sys.WebWindowManagerImpl;
 import com.haulmont.cuba.web.widgets.CubaTabSheet;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Layout;
@@ -260,7 +261,7 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
         public void setIcon(String icon) {
             this.icon = icon;
             if (!StringUtils.isEmpty(icon)) {
-                Resource iconResource = AppBeans.get(IconResolver.class)
+                Resource iconResource = AppBeans.get(IconResolver.class) // todo replace
                         .getIconResource(this.icon);
                 getVaadinTab().setIcon(iconResource);
             } else {
@@ -270,7 +271,7 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
 
         @Override
         public void setIconFromSet(Icons.Icon icon) {
-            String iconPath = AppBeans.get(Icons.class)
+            String iconPath = AppBeans.get(Icons.class) // todo replace
                     .get(icon);
             setIcon(iconPath);
         }
@@ -317,7 +318,7 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
                     && ((BelongToFrame) childComponent).getFrame() == null) {
                 ((BelongToFrame) childComponent).setFrame(frame);
             } else {
-                frame.registerComponent(childComponent);
+                ((FrameImplementation) frame).registerComponent(childComponent);
             }
         }
 
@@ -346,11 +347,10 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
     }
 
     @Override
-    public TabSheet.Tab addLazyTab(String name,
-                                   Element descriptor,
-                                   ComponentLoader loader) {
-        ComponentsFactory cf = AppBeans.get(ComponentsFactory.NAME);
-        BoxLayout tabContent = (BoxLayout) cf.createComponent(VBoxLayout.NAME);
+    public TabSheet.Tab addLazyTab(String name, Element descriptor, ComponentLoader loader) {
+
+        ComponentsFactory cf = AppBeans.get(ComponentsFactory.NAME); // todo replace
+        BoxLayout tabContent = cf.createComponent(VBoxLayout.NAME);
 
         Layout layout = tabContent.unwrap(Layout.class);
         layout.setSizeFull();
@@ -452,7 +452,9 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
 
     @Override
     public void setSelectedTab(TabSheet.Tab tab) {
-        this.component.setSelectedTab(WebComponentsHelper.unwrap(((Tab) tab).getComponent()));
+        Component tabComponent = ((Tab) tab).getComponent();
+        com.vaadin.ui.Component vTabContent = tabComponent.unwrap(com.vaadin.ui.Component.class);
+        this.component.setSelectedTab(vTabContent);
     }
 
     @Override
@@ -462,7 +464,9 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
             throw new IllegalStateException(String.format("Can't find tab '%s'", name));
         }
 
-        this.component.setSelectedTab(WebComponentsHelper.unwrap(tab.getComponent()));
+        Component tabComponent = tab.getComponent();
+        com.vaadin.ui.Component vTabContent = tabComponent.unwrap(com.vaadin.ui.Component.class);
+        this.component.setSelectedTab(vTabContent);
     }
 
     @Override
@@ -502,14 +506,6 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
         component.setTabsVisible(tabsVisible);
     }
 
-    @Override
-    public void addListener(TabChangeListener listener) {
-        initComponentTabChangeListener();
-
-        getEventRouter().addListener(SelectedTabChangeListener.class,
-                new CompatibleTabSheetSelectedTabChangeListener(listener));
-    }
-
     private void initComponentTabChangeListener() {
         // init component SelectedTabChangeListener only when needed, making sure it is
         // after all lazy tabs listeners
@@ -530,18 +526,13 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
 
                 Window window = ComponentsHelper.getWindow(WebTabSheet.this);
                 if (window != null) {
-                    ((DsContextImplementation) window.getDsContext()).resumeSuspended();
+                    ((DsContextImplementation) LegacyFrame.of(window).getDsContext()).resumeSuspended();
                 } else {
                     LoggerFactory.getLogger(WebTabSheet.class).warn("Please specify Frame for TabSheet");
                 }
             });
             componentTabChangeListenerInitialized = true;
         }
-    }
-
-    @Override
-    public void removeListener(TabChangeListener listener) {
-        getEventRouter().removeListener(SelectedTabChangeListener.class, new CompatibleTabSheetSelectedTabChangeListener(listener));
     }
 
     @Override
@@ -620,8 +611,8 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet> implements T
                     AppUI appUI = AppUI.getCurrent();
                     if (appUI.isPerformanceTestMode()) {
                         context.addPostInitTask((localContext, localWindow) -> {
-                            Window.TopLevelWindow appWindow = appUI.getTopLevelWindow();
-                            ((WebWindowManager) appWindow.getWindowManager()).initDebugIds(localWindow);
+                            RootWindow appWindow = appUI.getTopLevelWindow();
+                            ((WebWindowManagerImpl) appWindow.getWindowManager()).initDebugIds(localWindow);
                         });
                     }
                 }

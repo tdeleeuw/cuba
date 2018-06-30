@@ -19,11 +19,12 @@ package com.haulmont.cuba.web.gui.components;
 import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.events.EventRouter;
 import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HasDebugId;
 import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.sys.EventHubOwner;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.icons.IconResolver;
@@ -36,20 +37,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
-        extends EventHub
+        extends EventHub // todo remove this inheritance, use composition
         implements Component, Component.Wrapper, Component.HasXmlDescriptor, Component.BelongToFrame, Component.HasIcon,
-                   Component.HasCaption, HasDebugId {
+                   Component.HasCaption, HasDebugId, EventHubOwner {
 
     @Deprecated
-    public static final List<Sizeable.Unit> UNIT_SYMBOLS = Collections.unmodifiableList(Arrays.asList(
+    public static final List<Sizeable.Unit> UNIT_SYMBOLS = Arrays.asList(
             Sizeable.Unit.PIXELS, Sizeable.Unit.POINTS, Sizeable.Unit.PICAS,
             Sizeable.Unit.EM, Sizeable.Unit.EX, Sizeable.Unit.MM,
-            Sizeable.Unit.CM, Sizeable.Unit.INCH, Sizeable.Unit.PERCENTAGE));
+            Sizeable.Unit.CM, Sizeable.Unit.INCH, Sizeable.Unit.PERCENTAGE);
 
     public static final String ICON_STYLE = "icon";
 
@@ -79,6 +79,11 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     }
 
     @Override
+    public EventHub getEventHub() {
+        return this;
+    }
+
+    @Override
     public Frame getFrame() {
         return frame;
     }
@@ -86,8 +91,9 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public void setFrame(Frame frame) {
         this.frame = frame;
-        if (frame != null) {
-            frame.registerComponent(this);
+
+        if (frame instanceof FrameImplementation) {
+            ((FrameImplementation) frame).registerComponent(this);
         }
     }
 
@@ -129,7 +135,7 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     public void setId(String id) {
         if (!Objects.equals(this.id, id)) {
             if (frame != null) {
-                frame.unregisterComponent(this);
+                ((FrameImplementation) frame).unregisterComponent(this);
             }
 
             this.id = id;
@@ -138,7 +144,7 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
             }
 
             if (frame != null) {
-                frame.registerComponent(this);
+                ((FrameImplementation) frame).registerComponent(this);
             }
         }
     }
@@ -260,6 +266,8 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     }
 
     /**
+     * vaadin8 remove
+     *
      * @return component enabled property
      */
     public boolean getComponentEnabledFlag() {
@@ -267,6 +275,8 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     }
 
     /**
+     * vaadin8 remove
+     *
      * @return component visible property
      */
     public boolean getComponentVisibleFlag() {
@@ -276,11 +286,6 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public float getHeight() {
         return getComposition().getHeight();
-    }
-
-    @Override
-    public int getHeightUnits() {
-        return ComponentsHelper.convertFromSizeUnit(getHeightSizeUnit());
     }
 
     @Override
@@ -303,11 +308,6 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public float getWidth() {
         return getComposition().getWidth();
-    }
-
-    @Override
-    public int getWidthUnits() {
-        return ComponentsHelper.convertFromSizeUnit(getWidthSizeUnit());
     }
 
     @Override

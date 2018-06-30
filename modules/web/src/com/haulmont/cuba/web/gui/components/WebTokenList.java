@@ -50,6 +50,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static com.haulmont.cuba.gui.WindowManager.OpenType;
+
 public class WebTokenList<V> extends WebAbstractField<WebTokenList.CubaTokenList, V> implements TokenList<V> {
 
     protected CollectionDatasource datasource;
@@ -77,7 +79,7 @@ public class WebTokenList<V> extends WebAbstractField<WebTokenList.CubaTokenList
     protected WebLookupPickerField<Entity> lookupPickerField;
 
     protected String lookupScreen;
-    protected WindowManager.OpenType lookupOpenMode = WindowManager.OpenType.THIS_TAB;
+    protected OpenType lookupOpenMode = OpenType.THIS_TAB;
     protected Map<String, Object> lookupScreenParams;
 
     protected TokenStyleGenerator tokenStyleGenerator;
@@ -165,12 +167,12 @@ public class WebTokenList<V> extends WebAbstractField<WebTokenList.CubaTokenList
     }
 
     @Override
-    public WindowManager.OpenType getLookupOpenMode() {
+    public OpenType getLookupOpenMode() {
         return lookupOpenMode;
     }
 
     @Override
-    public void setLookupOpenMode(WindowManager.OpenType lookupOpenMode) {
+    public void setLookupOpenMode(OpenType lookupOpenMode) {
         this.lookupOpenMode = lookupOpenMode;
     }
 
@@ -765,7 +767,7 @@ public class WebTokenList<V> extends WebAbstractField<WebTokenList.CubaTokenList
 
                     WindowManager wm = App.getInstance().getWindowManager();
 
-                    Window.Lookup lookup = wm.openLookup(windowInfo, items -> {
+                    AbstractLookup lookup = (AbstractLookup) wm.openLookup(windowInfo, items -> {
                         if (lookupPickerField.isRefreshOptionsOnLookupClose()) {
                             lookupPickerField.getOptionsDatasource().refresh();
                         }
