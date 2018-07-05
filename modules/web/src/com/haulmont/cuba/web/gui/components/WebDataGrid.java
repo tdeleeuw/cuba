@@ -25,30 +25,11 @@ import com.haulmont.chile.core.model.MetaProperty;
 import com.haulmont.chile.core.model.MetaPropertyPath;
 import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.entity.Entity;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.core.global.MessageTools;
-import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.core.global.MetadataTools;
-import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.components.AbstractAction;
-import com.haulmont.cuba.gui.components.Action;
-import com.haulmont.cuba.gui.components.ButtonsPanel;
-import com.haulmont.cuba.gui.components.ContentMode;
-import com.haulmont.cuba.gui.components.DataGrid;
-import com.haulmont.cuba.gui.components.DescriptionProvider;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Formatter;
-import com.haulmont.cuba.gui.components.KeyCombination;
-import com.haulmont.cuba.gui.components.LookupComponent;
-import com.haulmont.cuba.gui.components.MouseEventDetails;
-import com.haulmont.cuba.gui.components.RowsCount;
-import com.haulmont.cuba.gui.components.SecuredActionsHolder;
-import com.haulmont.cuba.gui.components.StyleProvider;
-import com.haulmont.cuba.gui.components.VisibilityChangeNotifier;
 import com.haulmont.cuba.gui.components.Window;
-import com.haulmont.cuba.gui.components.WindowDelegate;
 import com.haulmont.cuba.gui.components.data.BindingState;
 import com.haulmont.cuba.gui.components.data.DataGridSource;
 import com.haulmont.cuba.gui.components.data.EntityDataGridSource;
@@ -59,30 +40,14 @@ import com.haulmont.cuba.gui.components.sys.ShowInfoAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsBuilder;
-import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
-import com.haulmont.cuba.gui.data.impl.WeakCollectionChangeListener;
-import com.haulmont.cuba.gui.data.impl.WeakItemChangeListener;
-import com.haulmont.cuba.gui.data.impl.WeakItemPropertyChangeListener;
-import com.haulmont.cuba.gui.data.impl.WeakStateChangeListener;
+import com.haulmont.cuba.gui.data.impl.*;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.web.App;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.datagrid.DataGridDataProvider;
 import com.haulmont.cuba.web.gui.components.datagrid.DataGridSourceEventsDelegate;
 import com.haulmont.cuba.web.gui.components.datagrid.SortableDataGridDataProvider;
-import com.haulmont.cuba.web.gui.components.renderers.RendererWrapper;
-import com.haulmont.cuba.web.gui.components.renderers.WebButtonRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebCheckBoxRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebClickableTextRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebComponentRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebDateRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebHtmlRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebImageRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebLocalDateRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebLocalDateTimeRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebNumberRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebProgressBarRenderer;
-import com.haulmont.cuba.web.gui.components.renderers.WebTextRenderer;
+import com.haulmont.cuba.web.gui.components.renderers.*;
 import com.haulmont.cuba.web.gui.components.util.ShortcutListenerDelegate;
 import com.haulmont.cuba.web.gui.components.valueproviders.EntityValueProvider;
 import com.haulmont.cuba.web.gui.components.valueproviders.FormatterBasedValueProvider;
@@ -108,10 +73,7 @@ import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.DescriptionGenerator;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.StyleGenerator;
+import com.vaadin.ui.*;
 import com.vaadin.ui.components.grid.ColumnVisibilityChangeListener;
 import com.vaadin.ui.components.grid.Footer;
 import com.vaadin.ui.components.grid.Header;
@@ -127,16 +89,7 @@ import org.springframework.context.ApplicationContext;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -189,16 +142,12 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
     protected RowsCount rowsCount;
 
     protected List<StyleProvider<? super E>> rowStyleProviders;
-    @SuppressWarnings("deprecation")
     protected List<CellStyleProvider<? super E>> cellStyleProviders;
 
     protected DescriptionProvider<? super E> rowDescriptionProvider;
-    @SuppressWarnings("deprecation")
     protected CellDescriptionProvider<? super E> cellDescriptionProvider;
 
     protected DetailsGenerator<E> detailsGenerator = null;
-
-//    protected CollectionDsListenersWrapper collectionDsListenersWrapper;
 
     protected Registration columnCollapsingChangeListenerRegistration;
     protected Registration columnResizeListenerRegistration;
@@ -272,7 +221,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
 
             @Override
             protected void detachShortcut(Action action, ShortcutListener shortcutDescriptor) {
-                //noinspection deprecation
                 component.removeShortcutListener(shortcutDescriptor);
             }
 
@@ -2174,7 +2122,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void addCellStyleProvider(CellStyleProvider<? super E> styleProvider) {
         if (this.cellStyleProviders == null) {
@@ -2188,7 +2135,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void removeCellStyleProvider(CellStyleProvider<? super E> styleProvider) {
         if (this.cellStyleProviders != null) {
@@ -2198,13 +2144,12 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         }
     }
 
-    @SuppressWarnings("unchecked, deprecation")
+    @SuppressWarnings("unchecked")
     @Override
     public CellDescriptionProvider<E> getCellDescriptionProvider() {
         return (CellDescriptionProvider<E>) cellDescriptionProvider;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void setCellDescriptionProvider(CellDescriptionProvider<? super E> provider) {
         this.cellDescriptionProvider = provider;
@@ -2683,7 +2628,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Nullable
     protected String getGeneratedCellStyle(E item, Column<E> column) {
         StringBuilder joinedStyle = null;
@@ -2822,7 +2766,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
 
         protected AbstractRenderer<E, ?> renderer;
         protected Function presentationProvider;
-        @SuppressWarnings("deprecation")
         protected Converter converter;
 
         protected StyleProvider<? super E> styleProvider;
@@ -3206,20 +3149,17 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
             return presentationProvider;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public Converter<?, ?> getConverter() {
             return converter;
         }
 
-        @SuppressWarnings("deprecation")
         @Override
         public void setConverter(Converter<?, ?> converter) {
             this.converter = converter;
             setRenderer(this.renderer, createConverterWrapper(converter));
         }
 
-        @SuppressWarnings("DeprecatedIsStillUsed")
         @Deprecated
         protected Function createConverterWrapper(final Converter converter) {
             return (Function<Object, Object>) value -> {
