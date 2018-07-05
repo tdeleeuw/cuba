@@ -1557,8 +1557,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
             case MULTI:
             case MULTI_CHECK:
                 component.deselectAll();
-                E[] itemArray = items.toArray((E[]) new Object[0]);
-                ((SelectionModel.Multi<E>) component.getSelectionModel()).selectItems(itemArray);
+                ((SelectionModel.Multi) component.getSelectionModel()).selectItems(items.toArray());
                 break;
         }
     }
