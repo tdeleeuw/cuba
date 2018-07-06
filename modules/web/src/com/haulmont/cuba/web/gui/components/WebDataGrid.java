@@ -3054,19 +3054,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         @Override
         public void setFormatter(Formatter formatter) {
             this.formatter = formatter;
-            if (gridColumn != null) {
-                if (formatter != null) {
-                    //noinspection unchecked
-                    setRendererInternal(this.renderer, new FormatterBasedValueProvider<>(formatter));
-                } else {
-                    if (presentationProvider != null) {
-                        setRendererInternal(this.renderer, createPresentationProviderWrapper(presentationProvider));
-                    } else {
-                        setRendererInternal(this.renderer, null);
-                    }
-                }
-                owner.repaint();
-            }
+            updateRendererInternal();
         }
 
         @Nullable
@@ -3098,10 +3086,20 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
 
         @Override
         public void setRenderer(Renderer renderer, Function presentationProvider) {
+            if (renderer == null && this.renderer != null) {
+                this.renderer.resetImplementation();
+                this.renderer.setDataGrid(null);
+            }
+
+            //noinspection unchecked
+            this.renderer = (AbstractRenderer) renderer;
             this.presentationProvider = presentationProvider;
 
-            setRendererInternal(renderer, presentationProvider != null
-                    ? createPresentationProviderWrapper(presentationProvider) : null);
+            if (this.renderer != null) {
+                this.renderer.setDataGrid(owner);
+            }
+
+            updateRendererInternal();
         }
 
         @SuppressWarnings({"unchecked"})
@@ -3110,36 +3108,24 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         }
 
         @SuppressWarnings("unchecked")
-        protected void setRendererInternal(Renderer renderer,
-                                           ValueProvider presentationProvider) {
-            if (renderer == null && this.renderer != null) {
-                this.renderer.resetImplementation();
-                this.renderer.setDataGrid(null);
-            }
-
-            //noinspection unchecked
-            this.renderer = (AbstractRenderer) renderer;
+        protected void updateRendererInternal() {
             if (gridColumn != null) {
-                if (this.renderer != null) {
-                    this.renderer.setDataGrid(owner);
+                com.vaadin.ui.renderers.Renderer vRenderer = renderer != null
+                        ? renderer.getImplementation()
+                        : owner.getDefaultRenderer(this);
 
-                    com.vaadin.ui.renderers.Renderer vRenderer = this.renderer.getImplementation();
-                    if (presentationProvider != null) {
-                        gridColumn.setRenderer(presentationProvider, vRenderer);
-                    } else if (this.renderer.getPresentationValueProvider() != null) {
-                        //noinspection RedundantCast
-                        gridColumn.setRenderer((ValueProvider) this.renderer.getPresentationValueProvider(), vRenderer);
-                    } else {
-                        gridColumn.setRenderer(owner.getDefaultPresentationValueProvider(this), vRenderer);
-                    }
-                } else {
-                    if (presentationProvider != null) {
-                        gridColumn.setRenderer(presentationProvider, owner.getDefaultRenderer(this));
-                    } else {
-                        gridColumn.setRenderer(owner.getDefaultPresentationValueProvider(this),
-                                owner.getDefaultRenderer(this));
-                    }
-                }
+                //noinspection RedundantCast
+                ValueProvider vPresentationProvider = presentationProvider != null
+                        ? createPresentationProviderWrapper(presentationProvider)
+                        : converter != null
+                        ? new DataGridConverterBasedValueProvider(converter)
+                        : formatter != null
+                        ? new FormatterBasedValueProvider(formatter)
+                        : renderer != null && renderer.getPresentationValueProvider() != null
+                        ? (ValueProvider) renderer.getPresentationValueProvider()
+                        : owner.getDefaultPresentationValueProvider(this);
+
+                gridColumn.setRenderer(vPresentationProvider, vRenderer);
                 owner.repaint();
             }
         }
@@ -3156,19 +3142,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         @Override
         public void setConverter(Converter<?, ?> converter) {
             this.converter = converter;
-            if (gridColumn != null) {
-                if (converter != null) {
-                    //noinspection unchecked
-                    setRendererInternal(this.renderer, new DataGridConverterBasedValueProvider(converter));
-                } else {
-                    if (presentationProvider != null) {
-                        setRendererInternal(this.renderer, createPresentationProviderWrapper(presentationProvider));
-                    } else {
-                        setRendererInternal(this.renderer, null);
-                    }
-                }
-                owner.repaint();
-            }
+            updateRendererInternal();
         }
 
         @Override
