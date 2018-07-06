@@ -3096,9 +3096,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
 
         @Override
         public void setRenderer(Renderer renderer) {
-            this.presentationProvider = null;
-
-            setRendererInternal(renderer, null);
+            setRenderer(renderer, null);
         }
 
         @Override
@@ -3135,10 +3133,15 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
                         //noinspection RedundantCast
                         gridColumn.setRenderer((ValueProvider) this.renderer.getPresentationValueProvider(), vRenderer);
                     } else {
-                        gridColumn.setRenderer(vRenderer);
+                        gridColumn.setRenderer(owner.getDefaultPresentationValueProvider(this), vRenderer);
                     }
                 } else {
-                    gridColumn.setRenderer(owner.getDefaultRenderer(this));
+                    if (presentationProvider != null) {
+                        gridColumn.setRenderer(presentationProvider, owner.getDefaultRenderer(this));
+                    } else {
+                        gridColumn.setRenderer(owner.getDefaultPresentationValueProvider(this),
+                                owner.getDefaultRenderer(this));
+                    }
                 }
                 owner.repaint();
             }
@@ -3156,7 +3159,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         @Override
         public void setConverter(Converter<?, ?> converter) {
             this.converter = converter;
-            setRenderer(this.renderer, createConverterWrapper(converter));
+            setRenderer(this.renderer, converter != null ? createConverterWrapper(converter) : null);
         }
 
         @Deprecated
