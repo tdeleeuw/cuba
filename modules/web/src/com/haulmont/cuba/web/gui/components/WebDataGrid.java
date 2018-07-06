@@ -49,10 +49,7 @@ import com.haulmont.cuba.web.gui.components.datagrid.DataGridSourceEventsDelegat
 import com.haulmont.cuba.web.gui.components.datagrid.SortableDataGridDataProvider;
 import com.haulmont.cuba.web.gui.components.renderers.*;
 import com.haulmont.cuba.web.gui.components.util.ShortcutListenerDelegate;
-import com.haulmont.cuba.web.gui.components.valueproviders.EntityValueProvider;
-import com.haulmont.cuba.web.gui.components.valueproviders.FormatterBasedValueProvider;
-import com.haulmont.cuba.web.gui.components.valueproviders.StringPresentationValueProvider;
-import com.haulmont.cuba.web.gui.components.valueproviders.YesNoIconPresentationValueProvider;
+import com.haulmont.cuba.web.gui.components.valueproviders.*;
 import com.haulmont.cuba.web.gui.icons.IconResolver;
 import com.haulmont.cuba.web.widgets.CubaGrid;
 import com.haulmont.cuba.web.widgets.addons.contextmenu.Menu;
@@ -3159,15 +3156,19 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         @Override
         public void setConverter(Converter<?, ?> converter) {
             this.converter = converter;
-            setRenderer(this.renderer, converter != null ? createConverterWrapper(converter) : null);
-        }
-
-        @Deprecated
-        protected Function createConverterWrapper(final Converter converter) {
-            return (Function<Object, Object>) value -> {
-                //noinspection unchecked
-                return converter.convertToPresentation(value, null, null);
-            };
+            if (gridColumn != null) {
+                if (converter != null) {
+                    //noinspection unchecked
+                    setRendererInternal(this.renderer, new DataGridConverterBasedValueProvider(converter));
+                } else {
+                    if (presentationProvider != null) {
+                        setRendererInternal(this.renderer, createPresentationProviderWrapper(presentationProvider));
+                    } else {
+                        setRendererInternal(this.renderer, null);
+                    }
+                }
+                owner.repaint();
+            }
         }
 
         @Override
