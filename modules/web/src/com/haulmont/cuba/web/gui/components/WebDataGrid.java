@@ -884,7 +884,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         for (E item : selectedItems) {
             //noinspection unchecked
             if (event.getSource().containsItem(item)) {
-                newSelection.add(item);
+                newSelection.add(event.getSource().getItem(item.getId()));
             }
         }
 
@@ -896,7 +896,12 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         if (newSelection.isEmpty()) {
             setSelected((E) null);
         } else {
-            setSelectedItems(newSelection);
+            // Workaround for the MultiSelect model.
+            // Set the selected items only if the previous selection is different
+            // Otherwise, the DataGrid rows will display the values before editing
+            if (isMultiSelect() && !selectedItems.equals(newSelection)) {
+                setSelectedItems(newSelection);
+            }
         }
 
         refreshActionsState();
