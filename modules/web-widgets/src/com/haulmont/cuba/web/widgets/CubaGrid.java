@@ -94,6 +94,7 @@ public class CubaGrid<T> extends Grid<T> implements Action.ShortcutNotifier {
     }
 
     public void repaint() {
+        markAsDirtyRecursive();
         getDataCommunicator().reset();
     }
 
