@@ -358,7 +358,8 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
         } else {
             addedItems = new ArrayList<>(e.getAllSelectedItems());
             //noinspection unchecked
-            removedItems = Collections.singletonList(((HasValue.ValueChangeEvent<E>) e).getOldValue());
+            E oldValue = ((HasValue.ValueChangeEvent<E>) e).getOldValue();
+            removedItems = oldValue != null ? Collections.singletonList(oldValue) : Collections.emptyList();
             selectedItems = new ArrayList<>(e.getAllSelectedItems());
         }
 
