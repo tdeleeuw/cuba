@@ -5,6 +5,7 @@ import com.haulmont.cuba.gui.components.data.BindingState;
 import com.haulmont.cuba.gui.components.data.DataGridSource;
 import com.vaadin.data.provider.AbstractDataProvider;
 import com.vaadin.data.provider.DataChangeEvent;
+import com.vaadin.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.data.provider.Query;
 import com.vaadin.server.SerializablePredicate;
 
@@ -109,6 +110,8 @@ public class DataGridDataProvider<T> extends AbstractDataProvider<T, Serializabl
     }
 
     protected void datasourceValueChanged(DataGridSource.ValueChangeEvent<T> event) {
+        fireEvent(new DataRefreshEvent<>(this, event.getItem()));
+
         dataEventsDelegate.dataGridSourcePropertyValueChanged(event);
     }
 

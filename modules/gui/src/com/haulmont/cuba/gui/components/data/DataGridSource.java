@@ -5,6 +5,7 @@ import com.haulmont.bali.events.Subscription;
 import javax.annotation.Nullable;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -72,11 +73,13 @@ public interface DataGridSource<T> {
 
     // todo
     class ValueChangeEvent<T> extends EventObject {
-        private final T prevValue;
-        private final T value;
+        private final T item;
+        private final Object prevValue;
+        private final Object value;
 
-        public ValueChangeEvent(DataGridSource<T> source, T prevValue, T value) {
+        public ValueChangeEvent(DataGridSource<T> source, T item, Object prevValue, Object value) {
             super(source);
+            this.item = item;
             this.prevValue = prevValue;
             this.value = value;
         }
@@ -87,11 +90,15 @@ public interface DataGridSource<T> {
             return (DataGridSource<T>) super.getSource();
         }
 
-        public T getPrevValue() {
+        public T getItem() {
+            return item;
+        }
+
+        public Object getPrevValue() {
             return prevValue;
         }
 
-        public T getValue() {
+        public Object getValue() {
             return value;
         }
     }
