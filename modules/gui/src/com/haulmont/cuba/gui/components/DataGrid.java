@@ -2725,11 +2725,41 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          */
         void setRenderer(Renderer renderer);
 
-        // TODO: gg, JavaDoc
+        /**
+         * Sets the renderer for this column. If given renderer is null, then
+         * the default renderer will be used.
+         * <p>
+         * The presentation provider is a {@link Function} that takes the value of this
+         * column on a single row, and converts that to a value that the renderer accepts.
+         * <p>
+         * The presentation provider takes precedence over {@link Converter} and {@link Formatter}.
+         *
+         * @param renderer             the renderer to use
+         * @param presentationProvider the presentation provider to use
+         * @see #setRenderer(Renderer)
+         */
         void setRenderer(Renderer renderer, Function presentationProvider);
 
-        // TODO: gg, JavaDoc
+        /**
+         * @return a function to get presentations from the value of this column
+         */
         Function getPresentationProvider();
+
+        /**
+         * @deprecated use {@link #getPresentationProvider()} instead
+         */
+        @Deprecated
+        @Override
+        Formatter getFormatter();
+
+        /**
+         * If either {@link Function presentation provider} or {@link Converter} are set they take precedence over {@link Formatter}.
+         *
+         * @deprecated use {@link #getPresentationProvider()} instead
+         */
+        @Deprecated
+        @Override
+        void setFormatter(Formatter formatter);
 
         /**
          * Returns the converter instance used by this column.
@@ -2744,6 +2774,8 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
          * Sets the converter used to convert from the property value type to
          * the renderer presentation type. If given converter is null, then the
          * default converter will be used.
+         * <p>
+         * Takes precedence over {@link Formatter}, but is inferior to the {@link Function presentation provider}.
          *
          * @param converter the converter to use, or {@code null} to not use any
          *                  converters

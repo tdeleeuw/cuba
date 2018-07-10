@@ -3170,6 +3170,9 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
                         ? renderer.getImplementation()
                         : owner.getDefaultRenderer(this);
 
+                // The following priority is used to determine a value provider:
+                // a presentation provider > a converter > a formatter > a renderer's presentation provider >
+                // a value provider that always returns its input argument > a default presentation provider
                 //noinspection RedundantCast
                 ValueProvider vPresentationProvider = presentationProvider != null
                         ? createPresentationProviderWrapper(presentationProvider)
@@ -3180,6 +3183,9 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
                         : renderer != null && renderer.getPresentationValueProvider() != null
                         ? (ValueProvider) renderer.getPresentationValueProvider()
                         : renderer != null
+                        // In case renderer != null and there are no other user specified value providers
+                        // We use a value provider that always returns its input argument instead of a default
+                        // value provider as we want to keep the original value type.
                         ? ValueProvider.identity()
                         : owner.getDefaultPresentationValueProvider(this);
 
@@ -3188,6 +3194,7 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
             }
         }
 
+        @Override
         public Function getPresentationProvider() {
             return presentationProvider;
         }
