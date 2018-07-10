@@ -1093,7 +1093,6 @@ public class WebDataGrid<E extends Entity> extends WebAbstractComponent<CubaGrid
 
     @Override
     public E getEditedItem() {
-        // TEST: gg, this one?
         return component.getEditor().getBinder().getBean();
     }
 
