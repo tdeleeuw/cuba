@@ -474,6 +474,9 @@ public class ServerLogWindow extends AbstractWindow {
 
     protected String highlightLevel(String line, String level) {
         // use css classes for highlight different log levels
+        if (line.contains("at&nbsp;java.lang.reflect") || line.contains("at&nbsp;sun.reflect")) {
+            return "<span class='grey'>" + line + "</span>";
+        }
         return line.replaceFirst(level,
                 "<span class='c-log-level c-log-level-" + level + "'>" + level + "</span>");
     }

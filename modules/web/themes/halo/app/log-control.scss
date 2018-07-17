@@ -25,6 +25,10 @@
   }
 
   .v-label {
+    span.grey {
+      color: grey;
+    }
+
     span.c-log-level {
       font-weight: bold;
     }
