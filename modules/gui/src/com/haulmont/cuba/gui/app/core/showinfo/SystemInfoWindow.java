@@ -84,8 +84,6 @@ public class SystemInfoWindow extends AbstractWindow {
         paramsDs.setInstance(item);
         paramsDs.setInstanceMetaClass((MetaClass) params.get("metaClass"));
 
-
-
         String cubaLogContentClass = "c-system-info-log-content";
         String cubaCopyLogContentClass = cubaLogContentClass + "-" + UUID.randomUUID();
         scriptArea.setStyleName(cubaLogContentClass);

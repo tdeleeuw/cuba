@@ -26,8 +26,6 @@ import com.haulmont.cuba.web.toolkit.ui.CubaTable;
 import com.vaadin.ui.Notification;
 
 public class SystemInfoWindowCompanion implements SystemInfoWindow.Companion {
-
-
     @Override
     public void initInfoTable(Table infoTable) {
         CubaTable webTable = (CubaTable) WebComponentsHelper.unwrap(infoTable);
@@ -44,5 +42,4 @@ public class SystemInfoWindowCompanion implements SystemInfoWindow.Companion {
                             Notification.Type.TRAY_NOTIFICATION));
         }
     }
-
 }
