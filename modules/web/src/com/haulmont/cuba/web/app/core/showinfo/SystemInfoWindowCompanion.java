@@ -18,14 +18,39 @@
 package com.haulmont.cuba.web.app.core.showinfo;
 
 import com.haulmont.cuba.gui.app.core.showinfo.SystemInfoWindow;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
+import com.haulmont.cuba.web.toolkit.ui.CubaCopyButtonExtension;
 import com.haulmont.cuba.web.toolkit.ui.CubaTable;
+import com.vaadin.server.Page;
+import com.vaadin.server.WebBrowser;
+import com.vaadin.ui.Notification;
 
 public class SystemInfoWindowCompanion implements SystemInfoWindow.Companion {
+
+
     @Override
     public void initInfoTable(Table infoTable) {
         CubaTable webTable = (CubaTable) WebComponentsHelper.unwrap(infoTable);
         webTable.setTextSelectionEnabled(true);
     }
+
+    @Override
+    public void addCopyAction(Button copyButton, String success, String fail, String cubaCopyLogContentClass) {
+        if (browserSupportCopy()) {
+            com.vaadin.ui.Button button = (com.vaadin.ui.Button) WebComponentsHelper.unwrap(copyButton);
+            CubaCopyButtonExtension copyExtension = CubaCopyButtonExtension.copyWith(button, cubaCopyLogContentClass.concat(" textarea"));
+            copyExtension.addCopyListener(event ->
+                    Notification.show(event.isSuccess() ? success : fail,
+                            Notification.Type.TRAY_NOTIFICATION));
+        }
+    }
+
+    protected boolean browserSupportCopy() {
+        WebBrowser webBrowser = Page.getCurrent().getWebBrowser();
+        return !webBrowser.isSafari() && !webBrowser.isIOS() && !webBrowser.isWindowsPhone();
+    }
+
+
 }
