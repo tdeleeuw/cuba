@@ -142,8 +142,9 @@ public class SystemInfoWindow extends AbstractWindow {
     }
 
     private void setCopyButtonVisible() {
-        if (buttonsHbox.getComponent("copy") != null) {
-            buttonsHbox.getComponent("copy").setVisible(true);
+        Component copyBtn = buttonsHbox.getComponent("copy");
+        if (copyBtn != null) {
+            copyBtn.setVisible(true);
         }
     }
 
