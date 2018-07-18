@@ -60,6 +60,34 @@ public class ServerLogWindow extends AbstractWindow {
 
     private final Logger log = LoggerFactory.getLogger(ServerLogWindow.class);
 
+    private final String SPACE = "&nbsp;";
+
+    private final String TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
+
+    private final List<String> expressionsToColor = Arrays.asList(
+            TAB + "at" + SPACE + "com.sun.proxy.$Proxy",
+            TAB + "at" + SPACE + "groovy.",
+            TAB + "at" + SPACE + "java.lang.reflect.Constructor.newInstance(",
+            TAB + "at" + SPACE + "java.lang.reflect.Method.invoke(",
+            TAB + "at" + SPACE + "java.rmi.",
+            TAB + "at" + SPACE + "java.security.AccessControlContext$1.doIntersectionPrivilege(",
+            TAB + "at" + SPACE + "java.security.AccessController.doPrivileged(Native Method)",
+            TAB + "at" + SPACE + "java.security.ProtectionDomain$1.doIntersectionPrivilege(",
+            TAB + "at" + SPACE + "java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(",
+            TAB + "at" + SPACE + "java.util.Spliterators$",
+            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.copyInto(",
+            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.evaluate(",
+            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.wrapAndCopyInto(",
+            TAB + "at" + SPACE + "java.util.stream.ReduceOps$",
+            TAB + "at" + SPACE + "java.util.stream.ReferencePipeline$",
+            TAB + "at" + SPACE + "org.codehaus.groovy.",
+            TAB + "at" + SPACE + "org.gradle.",
+            TAB + "at" + SPACE + "sun.reflect.",
+            TAB + "at" + SPACE + "sun.rmi.",
+            TAB + "at" + SPACE + "com.vaadin.event.EventRouter.fireEvent",
+            TAB + "at" + SPACE + "com.vaadin.server.ServerRpcManager"
+    );
+
     @Inject
     protected CollectionDatasource<JmxInstance, UUID> jmxInstancesDs;
 
@@ -263,7 +291,8 @@ public class ServerLogWindow extends AbstractWindow {
 
             // transform to XHTML
             value = StringEscapeUtils.escapeHtml(value);
-            value = StringUtils.replace(value, " ", "&nbsp;");
+            value = StringUtils.replace(value, " ", SPACE);
+            value = StringUtils.replace(value, "\t", TAB);
 
             // highlight log
             StringBuilder coloredLog = new StringBuilder();
@@ -412,11 +441,11 @@ public class ServerLogWindow extends AbstractWindow {
                     exportDisplay.show(dataProvider, fileName + ".zip");
                 } else {
                     openWindow("serverLogDownloadOptionsDialog",
-                               OpenType.DIALOG,
-                               ParamsMap.of("logFileName", fileName,
-                                            "connection", selectedConnection,
-                                            "logFileSize", size,
-                                            "remoteContextList", availableContexts));
+                            OpenType.DIALOG,
+                            ParamsMap.of("logFileName", fileName,
+                                    "connection", selectedConnection,
+                                    "logFileSize", size,
+                                    "remoteContextList", availableContexts));
                 }
             } catch (RuntimeException | LogControlException e) {
                 showNotification(getMessage("exception.logControl"), NotificationType.ERROR);
@@ -474,8 +503,10 @@ public class ServerLogWindow extends AbstractWindow {
 
     protected String highlightLevel(String line, String level) {
         // use css classes for highlight different log levels
-        if (line.contains("at&nbsp;java.lang.reflect") || line.contains("at&nbsp;sun.reflect")) {
-            return "<span class='grey'>" + line + "</span>";
+        for (String expression : expressionsToColor) {
+            if (line.startsWith(expression)) {
+                return "<span class='grey'>" + line + "</span>";
+            }
         }
         return line.replaceFirst(level,
                 "<span class='c-log-level c-log-level-" + level + "'>" + level + "</span>");
