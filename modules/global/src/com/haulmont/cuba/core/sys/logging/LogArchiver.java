@@ -17,7 +17,6 @@
 
 package com.haulmont.cuba.core.sys.logging;
 
-import com.haulmont.cuba.core.sys.LogControlImpl;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -97,7 +96,6 @@ public class LogArchiver {
             long lengthFile = randomAccessFile.length();
             if (lengthFile >= LOG_TAIL_FOR_PACKING_SIZE) {
                 randomAccessFile.seek(lengthFile - LOG_TAIL_FOR_PACKING_SIZE);
-                LogControlImpl.skipFirstLine(randomAccessFile);
             }
             buf = new byte[size];
             while ((len = randomAccessFile.read(buf, 0, size)) != -1) {
