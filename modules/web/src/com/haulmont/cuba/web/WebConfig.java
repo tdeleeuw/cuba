@@ -412,4 +412,33 @@ public interface WebConfig extends Config {
     @DefaultBoolean(true)
     boolean getDefaultScreenCanBeClosed();
     void setDefaultScreenCanBeClosed(boolean b);
+
+    /**
+     * Defines enabled expressions to color in server log.
+     */
+    @Property("cuba.web.expressionsToColor")
+    @Source(type = SourceType.DATABASE)
+    @Default("&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;com.sun.proxy.$Proxy|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;groovy.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.lang.reflect.Constructor.newInstance(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.lang.reflect.Method.invoke(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.rmi.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.security.AccessControlContext$1.doIntersectionPrivilege(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.security.AccessController.doPrivileged(Native Method)" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.security.ProtectionDomain$1.doIntersectionPrivilege(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.Spliterators$|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.stream.AbstractPipeline.copyInto(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.stream.AbstractPipeline.evaluate(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.stream.AbstractPipeline.wrapAndCopyInto(|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.stream.ReduceOps$|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;java.util.stream.ReferencePipeline$|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;org.codehaus.groovy.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;org.gradle.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;sun.reflect.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;sun.rmi.|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;com.vaadin.event.EventRouter.fireEvent|" +
+            "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;com.vaadin.server.ServerRpcManager|")
+    @Factory(factory = StringListTypeFactory.class)
+    List<String> getExpressionsToColor();
 }

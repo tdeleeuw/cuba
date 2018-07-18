@@ -34,6 +34,7 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.settings.Settings;
+import com.haulmont.cuba.web.WebConfig;
 import com.haulmont.cuba.web.app.ui.jmxinstance.edit.JmxInstanceEditor;
 import com.haulmont.cuba.web.export.LogDataProvider;
 import com.haulmont.cuba.web.jmx.JmxControlAPI;
@@ -60,33 +61,10 @@ public class ServerLogWindow extends AbstractWindow {
 
     private final Logger log = LoggerFactory.getLogger(ServerLogWindow.class);
 
-    private final String SPACE = "&nbsp;";
+    private List<String> expressionsToColor;
 
-    private final String TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
-
-    private final List<String> expressionsToColor = Arrays.asList(
-            TAB + "at" + SPACE + "com.sun.proxy.$Proxy",
-            TAB + "at" + SPACE + "groovy.",
-            TAB + "at" + SPACE + "java.lang.reflect.Constructor.newInstance(",
-            TAB + "at" + SPACE + "java.lang.reflect.Method.invoke(",
-            TAB + "at" + SPACE + "java.rmi.",
-            TAB + "at" + SPACE + "java.security.AccessControlContext$1.doIntersectionPrivilege(",
-            TAB + "at" + SPACE + "java.security.AccessController.doPrivileged(Native Method)",
-            TAB + "at" + SPACE + "java.security.ProtectionDomain$1.doIntersectionPrivilege(",
-            TAB + "at" + SPACE + "java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(",
-            TAB + "at" + SPACE + "java.util.Spliterators$",
-            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.copyInto(",
-            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.evaluate(",
-            TAB + "at" + SPACE + "java.util.stream.AbstractPipeline.wrapAndCopyInto(",
-            TAB + "at" + SPACE + "java.util.stream.ReduceOps$",
-            TAB + "at" + SPACE + "java.util.stream.ReferencePipeline$",
-            TAB + "at" + SPACE + "org.codehaus.groovy.",
-            TAB + "at" + SPACE + "org.gradle.",
-            TAB + "at" + SPACE + "sun.reflect.",
-            TAB + "at" + SPACE + "sun.rmi.",
-            TAB + "at" + SPACE + "com.vaadin.event.EventRouter.fireEvent",
-            TAB + "at" + SPACE + "com.vaadin.server.ServerRpcManager"
-    );
+    @Inject
+    private WebConfig webConfig;
 
     @Inject
     protected CollectionDatasource<JmxInstance, UUID> jmxInstancesDs;
@@ -149,6 +127,7 @@ public class ServerLogWindow extends AbstractWindow {
 
     @Override
     public void init(Map<String, Object> params) {
+        expressionsToColor = webConfig.getExpressionsToColor();
         localJmxField.setValue(jmxControlAPI.getLocalNodeName());
         localJmxField.setEditable(false);
 
@@ -291,8 +270,8 @@ public class ServerLogWindow extends AbstractWindow {
 
             // transform to XHTML
             value = StringEscapeUtils.escapeHtml(value);
-            value = StringUtils.replace(value, " ", SPACE);
-            value = StringUtils.replace(value, "\t", TAB);
+            value = StringUtils.replace(value, " ", "&nbsp;");
+            value = StringUtils.replace(value, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
             // highlight log
             StringBuilder coloredLog = new StringBuilder();
