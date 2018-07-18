@@ -208,7 +208,7 @@ public class LogControlImpl implements LogControl {
         throw new AppenderThresholdNotSupported(appenderName);
     }
 
-    protected void skipFirstLine(RandomAccessFile logFile) throws IOException {
+    public static void skipFirstLine(RandomAccessFile logFile) throws IOException {
         boolean eol = false;
         while (!eol) {
             switch (logFile.read()) {
