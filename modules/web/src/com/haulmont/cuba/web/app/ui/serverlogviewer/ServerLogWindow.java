@@ -56,6 +56,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ServerLogWindow extends AbstractWindow {
 
@@ -267,10 +269,10 @@ public class ServerLogWindow extends AbstractWindow {
 
             // transform to XHTML
             value = StringEscapeUtils.escapeHtml(value);
-            String SPACE = "&nbsp;";
-            value = StringUtils.replace(value, " ", SPACE);
-            String TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
-            value = StringUtils.replace(value, "\t", TAB);
+            String space = "&nbsp;";
+            value = StringUtils.replace(value, " ", space);
+            String tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
+            value = StringUtils.replace(value, "\t", tab);
 
             // highlight log
             StringBuilder coloredLog = new StringBuilder();
@@ -296,13 +298,11 @@ public class ServerLogWindow extends AbstractWindow {
                         }
                     }
                     for (String pattern : webConfig.getLoweredAttentionPatterns()) {
-                        pattern = TAB + pattern.replace(" ", SPACE);
-                        if (line.startsWith(pattern)) {
-                            String coloredLine = colorLine(line);
-                            if (!Objects.equals(coloredLine, line)) {
-                                line = coloredLine;
-                                break;
-                            }
+                        pattern = tab + pattern.replace(" ", space);
+                        String coloredLine = highlightLoweredAttention(line, pattern);
+                        if (!Objects.equals(coloredLine, line)) {
+                            line = coloredLine;
+                            break;
                         }
                     }
                     coloredLog.append(line).append("<br/>");
@@ -319,8 +319,13 @@ public class ServerLogWindow extends AbstractWindow {
         logContainer.unwrap(CubaScrollBoxLayout.class).setScrollTop(30000);
     }
 
-    protected String colorLine(String line) {
-        return "<span class='c-log-pattern'>" + line + "</span>";
+    protected String highlightLoweredAttention(String line, String pattern) {
+        Pattern patternObject = Pattern.compile(pattern);
+        Matcher matcher = patternObject.matcher(line);
+        if (matcher.find()) {
+            return "<span class='c-log-lowered-attention'>" + line + "</span>";
+        }
+        return line;
     }
 
     public void getLoggerLevel() {

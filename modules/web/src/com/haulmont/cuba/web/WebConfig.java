@@ -420,17 +420,17 @@ public interface WebConfig extends Config {
     @Source(type = SourceType.DATABASE)
     @Default("at com.sun.proxy.$Proxy|" +
             "at groovy.|" +
-            "at java.lang.reflect.Constructor.newInstance(|" +
-            "at java.lang.reflect.Method.invoke(|" +
+            "at java.lang.reflect.Constructor.newInstance|" +
+            "at java.lang.reflect.Method.invoke|" +
             "at java.rmi.|" +
-            "at java.security.AccessControlContext$1.doIntersectionPrivilege(|" +
+            "at java.security.AccessControlContext$1.doIntersectionPrivilege|" +
             "at java.security.AccessController.doPrivileged(Native Method)" +
-            "at java.security.ProtectionDomain$1.doIntersectionPrivilege(|" +
-            "at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(|" +
+            "at java.security.ProtectionDomain$1.doIntersectionPrivilege|" +
+            "at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege|" +
             "at java.util.Spliterators$|" +
-            "at java.util.stream.AbstractPipeline.copyInto(|" +
-            "at java.util.stream.AbstractPipeline.evaluate(|" +
-            "at java.util.stream.AbstractPipeline.wrapAndCopyInto(|" +
+            "at java.util.stream.AbstractPipeline.copyInto|" +
+            "at java.util.stream.AbstractPipeline.evaluate|" +
+            "at java.util.stream.AbstractPipeline.wrapAndCopyInto|" +
             "at java.util.stream.ReduceOps$|" +
             "at java.util.stream.ReferencePipeline$|" +
             "at org.codehaus.groovy.|" +
