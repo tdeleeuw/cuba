@@ -61,10 +61,8 @@ public class ServerLogWindow extends AbstractWindow {
 
     private final Logger log = LoggerFactory.getLogger(ServerLogWindow.class);
 
-    private List<String> expressionsToColor;
-
     @Inject
-    private WebConfig webConfig;
+    protected WebConfig webConfig;
 
     @Inject
     protected CollectionDatasource<JmxInstance, UUID> jmxInstancesDs;
@@ -127,7 +125,6 @@ public class ServerLogWindow extends AbstractWindow {
 
     @Override
     public void init(Map<String, Object> params) {
-        expressionsToColor = webConfig.getExpressionsToColor();
         localJmxField.setValue(jmxControlAPI.getLocalNodeName());
         localJmxField.setEditable(false);
 
@@ -270,8 +267,10 @@ public class ServerLogWindow extends AbstractWindow {
 
             // transform to XHTML
             value = StringEscapeUtils.escapeHtml(value);
-            value = StringUtils.replace(value, " ", "&nbsp;");
-            value = StringUtils.replace(value, "\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+            String SPACE = "&nbsp;";
+            value = StringUtils.replace(value, " ", SPACE);
+            String TAB = "&nbsp;&nbsp;&nbsp;&nbsp;";
+            value = StringUtils.replace(value, "\t", TAB);
 
             // highlight log
             StringBuilder coloredLog = new StringBuilder();
@@ -296,6 +295,16 @@ public class ServerLogWindow extends AbstractWindow {
                             break;
                         }
                     }
+                    for (String pattern : webConfig.getLoweredAttentionPatterns()) {
+                        pattern = TAB + pattern.replace(" ", SPACE);
+                        if (line.startsWith(pattern)) {
+                            String coloredLine = colorLine(line);
+                            if (!Objects.equals(coloredLine, line)) {
+                                line = coloredLine;
+                                break;
+                            }
+                        }
+                    }
                     coloredLog.append(line).append("<br/>");
                 }
             } catch (IOException e) {
@@ -308,6 +317,10 @@ public class ServerLogWindow extends AbstractWindow {
         }
 
         logContainer.unwrap(CubaScrollBoxLayout.class).setScrollTop(30000);
+    }
+
+    protected String colorLine(String line) {
+        return "<span class='c-log-pattern'>" + line + "</span>";
     }
 
     public void getLoggerLevel() {
@@ -482,11 +495,6 @@ public class ServerLogWindow extends AbstractWindow {
 
     protected String highlightLevel(String line, String level) {
         // use css classes for highlight different log levels
-        for (String expression : expressionsToColor) {
-            if (line.startsWith(expression)) {
-                return "<span class='grey'>" + line + "</span>";
-            }
-        }
         return line.replaceFirst(level,
                 "<span class='c-log-level c-log-level-" + level + "'>" + level + "</span>");
     }
