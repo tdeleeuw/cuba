@@ -298,7 +298,7 @@ public class ServerLogWindow extends AbstractWindow {
                         }
                     }
                     for (String pattern : webConfig.getLoweredAttentionPatterns()) {
-                        pattern = tab + pattern.replace(" ", space);
+                        pattern = pattern.replace(" ", space);
                         String coloredLine = highlightLoweredAttention(line, pattern);
                         if (!Objects.equals(coloredLine, line)) {
                             line = coloredLine;
