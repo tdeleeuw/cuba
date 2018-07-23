@@ -27,47 +27,62 @@ class ServerLogPatternsTest extends Specification {
 
         when: "line not from stack trace includes pattern's value"
         def line = "myLine consists of some-symbols"
-        def pattern = ".*some-symbol."
-        def changedLine = serverLog.highlightLoweredAttention(line, pattern)
+        def pattern = /.*some-symbol./
+        def changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
 
         then:
-        changedLine == "<span class='c-log-lowered-attention'>" + line + "</span>"
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
 
         when: "line from stack trace includes pattern's value"
         line = "2018-07-20 12:36:27.955 DEBUG [http-nio-8080-exec-7] " +
                 "com.haulmont.cuba.gui.theme.ThemeConstantsRepository - Loading theme constants"
-        pattern = "http-nio-8080-exec-\\d*"
-        changedLine = serverLog.highlightLoweredAttention(line, pattern)
+        pattern = /http-nio-8080-exec-\d*/
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
 
         then:
-        changedLine == "<span class='c-log-lowered-attention'>" + line + "</span>"
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
 
         when: "line from stack trace doesn't include pattern's value"
         line = "2018-07-20 12:36:27.955 DEBUG [http-nio-8080-exec-77] " +
                 "com.haulmont.cuba.gui.theme.ThemeConstantsRepository - Loading theme constants"
-        pattern = "http-nio-8080-exec-\\D"
+        pattern = /http-nio-8080-exec-\D/
 
-        changedLine = serverLog.highlightLoweredAttention(line, pattern)
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
 
         then:
-        changedLine != "<span class='c-log-lowered-attention'>" + line + "</span>"
+        changedLine != serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
 
         when: "line from stack trace with complex pattern"
         line = "at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_171]"
-        pattern = ".*at.*sun.reflect.NativeMethodAccessorImpl"
+        pattern = /.*at.*sun[\.]reflect[\.]NativeMethodAccessorImpl/
 
-        changedLine = serverLog.highlightLoweredAttention(line, pattern)
-
-        then:
-        changedLine == "<span class='c-log-lowered-attention'>" + line + "</span>"
-
-        when: "line from stack trace with specific symbols with complex pattern"
-        line = "&nbsp;&nbsp;&nbsp;&nbsp;at&nbsp;sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:1.8.0_171]"
-        pattern = ".*at.*sun.reflect.NativeMethodAccessorImpl"
-
-        changedLine = serverLog.highlightLoweredAttention(line, pattern)
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
 
         then:
-        changedLine == "<span class='c-log-lowered-attention'>" + line + "</span>"
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
+
+        when: "line from stack trace includes pattern's value"
+        line = "at com.sun.proxy.\$Proxy28.executeUpdate (Unknown Source)"
+        pattern = /at com[\.]sun[\.]proxy[\.][\$]Proxy/
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
+
+        then:
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
+
+        when: "line from stack trace includes pattern's value"
+        line = "at java.lang.reflect.Constructor.newInstance(Constructor.java:408)"
+        pattern = /at java[\.]lang[\.]reflect[\.]Constructor[\.]newInstance/
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
+
+        then:
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
+
+        when: "line from stack trace includes pattern's value"
+        line = "at java.lang.reflect.Constructor.newInstance(Constructor.java:408)"
+        pattern = /at java[\.]security[\.]ProtectionDomain[\$]1[\.]doIntersectionPrivilege|/
+        changedLine = serverLog.highlightLoweredAttention(serverLog.transformToXhtml(line), serverLog.transformToXhtml(pattern))
+
+        then:
+        changedLine == serverLog.getLoweredAttentionLine(serverLog.transformToXhtml(line))
     }
 }
