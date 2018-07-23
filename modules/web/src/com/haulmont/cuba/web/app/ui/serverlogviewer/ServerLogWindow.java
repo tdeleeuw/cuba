@@ -269,7 +269,7 @@ public class ServerLogWindow extends AbstractWindow {
 
             // transform to XHTML
             value = StringEscapeUtils.escapeHtml(value);
-            value = transformToXhtml(value);
+            value = replaceSpaces(value);
 
 
             // highlight log
@@ -296,10 +296,10 @@ public class ServerLogWindow extends AbstractWindow {
                         }
                     }
                     for (String pattern : webConfig.getLoweredAttentionPatterns()) {
-                        pattern = transformToXhtml(pattern);
-                        String coloredLine = highlightLoweredAttention(line, pattern);
-                        if (!Objects.equals(coloredLine, line)) {
-                            line = coloredLine;
+                        pattern = replaceSpaces(pattern);
+                        String changedLine = highlightLoweredAttention(line, pattern);
+                        if (!Objects.equals(changedLine, line)) {
+                            line = changedLine;
                             break;
                         }
                     }
@@ -317,7 +317,7 @@ public class ServerLogWindow extends AbstractWindow {
         logContainer.unwrap(CubaScrollBoxLayout.class).setScrollTop(30000);
     }
 
-    protected String transformToXhtml(String value) {
+    protected String replaceSpaces(String value) {
         String space = "&nbsp;";
         value = StringUtils.replace(value, " ", space);
         String tab = "&nbsp;&nbsp;&nbsp;&nbsp;";
