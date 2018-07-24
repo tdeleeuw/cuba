@@ -409,10 +409,10 @@ public abstract class AbstractComponentLoader<T extends Component> implements Co
             throw new GuiDevelopmentException("ComponentLoaderContext.frame is null", context.getFullFrameId());
     }
 
-    protected void loadAction(Component.ActionOwner component, Element element) {
+    protected void loadAction(Component component, Element element) {
         final String actionName = element.attributeValue("action");
         if (!StringUtils.isEmpty(actionName)) {
-            context.addPostInitTask(new AssignActionPostInitTask(component, actionName, context.getFrame()));
+            context.addPostInitTask(new ActionOwnerPostInitTask(component, actionName, context.getFrame()));
         }
     }
 
