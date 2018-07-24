@@ -90,11 +90,8 @@ public class AppPropertiesBrowse extends AbstractWindow {
                         paramsTable.setSelected(entity);
                     }
                 }
-            }
-            else {
-                for (AppPropertyEntity entity : paramsDs.getItems()) {
-                    paramsTable.expand(entity.getId());
-                }
+            } else {
+                paramsTable.expandAll();
             }
         });
     }
