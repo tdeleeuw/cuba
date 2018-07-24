@@ -22,6 +22,7 @@ package com.haulmont.cuba.gui.components;
  * @param <V>
  * @param <I>
  */
+@Deprecated
 public interface OptionsGroup<V, I> extends OptionsField<V, I>, LookupComponent, Component.Focusable, HasOrientation {
     String NAME = "optionsGroup";
 
