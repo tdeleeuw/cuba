@@ -225,10 +225,10 @@ public class ServerLogWindow extends AbstractWindow {
     protected void initLoweredAttentionPatterns() {
         List<String> loweredAttentionPatterns = webConfig.getLoweredAttentionPatterns();
         for (String loweredAttentionPattern: loweredAttentionPatterns) {
-            this.loweredAttentionPatterns.add(Pattern.compile(replaceSpaces(loweredAttentionPattern)));
+            String replacedPattern = replaceSpaces(loweredAttentionPattern);
+            Pattern pattern = Pattern.compile(replacedPattern);
+            this.loweredAttentionPatterns.add(pattern);
         }
-
-
     }
 
     private void refreshHostInfo() {
