@@ -1693,8 +1693,6 @@
                 <xs:attributeGroup ref="hasOptions"/>
                 <xs:attributeGroup ref="hasTabIndex"/>
 
-                <xs:attribute name="multiselect" type="xs:boolean"/>
-
                 <xs:attribute name="optionsEnum" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
@@ -1705,6 +1703,17 @@
         <xs:complexContent>
             <xs:extension base="optionsBaseFieldComponent">
                 <xs:attribute name="orientation" type="orientation"/>
+                <xs:attribute name="multiselect" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- OptionsList -->
+    <xs:complexType name="optionsListComponent">
+        <xs:complexContent>
+            <xs:extension base="optionsBaseFieldComponent">
+                <xs:attribute name="nullOptionVisible" type="xs:boolean"/>
+                <xs:attribute name="multiselect" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -1723,15 +1732,6 @@
         <xs:complexContent>
             <xs:extension base="optionsBaseFieldComponent">
                 <xs:attribute name="orientation" type="orientation"/>
-            </xs:extension>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <!-- OptionsList -->
-    <xs:complexType name="optionsListComponent">
-        <xs:complexContent>
-            <xs:extension base="optionsBaseFieldComponent">
-                <xs:attribute name="nullOptionVisible" type="xs:boolean"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
