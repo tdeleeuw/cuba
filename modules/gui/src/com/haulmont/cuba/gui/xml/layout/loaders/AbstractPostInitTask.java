@@ -62,14 +62,13 @@ abstract public class AbstractPostInitTask implements ComponentLoader.PostInitTa
                         "Can't find action '%s' in '%s'", id, holder.getId()), context.getFullFrameId(),
                         "Holder ID", holder.getId());
             }
-            addAction(component, action);
+            addAction(action);
         } else if (elements.length == 1) {
             final String id = elements[0];
             Action action = getActionRecursively(frame, id);
 
             if (action == null) {
-                action = checkHavingOwnAction(id);
-                if (action == null) {
+                if (!hasOwnAction(id)) {
                     String message = "Can't find action " + id;
                     if (Window.Editor.WINDOW_COMMIT.equals(id) || Window.Editor.WINDOW_COMMIT_AND_CLOSE.equals(id))
                         message += ". This may happen if you are opening an AbstractEditor-based screen by openWindow() method, " +
@@ -77,16 +76,17 @@ abstract public class AbstractPostInitTask implements ComponentLoader.PostInitTa
                                 "with '.edit' to open it as editor from the main menu.";
                     throw new GuiDevelopmentException(message, context.getFullFrameId());
                 }
+            } else {
+                addAction(action);
             }
-            addAction(component, action);
         } else {
             throw new GuiDevelopmentException("Empty action name", context.getFullFrameId());
         }
     }
 
-    protected abstract Action checkHavingOwnAction(String id);
+    protected abstract boolean hasOwnAction(String id);
 
-    protected abstract void addAction(Component component, Action action);
+    protected abstract void addAction(Action action);
 
     protected Action getActionRecursively(Frame frame, String actionId) {
         Action action = frame.getAction(actionId);

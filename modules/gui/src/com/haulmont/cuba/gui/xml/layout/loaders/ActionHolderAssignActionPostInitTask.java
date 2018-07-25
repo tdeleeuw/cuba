@@ -22,26 +22,27 @@ import com.haulmont.cuba.gui.components.Frame;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class ActionsHolderPostInitTask extends AbstractPostInitTask {
-    public ActionsHolderPostInitTask(Component.ActionsHolder component, String actionName, Frame frame) {
+public class ActionHolderAssignActionPostInitTask extends AbstractPostInitTask {
+    public ActionHolderAssignActionPostInitTask(Component.ActionsHolder component, String actionName, Frame frame) {
         super(component, actionName, frame);
     }
 
     @Override
-    protected Action checkHavingOwnAction(String id) {
+    protected boolean hasOwnAction(String id) {
         Component.ActionsHolder actionsHolder = (Component.ActionsHolder) component;
-        return actionsHolder.getAction(id);
+        return actionsHolder.getAction(id) != null;
     }
 
     @Override
-    protected void addAction(Component component, Action action) {
+    protected void addAction(Action action) {
         Component.ActionsHolder actionsHolder = (Component.ActionsHolder) component;
-        List<Action> declarativeActions = new ArrayList<>(actionsHolder.getActions());
-        for (Action declarativeAction : declarativeActions) {
-            if (declarativeAction.getId().equals(actionName)) {
-                int index = declarativeActions.indexOf(declarativeAction);
-                actionsHolder.removeAction(declarativeAction);
+        List<Action> existingActions = new ArrayList<>(actionsHolder.getActions());
+        for (Action existingAction : existingActions) {
+            if (Objects.equals(existingAction.getId(),action.getId())) {
+                int index = existingActions.indexOf(existingAction);
+                actionsHolder.removeAction(existingAction);
                 actionsHolder.addAction(action, index);
                 break;
             }

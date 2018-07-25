@@ -19,9 +19,10 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 
-public class AssignActionPostInitTask extends ActionOwnerPostInitTask {
+@Deprecated
+public class AssignActionPostInitTask extends ActionOwnerAssignActionPostInitTask {
 
     public AssignActionPostInitTask(Component.ActionOwner component, String actionName, Frame frame) {
-        super((Component) component, actionName, frame);
+        super(component, actionName, frame);
     }
 }

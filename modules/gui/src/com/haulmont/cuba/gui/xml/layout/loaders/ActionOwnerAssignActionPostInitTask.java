@@ -20,18 +20,18 @@ import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 
-public class ActionOwnerPostInitTask extends AbstractPostInitTask {
-    public ActionOwnerPostInitTask(Component component, String actionName, Frame frame) {
-        super(component, actionName, frame);
+public class ActionOwnerAssignActionPostInitTask extends AbstractPostInitTask {
+    public ActionOwnerAssignActionPostInitTask(Component.ActionOwner component, String actionName, Frame frame) {
+        super((Component) component, actionName, frame);
     }
 
     @Override
-    protected Action checkHavingOwnAction(String id) {
-        return null;
+    protected boolean hasOwnAction(String id) {
+        return false;
     }
 
     @Override
-    protected void addAction(Component component, Action action) {
+    protected void addAction(Action action) {
         Component.ActionOwner actionOwner = (Component.ActionOwner) component;
         actionOwner.setAction(action);
     }
