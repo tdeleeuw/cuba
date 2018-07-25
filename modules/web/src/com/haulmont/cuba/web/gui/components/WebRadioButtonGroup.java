@@ -43,7 +43,19 @@ public class WebRadioButtonGroup<V> extends WebV8AbstractField<CubaRadioButtonGr
     }
 
     protected void initComponent(CubaRadioButtonGroup<V> component) {
-        component.setItemCaptionGenerator(this::generateDefaultItemCaption);
+        component.setItemCaptionGenerator(this::generateItemCaption);
+    }
+
+    protected String generateItemCaption(V item) {
+        if (item == null) {
+            return null;
+        }
+
+        if (optionCaptionProvider != null) {
+            return optionCaptionProvider.apply(item);
+        }
+
+        return generateDefaultItemCaption(item);
     }
 
     // TODO: gg, refactor, extract to some value provider?
