@@ -2129,6 +2129,13 @@
         </xs:complexContent>
     </xs:complexType>
 
+    <!-- TreeDataGrid -->
+    <xs:complexType name="treeDataGridComponent">
+        <xs:complexContent>
+            <xs:extension base="dataGridComponent"/>
+        </xs:complexContent>
+    </xs:complexType>
+
     <!-- Filter -->
     <xs:complexType name="filterComponent">
         <xs:complexContent>
@@ -2959,6 +2966,7 @@
                 <xs:element name="treeTable" type="tableComponent"/>
                 <xs:element name="groupTable" type="groupTableComponent"/>
                 <xs:element name="dataGrid" type="dataGridComponent"/>
+                <xs:element name="treeDataGrid" type="treeDataGridComponent"/>
                 <xs:element name="buttonsPanel" type="buttonsPanelComponent"/>
                 <xs:element name="calendar" type="calendarComponent"/>
 
