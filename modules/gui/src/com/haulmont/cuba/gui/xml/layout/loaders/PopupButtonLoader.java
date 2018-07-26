@@ -86,8 +86,8 @@ public class PopupButtonLoader extends AbstractComponentLoader<PopupButton> {
 
         for (Element actionEl : Dom4j.elements(actionsEl, "action")) {
             actionsHolder.addAction(loadDeclarativeAction(actionsHolder, actionEl));
-            String actionName = actionEl.attributeValue("id");
-            context.addPostInitTask(new ActionHolderAssignActionPostInitTask(actionsHolder, actionName, context.getFrame()));
+            String actionId = actionEl.attributeValue("id");
+            context.addPostInitTask(new ActionHolderAssignActionPostInitTask(actionsHolder, actionId, context.getFrame()));
         }
     }
 

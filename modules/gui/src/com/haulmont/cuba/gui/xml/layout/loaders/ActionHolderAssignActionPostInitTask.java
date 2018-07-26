@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class ActionHolderAssignActionPostInitTask extends AbstractPostInitTask {
-    public ActionHolderAssignActionPostInitTask(Component.ActionsHolder component, String actionName, Frame frame) {
-        super(component, actionName, frame);
+    public ActionHolderAssignActionPostInitTask(Component.ActionsHolder component, String actionId, Frame frame) {
+        super(component, actionId, frame);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ActionHolderAssignActionPostInitTask extends AbstractPostInitTask {
         Component.ActionsHolder actionsHolder = (Component.ActionsHolder) component;
         List<Action> existingActions = new ArrayList<>(actionsHolder.getActions());
         for (Action existingAction : existingActions) {
-            if (Objects.equals(existingAction.getId(),action.getId())) {
+            if (Objects.equals(existingAction.getId(), actionId)) {
                 int index = existingActions.indexOf(existingAction);
                 actionsHolder.removeAction(existingAction);
                 actionsHolder.addAction(action, index);

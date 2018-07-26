@@ -26,18 +26,18 @@ import java.util.Arrays;
 abstract public class AbstractPostInitTask implements ComponentLoader.PostInitTask {
 
     protected Component component;
-    protected String actionName;
+    protected String actionId;
     protected Frame frame;
 
-    public AbstractPostInitTask(Component component, String actionName, Frame frame) {
+    public AbstractPostInitTask(Component component, String actionId, Frame frame) {
         this.component = component;
-        this.actionName = actionName;
+        this.actionId = actionId;
         this.frame = frame;
     }
 
     @Override
     public void execute(ComponentLoader.Context context, Frame window) {
-        String[] elements = ValuePathHelper.parse(actionName);
+        String[] elements = ValuePathHelper.parse(actionId);
         if (elements.length > 1) {
             final String id = elements[elements.length - 1];
             String[] subPath = (String[]) ArrayUtils.subarray(elements, 0, elements.length - 1);
@@ -46,7 +46,7 @@ abstract public class AbstractPostInitTask implements ComponentLoader.PostInitTa
             Component holder = this.frame.getComponent(ValuePathHelper.format(subPath));
             if (holder == null) {
                 throw new GuiDevelopmentException(
-                        "Can't find component: " + Arrays.toString(subPath) + " for action: " + actionName,
+                        "Can't find component: " + Arrays.toString(subPath) + " for action: " + actionId,
                         context.getFullFrameId(), "Component ID", Arrays.toString(subPath));
             }
 

@@ -22,7 +22,7 @@ import com.haulmont.cuba.gui.components.Frame;
 @Deprecated
 public class AssignActionPostInitTask extends ActionOwnerAssignActionPostInitTask {
 
-    public AssignActionPostInitTask(Component.ActionOwner component, String actionName, Frame frame) {
-        super(component, actionName, frame);
+    public AssignActionPostInitTask(Component.ActionOwner component, String actionId, Frame frame) {
+        super(component, actionId, frame);
     }
 }
