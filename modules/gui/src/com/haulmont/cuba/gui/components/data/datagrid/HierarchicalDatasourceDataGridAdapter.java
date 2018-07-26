@@ -5,6 +5,7 @@ import com.haulmont.cuba.gui.components.data.TreeDataGridSource;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 public class HierarchicalDatasourceDataGridAdapter<E extends Entity<K>, K>
@@ -28,11 +29,11 @@ public class HierarchicalDatasourceDataGridAdapter<E extends Entity<K>, K>
 
     @Override
     public Stream<E> getChildren(E item) {
-        if (item == null) {
-            return Stream.empty();
-        }
+        Collection<K> itemIds = item == null
+                ? getHierarchicalDatasource().getRootItemIds()
+                : getHierarchicalDatasource().getChildren(item.getId());
 
-        return getHierarchicalDatasource().getChildren(item.getId()).stream()
+        return itemIds.stream()
                 .map(id -> datasource.getItem(id));
     }
 
