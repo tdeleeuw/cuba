@@ -20,7 +20,7 @@ import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 
-public class ActionOwnerAssignActionPostInitTask extends AbstractPostInitTask {
+public class ActionOwnerAssignActionPostInitTask extends AbstractAssignActionPostInitTask {
     public ActionOwnerAssignActionPostInitTask(Component.ActionOwner component, String actionId, Frame frame) {
         super((Component) component, actionId, frame);
     }

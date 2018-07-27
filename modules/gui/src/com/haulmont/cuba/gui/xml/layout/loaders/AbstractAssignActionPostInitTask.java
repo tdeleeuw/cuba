@@ -23,13 +23,13 @@ import org.apache.commons.lang.ArrayUtils;
 
 import java.util.Arrays;
 
-abstract public class AbstractPostInitTask implements ComponentLoader.PostInitTask {
+abstract public class AbstractAssignActionPostInitTask implements ComponentLoader.PostInitTask {
 
     protected Component component;
     protected String actionId;
     protected Frame frame;
 
-    public AbstractPostInitTask(Component component, String actionId, Frame frame) {
+    public AbstractAssignActionPostInitTask(Component component, String actionId, Frame frame) {
         this.component = component;
         this.actionId = actionId;
         this.frame = frame;

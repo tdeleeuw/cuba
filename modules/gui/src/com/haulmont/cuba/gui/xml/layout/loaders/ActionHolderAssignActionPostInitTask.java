@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ActionHolderAssignActionPostInitTask extends AbstractPostInitTask {
+public class ActionHolderAssignActionPostInitTask extends AbstractAssignActionPostInitTask {
     public ActionHolderAssignActionPostInitTask(Component.ActionsHolder component, String actionId, Frame frame) {
         super(component, actionId, frame);
     }
@@ -40,6 +40,7 @@ public class ActionHolderAssignActionPostInitTask extends AbstractPostInitTask {
         Component.ActionsHolder actionsHolder = (Component.ActionsHolder) component;
         List<Action> existingActions = new ArrayList<>(actionsHolder.getActions());
         for (Action existingAction : existingActions) {
+            // Comparing the id of an existing action with the uncut ID of the action to be added
             if (Objects.equals(existingAction.getId(), actionId)) {
                 int index = existingActions.indexOf(existingAction);
                 actionsHolder.removeAction(existingAction);
