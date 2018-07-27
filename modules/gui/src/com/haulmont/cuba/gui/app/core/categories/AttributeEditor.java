@@ -175,12 +175,14 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         initLocalizedFrame();
         initFieldGroup();
 
-        targetScreensTable.addAction(new AbstractAction("create") {
+        Action createAction = new AbstractAction("create") {
             @Override
             public void actionPerform(Component component) {
                 screensDs.addItem(new ScreenAndComponent());
             }
-        });
+        };
+        createAction.setCaption(messages.getMainMessage("actions.Create"));
+        targetScreensTable.addAction(createAction);
         targetScreensTable.addAction(new RemoveAction(targetScreensTable));
     }
 
