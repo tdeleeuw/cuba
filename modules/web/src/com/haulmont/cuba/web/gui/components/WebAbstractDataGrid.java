@@ -650,6 +650,8 @@ public abstract class WebAbstractDataGrid<T extends Grid<E> & CubaEnhancedGrid, 
     @Nullable
     @Override
     public Column<E> getColumn(String id) {
+        checkNotNullArgument(id);
+
         return columns.get(id);
     }
 
