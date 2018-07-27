@@ -40,7 +40,7 @@ public class ActionHolderAssignActionPostInitTask extends AbstractAssignActionPo
         Component.ActionsHolder actionsHolder = (Component.ActionsHolder) component;
         List<Action> existingActions = new ArrayList<>(actionsHolder.getActions());
         for (Action existingAction : existingActions) {
-            // Comparing the id of an existing action with the uncut ID of the action to be added
+            // Comparing the id of an existing action with the full Id (including path) of the action to be added
             if (Objects.equals(existingAction.getId(), actionId)) {
                 int index = existingActions.indexOf(existingAction);
                 actionsHolder.removeAction(existingAction);
