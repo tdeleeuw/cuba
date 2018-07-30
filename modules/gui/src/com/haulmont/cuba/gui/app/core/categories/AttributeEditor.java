@@ -181,18 +181,18 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         Action createAction = getCreateActionWithScreenAndComponent();
         targetScreensTable.addAction(createAction);
         Action removeAction = new RemoveAction(targetScreensTable);
-        removeAction.setCaption(messages.getMessage(this.getClass(), "targetScreensTable.remove"));
+        removeAction.setCaption(getMessage("targetScreensTable.remove"));
         targetScreensTable.addAction(removeAction);
     }
 
     protected Action getCreateActionWithScreenAndComponent() {
-        Action createAction = new AbstractAction("create") {
+        Action createAction = new BaseAction("create") {
             @Override
             public void actionPerform(Component component) {
                 screensDs.addItem(new ScreenAndComponent());
             }
         };
-        createAction.setCaption(messages.getMessage(this.getClass(), "targetScreensTable.create"));
+        createAction.setCaption(getMessage("targetScreensTable.create"));
         String icon = AppBeans.get(Icons.class).get(CubaIcon.CREATE_ACTION);
         createAction.setIcon(icon);
         Configuration configuration = AppBeans.get(Configuration.NAME);
