@@ -1,35 +1,13 @@
 package com.haulmont.cuba.web.widgets.client.treegrid;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Widget;
 import com.haulmont.cuba.web.widgets.client.grid.HasClickSettings;
-import com.haulmont.cuba.web.widgets.client.grid.events.CubaGridClickEvent;
-import com.haulmont.cuba.web.widgets.client.grid.events.CubaGridDoubleClickEvent;
-import com.haulmont.cuba.web.widgets.client.grid.events.CubaGridKeyDownEvent;
-import com.haulmont.cuba.web.widgets.client.grid.events.CubaGridKeyPressEvent;
-import com.haulmont.cuba.web.widgets.client.grid.events.CubaGridKeyUpEvent;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.renderers.Renderer;
-import com.vaadin.client.widget.escalator.EscalatorUpdater;
 import com.vaadin.client.widget.escalator.FlyweightCell;
 import com.vaadin.client.widget.escalator.RowContainer;
-import com.vaadin.client.widget.grid.events.BodyClickHandler;
-import com.vaadin.client.widget.grid.events.BodyDoubleClickHandler;
-import com.vaadin.client.widget.grid.events.BodyKeyDownHandler;
-import com.vaadin.client.widget.grid.events.BodyKeyPressHandler;
-import com.vaadin.client.widget.grid.events.BodyKeyUpHandler;
-import com.vaadin.client.widget.grid.events.FooterClickHandler;
-import com.vaadin.client.widget.grid.events.FooterDoubleClickHandler;
-import com.vaadin.client.widget.grid.events.FooterKeyDownHandler;
-import com.vaadin.client.widget.grid.events.FooterKeyPressHandler;
-import com.vaadin.client.widget.grid.events.FooterKeyUpHandler;
 import com.vaadin.client.widget.grid.events.GridClickEvent;
-import com.vaadin.client.widget.grid.events.HeaderClickHandler;
-import com.vaadin.client.widget.grid.events.HeaderDoubleClickHandler;
-import com.vaadin.client.widget.grid.events.HeaderKeyDownHandler;
-import com.vaadin.client.widget.grid.events.HeaderKeyPressHandler;
-import com.vaadin.client.widget.grid.events.HeaderKeyUpHandler;
 import com.vaadin.client.widget.treegrid.TreeGrid;
 import elemental.json.JsonObject;
 
@@ -95,91 +73,6 @@ public class CubaTreeGridWidget extends TreeGrid {
         Widget widget = WidgetUtil.findWidget(e, null);
         return widget instanceof HasClickSettings &&
                 ((HasClickSettings) widget).isClickThroughEnabled();
-    }
-
-    @Override
-    public HandlerRegistration addBodyKeyDownHandler(BodyKeyDownHandler handler) {
-        return addHandler(handler, CubaGridKeyDownEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBodyKeyUpHandler(BodyKeyUpHandler handler) {
-        return addHandler(handler, CubaGridKeyUpEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBodyKeyPressHandler(BodyKeyPressHandler handler) {
-        return addHandler(handler, CubaGridKeyPressEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addHeaderKeyDownHandler(HeaderKeyDownHandler handler) {
-        return addHandler(handler, CubaGridKeyDownEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addHeaderKeyUpHandler(HeaderKeyUpHandler handler) {
-        return addHandler(handler, CubaGridKeyUpEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addHeaderKeyPressHandler(HeaderKeyPressHandler handler) {
-        return addHandler(handler, CubaGridKeyPressEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFooterKeyDownHandler(FooterKeyDownHandler handler) {
-        return addHandler(handler, CubaGridKeyDownEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFooterKeyUpHandler(FooterKeyUpHandler handler) {
-        return addHandler(handler, CubaGridKeyUpEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFooterKeyPressHandler(FooterKeyPressHandler handler) {
-        return addHandler(handler, CubaGridKeyPressEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBodyClickHandler(BodyClickHandler handler) {
-        return addHandler(handler, CubaGridClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addHeaderClickHandler(HeaderClickHandler handler) {
-        return addHandler(handler, CubaGridClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFooterClickHandler(FooterClickHandler handler) {
-        return addHandler(handler, CubaGridClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBodyDoubleClickHandler(BodyDoubleClickHandler handler) {
-        return addHandler(handler, CubaGridDoubleClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addHeaderDoubleClickHandler(HeaderDoubleClickHandler handler) {
-        return addHandler(handler, CubaGridDoubleClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFooterDoubleClickHandler(FooterDoubleClickHandler handler) {
-        return addHandler(handler, CubaGridDoubleClickEvent.EVENT_TYPE);
-    }
-
-    @Override
-    protected EscalatorUpdater createHeaderUpdater() {
-        return new CubaTreeGridWidget.CubaStaticSectionUpdater(getHeader(), getEscalator().getHeader());
-    }
-
-    @Override
-    protected EscalatorUpdater createFooterUpdater() {
-        return new CubaTreeGridWidget.CubaStaticSectionUpdater(getFooter(), getEscalator().getFooter());
     }
 
     @Override
