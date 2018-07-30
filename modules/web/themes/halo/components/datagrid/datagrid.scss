@@ -262,6 +262,14 @@
     }
   }
 
+  .#{$primary-stylename}-sidebar.v-contextmenu .#{$primary-stylename}-sidebar-button:after {
+    content: "\f013";
+  }
+
+  .#{$primary-stylename}-sidebar.v-contextmenu.open .#{$primary-stylename}-sidebar-button:after {
+    content: "\f013";
+  }
+
   // styles from componentrenderers addon
   .#{$primary-stylename}-cell > .cr-component-cell {
     display: flex;
@@ -281,13 +289,5 @@
   .#{$primary-stylename}-editor-cells .cr-editor-field .v-checkbox{
     margin-left: 0;
     margin-right: 0;
-  }
-
-  .#{$primary-stylename}-sidebar.v-contextmenu .#{$primary-stylename}-sidebar-button:after {
-    content: "\f013";
-  }
-
-  .#{$primary-stylename}-sidebar.v-contextmenu.open .#{$primary-stylename}-sidebar-button:after {
-    content: "\f013";
   }
 }
