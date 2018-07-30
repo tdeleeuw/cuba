@@ -106,6 +106,8 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
     protected CategoryAttribute attribute;
 
+
+
     @Inject
     protected FieldGroup attributeFieldGroup;
     protected LookupField dataTypeField;
@@ -163,6 +165,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
     @Inject
     protected GlobalConfig globalConfig;
 
+    @Inject
+    protected ClientConfig clientConfig;
+
     protected LocalizedNameFrame localizedFrame;
 
     private ListEditor enumerationListEditor;
@@ -195,8 +200,6 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
         createAction.setCaption(getMessage("targetScreensTable.create"));
         String icon = AppBeans.get(Icons.class).get(CubaIcon.CREATE_ACTION);
         createAction.setIcon(icon);
-        Configuration configuration = AppBeans.get(Configuration.NAME);
-        ClientConfig clientConfig = configuration.getConfig(ClientConfig.class);
         createAction.setShortcut(clientConfig.getTableInsertShortcut());
         return createAction;
     }
