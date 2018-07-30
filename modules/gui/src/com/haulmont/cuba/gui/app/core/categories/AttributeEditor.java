@@ -180,7 +180,9 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
 
         Action createAction = getCreateActionWithScreenAndComponent();
         targetScreensTable.addAction(createAction);
-        targetScreensTable.addAction(new RemoveAction(targetScreensTable));
+        Action removeAction = new RemoveAction(targetScreensTable);
+        removeAction.setCaption(messages.getMessage(this.getClass(), "targetScreensTable.remove"));
+        targetScreensTable.addAction(removeAction);
     }
 
     protected Action getCreateActionWithScreenAndComponent() {
@@ -190,7 +192,7 @@ public class AttributeEditor extends AbstractEditor<CategoryAttribute> {
                 screensDs.addItem(new ScreenAndComponent());
             }
         };
-        createAction.setCaption(messages.getMainMessage("actions.Create"));
+        createAction.setCaption(messages.getMessage(this.getClass(), "targetScreensTable.create"));
         String icon = AppBeans.get(Icons.class).get(CubaIcon.CREATE_ACTION);
         createAction.setIcon(icon);
         Configuration configuration = AppBeans.get(Configuration.NAME);
