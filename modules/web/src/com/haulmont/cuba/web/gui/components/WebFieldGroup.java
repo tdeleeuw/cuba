@@ -1374,6 +1374,8 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
             if (isWrapped()) {
                 if (targetCaption != null) {
                     composition.setCaption(targetCaption);
+                } else if (getCaption() != null) {
+                    composition.setCaption(getCaption());
                 }
                 if (targetRequired != null) {
                     composition.setRequired(targetRequired);
