@@ -1191,6 +1191,9 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
             if (component instanceof Field) {
                 return ((Field) component).getCaption();
             }
+            if (component instanceof HasCaption) {
+                return ((HasCaption) component).getCaption();
+            }
             if (composition != null && isWrapped()) {
                 return composition.getCaption();
             }
