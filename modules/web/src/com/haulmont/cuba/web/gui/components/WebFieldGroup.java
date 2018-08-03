@@ -1191,9 +1191,6 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
             if (component instanceof Field) {
                 return ((Field) component).getCaption();
             }
-            if (component instanceof HasCaption) {
-                return ((HasCaption) component).getCaption();
-            }
             if (composition != null && isWrapped()) {
                 return composition.getCaption();
             }
@@ -1377,8 +1374,6 @@ public class WebFieldGroup extends WebAbstractComponent<CubaFieldGroupLayout> im
             if (isWrapped()) {
                 if (targetCaption != null) {
                     composition.setCaption(targetCaption);
-                } else if (getCaption() != null) {
-                    composition.setCaption(getCaption());
                 }
                 if (targetRequired != null) {
                     composition.setRequired(targetRequired);
