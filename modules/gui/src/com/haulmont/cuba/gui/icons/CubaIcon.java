@@ -54,6 +54,7 @@ public enum CubaIcon implements Icons.Icon {
     EDITOR_OK("font-icon:CHECK"),
     EDITOR_CANCEL("font-icon:BAN"),
 
+    _500PX("font-icon:_500PX"),
     ADDRESS_BOOK("font-icon:ADDRESS_BOOK"),
     ADDRESS_BOOK_O("font-icon:ADDRESS_BOOK_O"),
     ADDRESS_CARD("font-icon:ADDRESS_CARD"),
