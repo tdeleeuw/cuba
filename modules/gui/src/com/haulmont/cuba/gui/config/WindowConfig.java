@@ -31,7 +31,7 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.gui.sys.ScreenDescriptorUtils;
 import com.haulmont.cuba.gui.sys.ScreensConfiguration;
-import com.haulmont.cuba.gui.sys.ScreensConfiguration.UIControllerDefinition;
+import com.haulmont.cuba.gui.sys.ScreensConfiguration.UiControllerDefinition;
 import com.haulmont.cuba.gui.xml.layout.ScreenXmlLoader;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -222,9 +222,9 @@ public class WindowConfig {
 
     protected void loadScreenConfigurations() {
         for (ScreensConfiguration provider : screensConfigurations) {
-            List<UIControllerDefinition> uiControllers = provider.getUIControllers();
+            List<UiControllerDefinition> uiControllers = provider.getUIControllers();
 
-            for (UIControllerDefinition definition : uiControllers) {
+            for (UiControllerDefinition definition : uiControllers) {
                 WindowInfo windowInfo = new WindowInfo(definition.getId(), windowAttributesProvider,
                         definition.getControllerClass());
                 screens.put(definition.getId(), windowInfo);

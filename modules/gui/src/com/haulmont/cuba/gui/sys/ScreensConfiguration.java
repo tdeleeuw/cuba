@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import javax.inject.Inject;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * JavaDoc
+ * Configuration that performs ClassPath scanning of {@link UiController}s and provides {@link UiControllerDefinition}.
  */
 public class ScreensConfiguration {
     private static final Logger log = LoggerFactory.getLogger(ScreensConfiguration.class);
@@ -40,7 +41,7 @@ public class ScreensConfiguration {
         this.packages = packages;
     }
 
-    public List<UIControllerDefinition> getUIControllers() {
+    public List<UiControllerDefinition> getUIControllers() {
         ClassPathScanningCandidateComponentProvider provider = createComponentScanner();
 
         log.trace("Scanning packages {}", packages);
@@ -61,7 +62,7 @@ public class ScreensConfiguration {
 
                     String id = ScreenDescriptorUtils.getInferredScreenId(uiController, screenClass);
 
-                    return new UIControllerDefinition(id, className);
+                    return new UiControllerDefinition(id, className);
                 })
                 .collect(Collectors.toList());
     }
@@ -70,16 +71,20 @@ public class ScreensConfiguration {
         // Don't pull default filters (@Component, etc.):
         ClassPathScanningCandidateComponentProvider provider
                 = new ClassPathScanningCandidateComponentProvider(false);
-        provider.setResourceLoader(applicationContext);
+        provider.setResourceLoader(getResourceLoader());
         provider.addIncludeFilter(new AnnotationTypeFilter(UiController.class));
         return provider;
     }
 
-    public final static class UIControllerDefinition {
+    protected ResourceLoader getResourceLoader() {
+        return applicationContext;
+    }
+
+    public final static class UiControllerDefinition {
         private final String id;
         private final String controllerClass;
 
-        public UIControllerDefinition(String id, String controllerClass) {
+        public UiControllerDefinition(String id, String controllerClass) {
             this.id = id;
             this.controllerClass = controllerClass;
         }
