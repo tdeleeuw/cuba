@@ -112,6 +112,8 @@ public class ControlLoggerWindow extends AbstractWindow {
         loggerNameField.setFrame(this);
         loggerNameField.setWidth("100%");
 
+        levels.put(loggerName, level);
+
         HBoxLayout buttonField = componentsFactory.createComponent(HBoxLayout.class);
         buttonField.setSpacing(true);
 
