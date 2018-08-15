@@ -96,6 +96,7 @@ public class Param {
     protected List<String> runtimeEnum;
     protected UUID categoryAttrId;
     protected Component editComponent;
+    protected boolean isFilterSet = false;
 
     protected Messages messages = AppBeans.get(Messages.NAME);
     protected UserSessionSource userSessionSource = AppBeans.get(UserSessionSource.NAME);
@@ -245,6 +246,14 @@ public class Param {
         this.inExpr = inExpr;
     }
 
+    public boolean isFilterSet() {
+        return isFilterSet;
+    }
+
+    public void setFilterSet(boolean setFilter) {
+        isFilterSet = setFilter;
+    }
+
     public boolean isUseUserTimeZone() {
         return useUserTimeZone;
     }
@@ -319,7 +328,12 @@ public class Param {
                         }
                     }
                 }
-                value = list.isEmpty() ? null : list;
+
+                if (isFilterSet) {
+                    value = list;
+                } else {
+                    value = list.isEmpty() ? null : list;
+                }
             }
         } else {
             value = parseSingleValue(text);
