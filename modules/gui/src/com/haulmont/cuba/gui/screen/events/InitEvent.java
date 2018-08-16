@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.screen.events;
 
+import com.haulmont.bali.events.TemporaryEvent;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.ScreenOptions;
 
@@ -24,6 +25,7 @@ import java.util.EventObject;
 /**
  * JavaDoc
  */
+@TemporaryEvent
 public class InitEvent extends EventObject {
     protected final ScreenOptions options;
 

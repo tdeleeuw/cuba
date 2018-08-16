@@ -16,6 +16,7 @@
 
 package com.haulmont.cuba.gui.screen.events;
 
+import com.haulmont.bali.events.TemporaryEvent;
 import com.haulmont.cuba.gui.screen.Screen;
 
 import java.util.EventObject;
@@ -23,6 +24,7 @@ import java.util.EventObject;
 /**
  * JavaDoc
  */
+@TemporaryEvent
 public class BeforeShowEvent extends EventObject {
     public BeforeShowEvent(Screen source) {
         super(source);

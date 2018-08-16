@@ -231,16 +231,13 @@ public class WebScreens implements Screens, WindowManager {
             componentLoaderContext.setCurrentFrameId(windowInfo.getId());
             componentLoaderContext.setFrame(window);
 
-            ComponentLoader windowLoader = createLayout(windowInfo, window, element, componentLoaderContext);
+            ComponentLoader windowLoader = createLayoutStructure(windowInfo, window, element, componentLoaderContext);
 
-            // deploy views only if screen is legacy
             if (controller instanceof LegacyFrame) {
                 screenViewsLoader.deployViews(element);
 
                 initDsContext(window, element, componentLoaderContext);
-            }
 
-            if (controller instanceof LegacyFrame) {
                 DsContext dsContext = ((LegacyFrame) controller).getDsContext();
                 if (dsContext != null) {
                     dsContext.setFrameContext(window.getContext());
@@ -249,11 +246,12 @@ public class WebScreens implements Screens, WindowManager {
 
             windowLoader.loadComponent();
 
-            EventHub eventHub = ScreenUtils.getEventHub(controller);
-
-            eventHub.subscribe(AfterInitEvent.class, event ->
-                    componentLoaderContext.executePostInitTasks()
-            );
+            if (!componentLoaderContext.getPostInitTasks().isEmpty()) {
+                EventHub eventHub = ScreenUtils.getEventHub(controller);
+                eventHub.subscribe(AfterInitEvent.class, event ->
+                        componentLoaderContext.executePostInitTasks()
+                );
+            }
         }
     }
 
@@ -295,8 +293,8 @@ public class WebScreens implements Screens, WindowManager {
         }
     }
 
-    protected ComponentLoader createLayout(WindowInfo windowInfo, Window window, Element rootElement,
-                                           ComponentLoader.Context context) {
+    protected ComponentLoader createLayoutStructure(WindowInfo windowInfo, Window window, Element rootElement,
+                                                    ComponentLoader.Context context) {
         String descriptorPath = windowInfo.getTemplate();
 
         LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, context);

@@ -14,24 +14,15 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.gui.screen.events;
+package com.haulmont.bali.events;
 
-import com.haulmont.bali.events.TemporaryEvent;
-import com.haulmont.cuba.gui.screen.Screen;
-
-import java.util.EventObject;
+import java.lang.annotation.*;
 
 /**
- * JavaDoc
+ * Annotation for event types that forces {@link EventHub} to unsubscribe listeners for this event type after invoke.
  */
-@TemporaryEvent
-public class AfterShowEvent extends EventObject {
-    public AfterShowEvent(Screen source) {
-        super(source);
-    }
-
-    @Override
-    public Screen getSource() {
-        return (Screen) super.getSource();
-    }
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TemporaryEvent {
 }
