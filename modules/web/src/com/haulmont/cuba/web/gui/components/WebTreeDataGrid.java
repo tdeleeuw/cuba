@@ -52,7 +52,7 @@ public class WebTreeDataGrid<E extends Entity> extends WebAbstractDataGrid<CubaT
         return e -> {
             ExpandEvent<E> event = new ExpandEvent<>(WebTreeDataGrid.this,
                     e.getExpandedItem(), e.isUserOriginated());
-            publish(ExpandEvent.class, event);
+            fireEvent(ExpandEvent.class, event);
         };
     }
 
@@ -60,7 +60,7 @@ public class WebTreeDataGrid<E extends Entity> extends WebAbstractDataGrid<CubaT
         return e -> {
             CollapseEvent<E> event = new CollapseEvent<>(WebTreeDataGrid.this,
                     e.getCollapsedItem(), e.isUserOriginated());
-            publish(CollapseEvent.class, event);
+            fireEvent(CollapseEvent.class, event);
         };
     }
 
@@ -135,12 +135,12 @@ public class WebTreeDataGrid<E extends Entity> extends WebAbstractDataGrid<CubaT
     @SuppressWarnings("unchecked")
     @Override
     public Subscription addExpandListener(Consumer<ExpandEvent<E>> listener) {
-        return subscribe(ExpandEvent.class, (Consumer) listener);
+        return addListener(ExpandEvent.class, (Consumer) listener);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Subscription addCollapseListener(Consumer<CollapseEvent<E>> listener) {
-        return subscribe(CollapseEvent.class, (Consumer) listener);
+        return addListener(CollapseEvent.class, (Consumer) listener);
     }
 }

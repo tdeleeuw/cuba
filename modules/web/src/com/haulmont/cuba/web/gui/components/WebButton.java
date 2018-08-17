@@ -48,7 +48,7 @@ public class WebButton extends WebAbstractComponent<CubaButton> implements Butto
         if (action != null) {
             action.actionPerform(getActionEventTarget());
         }
-        getEventHub().publish(ClickEvent.class, new ClickEvent(this));
+        fireEvent(ClickEvent.class, new ClickEvent(this));
         afterActionPerformed();
     }
 
@@ -206,6 +206,6 @@ public class WebButton extends WebAbstractComponent<CubaButton> implements Butto
 
     @Override
     public Subscription addClickListener(Consumer<ClickEvent> listener) {
-        return getEventHub().subscribe(ClickEvent.class, listener);
+        return addListener(ClickEvent.class, listener);
     }
 }
