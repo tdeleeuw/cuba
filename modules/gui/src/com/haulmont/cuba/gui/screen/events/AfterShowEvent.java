@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.screen.events;
 
-import com.haulmont.bali.events.TemporaryEvent;
+import com.haulmont.bali.events.TriggerOnce;
 import com.haulmont.cuba.gui.screen.Screen;
 
 import java.util.EventObject;
@@ -24,7 +24,7 @@ import java.util.EventObject;
 /**
  * JavaDoc
  */
-@TemporaryEvent
+@TriggerOnce
 public class AfterShowEvent extends EventObject {
     public AfterShowEvent(Screen source) {
         super(source);

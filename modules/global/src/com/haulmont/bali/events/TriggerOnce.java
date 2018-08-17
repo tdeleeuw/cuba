@@ -19,10 +19,10 @@ package com.haulmont.bali.events;
 import java.lang.annotation.*;
 
 /**
- * Annotation for event types that forces {@link EventHub} to unsubscribe listeners for this event type after invoke.
+ * Annotation for event types that forces {@link EventHub} to unsubscribe listeners for this event type after invocation.
  */
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TemporaryEvent {
+public @interface TriggerOnce {
 }

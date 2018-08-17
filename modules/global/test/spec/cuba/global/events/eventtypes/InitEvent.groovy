@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.gui.screen.events;
+package spec.cuba.global.events.eventtypes
 
-import com.haulmont.bali.events.TriggerOnce;
-import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.bali.events.TriggerOnce
 
-import java.util.EventObject;
-
-/**
- * JavaDoc
- */
 @TriggerOnce
-public class BeforeShowEvent extends EventObject {
-    public BeforeShowEvent(Screen source) {
-        super(source);
-    }
-
-    @Override
-    public Screen getSource() {
-        return (Screen) super.getSource();
+class InitEvent extends EventObject {
+    InitEvent(Object source) {
+        super(source)
     }
 }

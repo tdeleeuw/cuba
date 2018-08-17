@@ -16,7 +16,7 @@
 
 package com.haulmont.cuba.gui.screen.events;
 
-import com.haulmont.bali.events.TemporaryEvent;
+import com.haulmont.bali.events.TriggerOnce;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.ScreenOptions;
 
@@ -27,7 +27,7 @@ import java.util.EventObject;
  *
  * Used by UI components to perform actions after UiController initialized
  */
-@TemporaryEvent
+@TriggerOnce
 public class AfterInitEvent extends EventObject {
     protected final ScreenOptions options;
 

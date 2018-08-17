@@ -147,8 +147,8 @@ public class EventHub {
                 }
             }
 
-            TemporaryEvent temporaryEvent = eventType.getAnnotation(TemporaryEvent.class);
-            if (temporaryEvent != null) {
+            TriggerOnce triggerOnce = eventType.getAnnotation(TriggerOnce.class);
+            if (triggerOnce != null) {
                 unsubscribe(eventType);
             }
         }
