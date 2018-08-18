@@ -18,7 +18,6 @@ package spec.cuba.web.serverlogviewer
 
 import com.google.gson.Gson
 import com.google.gson.internal.LinkedTreeMap
-import com.haulmont.cuba.core.global.Resources
 import com.haulmont.cuba.core.sys.ResourcesImpl
 import com.haulmont.cuba.web.app.ui.serverlogviewer.ServerLogWindow
 import spock.lang.Shared
@@ -29,27 +28,42 @@ import java.util.regex.Pattern
 class ServerLogPatternsTest extends Specification {
 
     @Shared
-    protected ServerLogWindow serverLog
+    def serverLog
 
-    protected List<String> lines
+    @Shared
+    def resources
 
-    protected List<String> patterns
+    @Shared
+    def correctLines
+
+    @Shared
+    def correctPatterns
+
+    @Shared
+    def incorrectLines
+
+    @Shared
+    def incorrectPatterns
 
     def setupSpec() {
         serverLog = new ServerLogWindow()
+        def loader = getClass().getClassLoader()
+        resources = new ResourcesImpl(loader, null)
+        loadData()
     }
 
-    def "check the line doesn't match pattern"() {
-        when: "line from stack trace doesn't include pattern's value"
-        def line = "2018-07-20 12:36:27.955 DEBUG [http-nio-8080-exec-77] " +
-                "com.haulmont.cuba.gui.theme.ThemeConstantsRepository - Loading theme constants"
-        def pattern = /http-nio-8080-exec-\D/
+    def "check the line doesn't match pattern"(String line, String pattern) {
+        when:
         def transformedLine = serverLog.replaceSpaces(line)
         def transformedPattern = Pattern.compile(serverLog.replaceSpaces(pattern))
         def changedLine = serverLog.highlightLoweredAttention(transformedLine, transformedPattern)
 
         then:
         changedLine != serverLog.getLoweredAttentionLine(transformedLine)
+
+        where:
+        line << incorrectLines
+        pattern << incorrectPatterns
     }
 
     def "check the line matches pattern"(String line, String pattern) {
@@ -62,38 +76,42 @@ class ServerLogPatternsTest extends Specification {
         changedLine == serverLog.getLoweredAttentionLine(transformedLine)
 
         where:
-        line << loadLines()
-        pattern << loadPatterns()
-    }
-
-    def loadLines() {
-        if (lines == null) {
-            loadData()
-        }
-        return lines
-    }
-
-    def loadPatterns() {
-        if (patterns == null) {
-            loadData()
-        }
-        return patterns
+        line << correctLines
+        pattern << correctPatterns
     }
 
     def loadData() {
-        String path = "spec/cuba/web/serverlogviewer/testData"
-        def loader = getClass().getClassLoader()
-        Resources resources = new ResourcesImpl(loader, null)
-        String json = resources.getResourceAsString(path)
+        loadCorrectTestData()
+        loadIncorrectTestData()
+    }
+
+    def loadIncorrectTestData() {
+        String incorrectTestDataPath = "spec/cuba/web/serverlogviewer/incorrectTestData"
+        String json = resources.getResourceAsString(incorrectTestDataPath)
         List<LinkedTreeMap> data = new Gson().fromJson(json, ArrayList.class) as List<LinkedTreeMap>
 
-        lines = new ArrayList<>()
-        patterns = new ArrayList<>()
-        for (LinkedTreeMap object: data) {
+        incorrectLines = new ArrayList<>()
+        incorrectPatterns = new ArrayList<>()
+        for (LinkedTreeMap object : data) {
             String line = object.get("line").toString()
-            lines.add(line)
+            incorrectLines.add(line)
             String pattern = object.get("pattern").toString()
-            patterns.add(pattern)
+            incorrectPatterns.add(pattern)
+        }
+    }
+
+    def loadCorrectTestData() {
+        String correctTestDataPath = "spec/cuba/web/serverlogviewer/correctTestData"
+        String json = resources.getResourceAsString(correctTestDataPath)
+        List<LinkedTreeMap> data = new Gson().fromJson(json, ArrayList.class) as List<LinkedTreeMap>
+
+        correctLines = new ArrayList<>()
+        correctPatterns = new ArrayList<>()
+        for (LinkedTreeMap object : data) {
+            String line = object.get("line").toString()
+            correctLines.add(line)
+            String pattern = object.get("pattern").toString()
+            correctPatterns.add(pattern)
         }
     }
 }
