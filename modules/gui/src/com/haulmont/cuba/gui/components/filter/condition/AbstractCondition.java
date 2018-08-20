@@ -195,12 +195,12 @@ public abstract class AbstractCondition extends BaseUuidEntity {
             param = paramBuilder.createParam(this);
             param.setDateInterval(BooleanUtils.toBoolean(paramElem.attributeValue("isDateInterval", "false"), "true", "false"));
 
-            // read additional attribute for filter with set, because if all entities in set are removed (in db), value
-            // from param returns 'NULL' and shows all entities
-            String isFilterSet = paramElem.attributeValue("isFilterSet");
-            if (!Strings.isNullOrEmpty(isFilterSet)) {
-                boolean isSet = Boolean.parseBoolean(isFilterSet);
-                param.setFilterSet(isSet);
+            // read additional attribute for filter with folder entities set, because if all entities in set are
+            // removed (in db), value from param returns 'NULL' and shows all entities
+            String isFoldersFilterEntitiesSet = paramElem.attributeValue("isFoldersFilterEntitiesSet");
+            if (!Strings.isNullOrEmpty(isFoldersFilterEntitiesSet)) {
+                boolean isEntitiesSet = Boolean.parseBoolean(isFoldersFilterEntitiesSet);
+                param.setFoldersFilterEntitiesSet(isEntitiesSet);
             }
 
             param.parseValue(paramElem.getText());

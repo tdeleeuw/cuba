@@ -53,7 +53,7 @@ public class UserSetHelper {
 
         Element param = condition.addElement("param");
         param.addAttribute("name", "component$" + componentId + "." + randomName);
-        param.addAttribute("isFilterSet", "true");
+        param.addAttribute("isFoldersFilterEntitiesSet", "true");
         param.addText(listOfId);
 
         document.add(root);
