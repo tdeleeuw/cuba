@@ -20,6 +20,7 @@ import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.DialogOptions;
 import com.haulmont.cuba.gui.WindowContext;
 import com.haulmont.cuba.gui.WindowManager;
@@ -32,6 +33,8 @@ import com.haulmont.cuba.gui.screen.events.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.events.InitEvent;
 import com.haulmont.cuba.gui.settings.Settings;
 import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 
 import javax.annotation.Nullable;
@@ -640,20 +643,6 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
         return frame.validate(fields);
     }
 
-    /**
-     * Check validity by invoking validators on all components which support them
-     * and show validation result notification. This method also calls {@link #postValidate(ValidationErrors)} hook to
-     * support additional validation.
-     * <p>You should override this method in subclasses ONLY if you want to completely replace the validation process,
-     * otherwise use {@link #postValidate(ValidationErrors)}.
-     *
-     * @return true if the validation was successful, false if there were any problems
-     */
-    @Override
-    public boolean validateAll() {
-        return frame.validateAll();
-    }
-
     @Override
     public DialogOptions getDialogOptions() {
         return ((Window) frame).getDialogOptions();
@@ -693,6 +682,71 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
      */
     protected boolean preClose(String actionId) {
         return true;
+    }
+
+    protected void validateAdditionalRules(ValidationErrors errors) {
+    }
+
+    /**
+     * Check validity by invoking validators on all components which support them
+     * and show validation result notification. This method also calls {@link #postValidate(ValidationErrors)} hook to
+     * support additional validation.
+     * <p>You should override this method in subclasses ONLY if you want to completely replace the validation process,
+     * otherwise use {@link #postValidate(ValidationErrors)}.
+     *
+     * @return true if the validation was successful, false if there were any problems
+     */
+    @Override
+    public boolean validateAll() {
+        ValidationErrors errors = new ValidationErrors();
+
+        Collection<Component> components = ComponentsHelper.getComponents(this);
+        for (Component component : components) {
+            if (component instanceof Validatable) {
+                Validatable validatable = (Validatable) component;
+                if (validatable.isValidateOnCommit()) {
+                    try {
+                        validatable.validate();
+                    } catch (ValidationException e) {
+                        Logger log = LoggerFactory.getLogger(AbstractWindow.class);
+
+                        if (log.isTraceEnabled())
+                            log.trace("Validation failed", e);
+                        else if (log.isDebugEnabled())
+                            log.debug("Validation failed: " + e);
+
+                        ComponentsHelper.fillErrorMessages(validatable, e, errors);
+                    }
+                }
+            }
+        }
+
+        validateAdditionalRules(errors);
+
+        return handleValidationErrors(errors);
+    }
+
+    protected boolean handleValidationErrors(ValidationErrors errors) {
+        postValidate(errors);
+
+        if (errors.isEmpty())
+            return true;
+
+        showValidationErrors(errors);
+
+        focusProblemComponent(errors);
+
+        return false;
+    }
+
+    protected void focusProblemComponent(ValidationErrors errors) {
+        com.haulmont.cuba.gui.components.Component component = null;
+        if (!errors.getAll().isEmpty()) {
+            component = errors.getAll().get(0).component;
+        }
+        if (component != null) {
+            ComponentsHelper.focusComponent(component);
+        }
     }
 
     @Override

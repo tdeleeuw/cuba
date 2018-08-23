@@ -22,6 +22,7 @@ import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.Dialogs.MessageType;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
@@ -35,9 +36,11 @@ import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.gui.util.UnknownOperationResult;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -68,6 +71,10 @@ public abstract class Screen implements FrameOwner {
         this.beanLocator = beanLocator;
     }
 
+    protected BeanLocator getBeanLocator() {
+        return beanLocator;
+    }
+
     protected EventHub getEventHub() {
         return eventHub;
     }
@@ -93,8 +100,7 @@ public abstract class Screen implements FrameOwner {
         return screenContext;
     }
 
-    @Override
-    public ScreenData getScreenData() {
+    protected ScreenData getScreenData() {
         return screenData;
     }
 
@@ -381,5 +387,37 @@ public abstract class Screen implements FrameOwner {
      */
     protected void deleteSettings() {
         settings.delete();
+    }
+
+    /**
+     * JavaDoc
+     *
+     * @return validation errors
+     */
+    protected ValidationErrors getValidationErrors() {
+        ValidationErrors errors = new ValidationErrors();
+
+        Collection<Component> components = ComponentsHelper.getComponents(getWindow());
+        for (Component component : components) {
+            if (component instanceof Validatable) {
+                Validatable validatable = (Validatable) component;
+                if (validatable.isValidateOnCommit()) {
+                    try {
+                        validatable.validate();
+                    } catch (ValidationException e) {
+                        Logger log = LoggerFactory.getLogger(Screen.class);
+
+                        if (log.isTraceEnabled()) {
+                            log.trace("Validation failed", e);
+                        } else if (log.isDebugEnabled()) {
+                            log.debug("Validation failed: " + e);
+                        }
+
+                        ComponentsHelper.fillErrorMessages(validatable, e, errors);
+                    }
+                }
+            }
+        }
+        return errors;
     }
 }

@@ -28,13 +28,11 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.gui.screen.events.BeforeShowEvent;
 import com.haulmont.cuba.gui.util.OperationResult;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 @UiController("dcScreen6")
 @UiDescriptor("dc-screen-6.xml")
 public class DcScreen6 extends Screen {
-
     @Inject
     protected EntityStates entityStates;
 
@@ -44,7 +42,6 @@ public class DcScreen6 extends Screen {
         this.entityToEdit = entity;
     }
 
-    @Nullable
     public Entity getEditedEntity() {
         return getEditedEntityContainer().getItemOrNull();
     }
