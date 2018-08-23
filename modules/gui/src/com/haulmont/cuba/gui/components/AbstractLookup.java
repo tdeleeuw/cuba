@@ -16,7 +16,17 @@
  */
 package com.haulmont.cuba.gui.components;
 
+import com.haulmont.cuba.core.global.Events;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.components.Window.Lookup;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.events.AfterInitEvent;
+import com.haulmont.cuba.gui.screen.events.InitEvent;
+import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Element;
+import org.springframework.core.annotation.Order;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -27,25 +37,62 @@ import java.util.function.Predicate;
  */
 public class AbstractLookup extends AbstractWindow implements Lookup {
 
-    private Predicate lookupValidator;
-    private Consumer lookupHandler;
+    private Predicate<ValidationContext> lookupValidator;
+    private Consumer<Collection> lookupHandler;
+
+    private Component lookupComponent;
 
     public AbstractLookup() {
+        addInitListener(this::initLookupActions);
+    }
+
+    protected void initLookupActions(@SuppressWarnings("unused") InitEvent event) {
+        addAction(new SelectAction(this));
+
+        Messages messages = getBeanLocator().get(Messages.NAME);
+        addAction(new BaseAction(LOOKUP_CANCEL_ACTION_ID)
+                .withCaption(messages.getMainMessage("actions.Cancel"))
+                .withHandler(e ->
+                        close("cancel")
+                ));
+    }
+
+    @Order(Events.HIGHEST_PLATFORM_PRECEDENCE + 10)
+    @Subscribe
+    protected void afterInit(AfterInitEvent event) {
+        initLookupLayout();
     }
 
     @Override
     public Component getLookupComponent() {
-        return ((Lookup) frame).getLookupComponent();
+        return lookupComponent;
     }
 
     @Override
     public void setLookupComponent(Component lookupComponent) {
-        ((Lookup) frame).setLookupComponent(lookupComponent);
+        this.lookupComponent = lookupComponent;
     }
 
     @Override
     public void initLookupLayout() {
-        ((Lookup) frame).initLookupLayout();
+        Action selectAction = getAction(Window.Lookup.LOOKUP_SELECT_ACTION_ID);
+
+        if (selectAction != null && selectAction.getOwner() == null) {
+            // todo load `lookupWindowActions` here and insert at the end of layout
+
+            // todo for demo only - adding simple button
+            ComponentsFactory componentsFactory = getBeanLocator().get(ComponentsFactory.NAME);
+            Button selectBtn = componentsFactory.createComponent(Button.NAME);
+            selectBtn.setAction(selectAction);
+            getFrame().add(selectBtn);
+        }
+
+        Element element = ((Component.HasXmlDescriptor) getFrame()).getXmlDescriptor();
+        String lookupComponent = element.attributeValue("lookupComponent");
+        if (!StringUtils.isEmpty(lookupComponent)) {
+            Component component = getFrame().getComponent(lookupComponent);
+            setLookupComponent(component);
+        }
     }
 
     @Override

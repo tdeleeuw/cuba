@@ -1400,6 +1400,8 @@ public class WebScreens implements Screens, WindowManager {
         DialogWindow window = (DialogWindow) screen.getWindow();
 
         CubaWindow vWindow = window.unwrapComposition(CubaWindow.class);
+        // centered by default
+        vWindow.center();
         vWindow.setErrorHandler(ui);
         vWindow.addContextActionHandler(new DialogWindowActionHandler(window));
 

@@ -22,6 +22,7 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.compatibility.AfterCloseListenerAdapter;
 import com.haulmont.cuba.gui.screen.EditorScreen;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.events.InitEvent;
 
 /**
  * Wrapper object for compatibility with legacy code.
@@ -32,6 +33,11 @@ public class ScreenEditorWrapper extends AbstractEditor {
 
     public ScreenEditorWrapper(Screen screen) {
         this.screen = screen;
+    }
+
+    @Override
+    protected void initCommitActions(InitEvent event) {
+        // do nothing
     }
 
     @Override

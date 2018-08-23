@@ -22,12 +22,16 @@ import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static com.haulmont.cuba.gui.components.Window.SELECT_ACTION_ID;
+
 /**
  * JavaDoc
  *
  * @param <T>
  */
 public interface LookupScreen<T extends Entity> {
+    CloseAction LOOKUP_SELECT_CLOSE_ACTION = new StandardCloseAction(SELECT_ACTION_ID);
+
     Consumer<Collection<T>> getSelectHandler();
     void setSelectHandler(Consumer<Collection<T>> selectHandler);
 
