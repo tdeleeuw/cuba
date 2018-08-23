@@ -16,11 +16,8 @@
  */
 package com.haulmont.cuba.gui.components;
 
-import com.haulmont.cuba.client.ClientConfig;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.DialogOptions;
 import com.haulmont.cuba.gui.WindowContext;
 import com.haulmont.cuba.gui.WindowManager;
@@ -30,12 +27,12 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.screen.events.AfterShowEvent;
+import com.haulmont.cuba.gui.screen.events.CloseTriggeredEvent;
 import com.haulmont.cuba.gui.screen.events.InitEvent;
 import com.haulmont.cuba.gui.settings.Settings;
 import org.dom4j.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -49,6 +46,8 @@ import java.util.Map;
  */
 public class AbstractWindow extends Screen implements Window, LegacyFrame, Component.HasXmlDescriptor, Window.Wrapper,
         SecuredActionsHolder {
+
+    public static final String UNKNOWN_CLOSE_ACTION_ID = "unknown";
 
     protected Frame frame;
     private Object _companion;
@@ -83,6 +82,7 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
         return frame;
     }
 
+    @Order(Events.HIGHEST_PLATFORM_PRECEDENCE + 10)
     @Subscribe
     protected void init(InitEvent initEvent) {
         Map<String, Object> params = Collections.emptyMap();
@@ -94,9 +94,21 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
         init(params);
     }
 
+    @Order(Events.HIGHEST_PLATFORM_PRECEDENCE + 10)
     @Subscribe
     protected void afterShow(AfterShowEvent event) {
         ready();
+    }
+
+    @Order(Events.HIGHEST_PLATFORM_PRECEDENCE + 10)
+    @Subscribe
+    protected void onCloseTriggered(CloseTriggeredEvent event) {
+        String actionId = event.getCloseAction() instanceof StandardCloseAction ?
+            ((StandardCloseAction) event.getCloseAction()).getActionId() : UNKNOWN_CLOSE_ACTION_ID;
+
+        if (!preClose(actionId)) {
+            event.preventWindowClose();
+        }
     }
 
     /**
@@ -333,24 +345,6 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
     @Override
     public void validate() throws ValidationException {
         frame.validate();
-    }
-
-    /**
-     * Show validation errors alert. Can be overriden in subclasses.
-     *
-     * @param errors the list of validation errors. Caller fills it by errors found during the default validation.
-     */
-    public void showValidationErrors(ValidationErrors errors) {
-        StringBuilder buffer = new StringBuilder();
-        for (ValidationErrors.Item error : errors.getAll()) {
-            buffer.append(error.description).append("\n");
-        }
-
-        Configuration configuration = AppBeans.get(Configuration.NAME);
-        ClientConfig clientConfig = configuration.getConfig(ClientConfig.class);
-
-        NotificationType notificationType = NotificationType.valueOf(clientConfig.getValidationNotificationType());
-        showNotification(messages.getMainMessage("validationFail.caption"), buffer.toString(), notificationType);
     }
 
     @Override
@@ -698,28 +692,7 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
      */
     @Override
     public boolean validateAll() {
-        ValidationErrors errors = new ValidationErrors();
-
-        Collection<Component> components = ComponentsHelper.getComponents(this);
-        for (Component component : components) {
-            if (component instanceof Validatable) {
-                Validatable validatable = (Validatable) component;
-                if (validatable.isValidateOnCommit()) {
-                    try {
-                        validatable.validate();
-                    } catch (ValidationException e) {
-                        Logger log = LoggerFactory.getLogger(AbstractWindow.class);
-
-                        if (log.isTraceEnabled())
-                            log.trace("Validation failed", e);
-                        else if (log.isDebugEnabled())
-                            log.debug("Validation failed: " + e);
-
-                        ComponentsHelper.fillErrorMessages(validatable, e, errors);
-                    }
-                }
-            }
-        }
+        ValidationErrors errors = getValidationErrors();
 
         validateAdditionalRules(errors);
 
@@ -737,16 +710,6 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
         focusProblemComponent(errors);
 
         return false;
-    }
-
-    protected void focusProblemComponent(ValidationErrors errors) {
-        com.haulmont.cuba.gui.components.Component component = null;
-        if (!errors.getAll().isEmpty()) {
-            component = errors.getAll().get(0).component;
-        }
-        if (component != null) {
-            ComponentsHelper.focusComponent(component);
-        }
     }
 
     @Override
