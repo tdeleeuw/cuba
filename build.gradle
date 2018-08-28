@@ -691,7 +691,7 @@ configure(webModule) {
     task enhanceTestModel(type: CubaTestEnhancing)
 
     task buildScssThemes(type: CubaWebScssThemeCreation) {
-        themes = ['halo', 'hover'
+        themes = ['halo', 'hover', 'holguin'
                   /* vaadin8 , 'havana'*/]
 //        compress = true
 //        sprites = true
@@ -711,6 +711,19 @@ configure(webModule) {
     task deployHover(type: Copy, dependsOn: buildHover) {
         from file("$webModule.buildDir/web/VAADIN/themes/hover")
         into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/hover"
+        exclude '**/web.xml'
+    }
+
+    task buildHolguin(type: CubaWebScssThemeCreation) {
+        themes = ['holguin']
+//        compress = true
+//        sprites = true
+//        cleanup = true
+    }
+
+    task deployHolguin(type: Copy, dependsOn: buildHolguin) {
+        from file("$webModule.buildDir/web/VAADIN/themes/holguin")
+        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/holguin"
         exclude '**/web.xml'
     }
 
