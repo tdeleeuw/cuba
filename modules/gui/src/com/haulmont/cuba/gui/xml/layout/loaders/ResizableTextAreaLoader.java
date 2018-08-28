@@ -27,7 +27,7 @@ import static com.haulmont.cuba.gui.components.ResizableTextArea.ResizeDirection
 
 public class ResizableTextAreaLoader extends TextAreaLoader {
 
-    private static final Logger log = LoggerFactory.getLogger("ResizableTextAreaLoader");
+    private static final Logger log = LoggerFactory.getLogger(ResizableTextAreaLoader.class);
 
     @Override
     public void createComponent() {
@@ -38,7 +38,7 @@ public class ResizableTextAreaLoader extends TextAreaLoader {
         if (element.getName().equals(TextArea.NAME)) {
             if (isResizable() || hasResizableDirection()) {
                 resultComponent = (ResizableTextArea) factory.createComponent(ResizableTextArea.NAME);
-                log.warn("To create resizable text area use 'ResizableTextArea' instead of 'TextArea'");
+                log.warn("'textArea' element must be used in order to create a non-resizable text area");
             } else {
                 resultComponent = (TextArea) factory.createComponent(TextArea.NAME);
             }

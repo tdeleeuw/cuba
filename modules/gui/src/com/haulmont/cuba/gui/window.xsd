@@ -1377,7 +1377,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-    <!-- TextArea -->
+    <!-- ResizableTextArea -->
     <xs:complexType name="resizableTextAreaComponent">
         <xs:complexContent>
             <xs:extension base="textAreaComponent"/>
