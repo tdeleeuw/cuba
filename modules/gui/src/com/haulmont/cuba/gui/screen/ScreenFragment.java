@@ -17,15 +17,15 @@
 package com.haulmont.cuba.gui.screen;
 
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.cuba.gui.components.Fragment;
 
 /**
  * JavaDoc
  */
 public abstract class ScreenFragment implements FrameOwner {
 
+    private Fragment fragment;
     private EventHub eventHub = new EventHub();
-
-    // todo
 
     protected EventHub getEventHub() {
         return eventHub;
@@ -33,5 +33,13 @@ public abstract class ScreenFragment implements FrameOwner {
 
     protected <E> void fireEvent(Class<E> eventType, E event) {
         eventHub.publish(eventType, event);
+    }
+
+    protected void setFragment(Fragment fragment) {
+        this.fragment = fragment;
+    }
+
+    public Fragment getFragment() {
+        return fragment;
     }
 }

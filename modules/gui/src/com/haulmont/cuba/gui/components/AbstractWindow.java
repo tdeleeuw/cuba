@@ -61,6 +61,8 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
     protected Messages messages;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private WindowManager windowManager;
 
     public AbstractWindow() {
     }
@@ -74,7 +76,7 @@ public class AbstractWindow extends Screen implements Window, LegacyFrame, Compo
 
     @Override
     public WindowManager getWindowManager() {
-        return frame.getWindowManager();
+        return windowManager;
     }
 
     @Override

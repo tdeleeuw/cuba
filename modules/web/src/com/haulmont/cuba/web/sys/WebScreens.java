@@ -125,16 +125,20 @@ public class WebScreens implements Screens, WindowManager {
     protected Messages messages;
 
     @Inject
+    protected WebConfig webConfig;
+    @Inject
+    protected ClientConfig clientConfig;
+
+    // UI scoped beans
+
+    @Inject
     protected Dialogs dialogs;
     @Inject
     protected Notifications notifications;
     @Inject
     protected WebBrowserTools webBrowserTools;
-
     @Inject
-    protected WebConfig webConfig;
-    @Inject
-    protected ClientConfig clientConfig;
+    protected Fragments fragments;
 
     protected AppUI ui;
 

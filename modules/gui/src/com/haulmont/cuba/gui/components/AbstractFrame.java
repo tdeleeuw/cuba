@@ -27,6 +27,7 @@ import com.haulmont.cuba.gui.components.Frame.NotificationType;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.MessageBundle;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationListener;
@@ -40,27 +41,28 @@ import java.util.Map;
 /**
  * Base class for frame controllers.
  */
-public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
+public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, LegacyFrame {
 
     protected Frame frame;
-    private Object _companion;
 
+    private Object _companion;
     private Component parent;
     private List<ApplicationListener> uiEventListeners;
-
     private DsContext dsContext;
 
     @Inject
     protected Messages messages;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private WindowManager windowManager;
 
     public AbstractFrame() {
     }
 
-    /** INTERNAL. Don't call from application code. */
-    public void setWrappedFrame(Frame frame) {
-        this.frame = frame;
+    @Override
+    public WindowManager getWindowManager() {
+        return windowManager;
     }
 
     @Override
@@ -69,10 +71,18 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     /**
+     * INTERNAL. Don't call from application code.
+     */
+    public void setWrappedFrame(Frame frame) {
+        this.frame = frame;
+    }
+
+    /**
      * Called by the framework after creation of all components and before showing the screen.
      * <br> Override this method and put initialization logic here.
+     *
      * @param params parameters passed from caller's code, usually from
-     * {@link #openWindow(String, WindowManager.OpenType)} and similar methods, or set in
+     *               {@link #openWindow(String, WindowManager.OpenType)} and similar methods, or set in
      *               {@code screens.xml} for this registered screen
      */
     public void init(Map<String, Object> params) {
@@ -85,7 +95,7 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
 
     @Override
     public void setId(String id) {
-        frame.setId(id); // todo
+        frame.setId(id);
     }
 
     @Override
@@ -104,13 +114,13 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     @Override
-    public boolean isEnabledRecursive() {
-        return frame.isEnabledRecursive();
+    public void setEnabled(boolean enabled) {
+        frame.setEnabled(enabled);
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        frame.setEnabled(enabled);
+    public boolean isEnabledRecursive() {
+        return frame.isEnabledRecursive();
     }
 
     @Override
@@ -134,13 +144,13 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     @Override
-    public SizeUnit getHeightSizeUnit() {
-        return frame.getHeightSizeUnit();
+    public void setHeight(String height) {
+        frame.setHeight(height);
     }
 
     @Override
-    public void setHeight(String height) {
-        frame.setHeight(height);
+    public SizeUnit getHeightSizeUnit() {
+        return frame.getHeightSizeUnit();
     }
 
     @Override
@@ -149,13 +159,13 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     @Override
-    public SizeUnit getWidthSizeUnit() {
-        return frame.getWidthSizeUnit();
+    public void setWidth(String width) {
+        frame.setWidth(width);
     }
 
     @Override
-    public void setWidth(String width) {
-        frame.setWidth(width);
+    public SizeUnit getWidthSizeUnit() {
+        return frame.getWidthSizeUnit();
     }
 
     @Override
@@ -174,6 +184,11 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     @Override
+    public void setCaption(String caption) {
+        frame.setCaption(caption);
+    }
+
+    @Override
     public boolean isResponsive() {
         return frame.isResponsive();
     }
@@ -181,11 +196,6 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     @Override
     public void setResponsive(boolean responsive) {
         frame.setResponsive(responsive);
-    }
-
-    @Override
-    public void setCaption(String caption) {
-        frame.setCaption(caption);
     }
 
     @Override
@@ -311,8 +321,9 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
 
     /**
      * Get localized message from the message pack associated with this frame or window.
-     * @param key   message key
-     * @return      localized message
+     *
+     * @param key message key
+     * @return localized message
      * @see Messages#getMessage(String, String)
      */
     protected String getMessage(String key) {
@@ -327,9 +338,10 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     /**
      * Get localized message from the message pack associated with this frame or window, and use it as a format
      * string for parameters provided.
-     * @param key       message key
-     * @param params    parameter values
-     * @return          formatted string or the key in case of IllegalFormatException
+     *
+     * @param key    message key
+     * @param params parameter values
+     * @return formatted string or the key in case of IllegalFormatException
      * @see Messages#formatMessage(String, String, Object...)
      */
     protected String formatMessage(String key, Object... params) {
@@ -404,18 +416,24 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
         return (T) _companion;
     }
 
-    /** INTERNAL. Don't call from application code. */
+    /**
+     * INTERNAL. Don't call from application code.
+     */
     public void setCompanion(Object companion) {
         this._companion = companion;
     }
 
-    /** INTERNAL. Don't call from application code. */
+    /**
+     * INTERNAL. Don't call from application code.
+     */
     @Nullable
     public List<ApplicationListener> getUiEventListeners() {
         return uiEventListeners;
     }
 
-    /** INTERNAL. Don't call from application code. */
+    /**
+     * INTERNAL. Don't call from application code.
+     */
     public void setUiEventListeners(List<ApplicationListener> uiEventListeners) {
         this.uiEventListeners = uiEventListeners;
     }
@@ -471,23 +489,23 @@ public class AbstractFrame implements Frame.Wrapper, LegacyFrame {
     }
 
     @Override
-    public void setSpacing(boolean enabled) {
-        frame.setSpacing(enabled);
-    }
-
-    @Override
     public boolean getSpacing() {
         return frame.getSpacing();
     }
 
     @Override
-    public void setMargin(MarginInfo marginInfo) {
-        frame.setMargin(marginInfo);
+    public void setSpacing(boolean enabled) {
+        frame.setSpacing(enabled);
     }
 
     @Override
     public MarginInfo getMargin() {
         return frame.getMargin();
+    }
+
+    @Override
+    public void setMargin(MarginInfo marginInfo) {
+        frame.setMargin(marginInfo);
     }
 
     @Override
