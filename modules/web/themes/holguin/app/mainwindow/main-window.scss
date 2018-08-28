@@ -12,16 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
+$v-border-color: #9bb3d3 !default;
 
-@import "app/mainwindow/app-menu";
-@import "app/mainwindow/main-window";
+@mixin cuba-main-window {
 
-.holguin {
-  @include holguin;
-  @include cuba-app-menu;
-  @include cuba-main-window;
+  .v-tabsheet-framed > .v-tabsheet-tabcontainer .v-tabsheet-tabitem .v-caption {
+    border-color: transparent;
+    border-bottom-color: $v-border-color;
+  }
+
+  .v-tabsheet.c-main-tabsheet.framed.padded-tabbar > .v-tabsheet-tabcontainer .v-tabsheet-tabitem-selected .v-caption {
+    border-color: $v-border-color;
+  }
 }

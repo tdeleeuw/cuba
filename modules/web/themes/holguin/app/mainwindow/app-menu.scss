@@ -12,16 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
+/*
+ *
+ */
+$main-menu-popup-text-color: white !default;
 
-@import "app/mainwindow/app-menu";
-@import "app/mainwindow/main-window";
+@mixin cuba-app-menu {
 
-.holguin {
-  @include holguin;
-  @include cuba-app-menu;
-  @include cuba-main-window;
+  .c-main-menu-popup {
+    border: solid 2px #506d8d;
+    background-color: $cuba-menubar-background-color;
+    color: $main-menu-popup-text-color;
+  }
+
+  .v-menubar-submenu .v-menubar-separator span {
+    background: $cuba-menubar-text-color;
+    border-top: 3px solid $cuba-menubar-background-color;
+    border-bottom: $cuba-menubar-background-color;
+  }
 }
