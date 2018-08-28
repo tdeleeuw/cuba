@@ -20,7 +20,6 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 import com.google.common.base.Strings;
 import com.haulmont.cuba.gui.components.ResizableTextArea;
 import com.haulmont.cuba.gui.components.TextArea;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +54,12 @@ public class ResizableTextAreaLoader extends TextAreaLoader {
         if (resultComponent instanceof ResizableTextArea) {
             ResizableTextArea textArea = (ResizableTextArea) resultComponent;
             String resizable = element.attributeValue("resizable");
-            if (StringUtils.isNotEmpty(resizable)) {
+            if (!Strings.isNullOrEmpty(resizable)) {
                 textArea.setResizable(Boolean.parseBoolean(resizable));
             }
 
             String resizableDirection = element.attributeValue("resizableDirection");
-            if (StringUtils.isNotEmpty(resizableDirection)) {
+            if (!Strings.isNullOrEmpty(resizableDirection)) {
                 textArea.setResizableDirection(ResizeDirection.valueOf(resizableDirection));
             }
 
@@ -79,7 +78,7 @@ public class ResizableTextAreaLoader extends TextAreaLoader {
 
     protected boolean hasResizableDirection() {
         String resizableDirection = element.attributeValue("resizableDirection");
-        if (StringUtils.isNotEmpty(resizableDirection)) {
+        if (!Strings.isNullOrEmpty(resizableDirection)) {
             return ResizeDirection.valueOf(resizableDirection) != ResizeDirection.NONE;
         }
 
