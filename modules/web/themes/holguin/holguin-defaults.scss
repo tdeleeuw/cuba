@@ -24,6 +24,8 @@ $v-table-row-height: 25px;
 $v-table-header-font-size: 12px;
 $cuba-table-highlight-hover-row: true;
 
+$cuba-datagrid-highlight-hover-row: true;
+
 $v-selection-color: rgb(77, 122, 178);
 $v-textfield-border: 1px solid #A5C4E0;
 
@@ -49,6 +51,12 @@ $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
 
 $cuba-maintabsheet-tabcontainer-background-color: $v-app-background-color;
+
+/**
+ * Whether to enable show/hide animations for dialog windows.
+ * @group window
+ */
+$v-window-animations-enabled: false !default;
 
 /**
  * The background color of hovered item.
