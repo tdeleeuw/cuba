@@ -12,25 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
+@mixin cuba-generic-filter($primary-stylename: c-generic-filter) {
 
-@import "app/mainwindow/app-menu";
-@import "app/mainwindow/main-window";
-@import "app/mainwindow/menubar";
-@import "app/mainwindow/generic-filter";
-@import "app/mainwindow/table";
+   $marginWidth: 5px;
 
-.holguin {
-  @include holguin;
-
-  @include holguin-menubar;
-  @include holguin-table;
-
-  @include cuba-app-menu;
-  @include cuba-main-window;
-
-  @include cuba-generic-filter;
+   .#{$primary-stylename}-margin-top {
+     padding-top: $marginWidth;
+   }
+   .#{$primary-stylename}-margin-bottom {
+     padding-bottom: $marginWidth;
+   }
+   .#{$primary-stylename}-margin-left {
+     padding-left: $marginWidth;
+   }
+   .#{$primary-stylename}-margin-right {
+     padding-right: $marginWidth;
+   }
 }

@@ -17,39 +17,47 @@
 
 $v-border-color: #9bb3d3 !default;
 
-$cuba-menubar-background-color: #315379;
-$cuba-menubar-border-color: #315379;
+$v-layout-margin-top: 5px;
+$v-layout-margin-left: 5px;
+$v-layout-margin-right: 5px;
+$v-layout-margin-bottom: 5px;
 
 $v-table-row-height: 25px;
 $v-table-header-font-size: 12px;
+
+$cuba-table-header-background-color: #e6eaef !default;
+$cuba-table-header-hover-background-color: #f2f5f7 !default;
+$cuba-table-row-selection-background-color: #c3e1ff !default;
 $cuba-table-highlight-hover-row: true;
+$cuba-table-text-color: #1e1e0d !default;
 
 $cuba-datagrid-highlight-hover-row: true;
 
 $v-selection-color: rgb(77, 122, 178);
-$v-textfield-border: 1px solid #A5C4E0;
-
 $v-selection-item-selection-color: #4D7AB2;
 
-$v-app-background-color: #ffffff;
+$v-textfield-border: 1px solid #A5C4E0;
+
 $v-font-size: 12px;
 $v-font-weight: 400;
+$v-font-family: Verdana,tahoma,arial,geneva,helvetica,sans-serif,"Trebuchet MS";
 $v-unit-size: 25px;
 $v-border-radius: 0px;
 $v-border: 1px solid $v-border-color !default;
-$v-font-family: Verdana,tahoma,arial,geneva,helvetica,sans-serif,"Trebuchet MS";
 
+$v-app-background-color: #ffffff;
 $v-panel-background-color: #ffffff;
 $v-background-color: #ffffff;
 $v-focus-color: #1075da;
 
-$cuba-menubar-menuitem-text-color: #ffffff;
-
 $cuba-app-menubar-padding-top: 8px;
 $cuba-app-menubar-padding-bottom: 8px;
 
+$cuba-menubar-menuitem-text-color: #ffffff;
 $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
+$cuba-menubar-background-color: #315379;
+$cuba-menubar-border-color: #315379;
 
 $cuba-maintabsheet-tabcontainer-background-color: $v-app-background-color;
 
