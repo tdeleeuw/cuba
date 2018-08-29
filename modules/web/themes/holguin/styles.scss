@@ -19,9 +19,11 @@
 
 @import "app/mainwindow/app-menu";
 @import "app/mainwindow/main-window";
+@import "app/mainwindow/menubar";
 
 .holguin {
   @include holguin;
   @include cuba-app-menu;
   @include cuba-main-window;
+  @include holguin-menubar;
 }

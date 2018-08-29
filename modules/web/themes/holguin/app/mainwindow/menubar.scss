@@ -15,26 +15,25 @@
  *
  */
 
-/*
- *
- */
-$main-menu-popup-text-color: white !default;
+@mixin holguin-menubar($primary-stylename : v-menubar) {
 
-@mixin cuba-app-menu {
+    .#{$primary-stylename}-menuitem {
+      text-shadow: black 1px 1px;
 
-  .c-inverse-header.c-app-menubar {
-    border-bottom: 1px solid #fff;
-  }
+      span {
+        text-shadow: black 1px 1px;
+      }
+    }
 
-  .c-main-menu-popup {
-    border: solid 2px #506d8d;
-    background-color: $cuba-menubar-background-color;
-    color: $main-menu-popup-text-color;
-  }
+    .#{$primary-stylename}-menuitem-selected {
+      text-shadow: black 1px 1px;
+    }
 
-  .v-menubar-submenu .v-menubar-separator span {
-    background: $cuba-menubar-text-color;
-    border-top: 3px solid $cuba-menubar-background-color;
-    border-bottom: $cuba-menubar-background-color;
-  }
+    .#{$primary-stylename}-menuitem:hover {
+      text-shadow: black 1px 1px;
+    }
+
+    .#{$primary-stylename}-menuitem {
+      text-shadow: black 1px 1px;
+    }
 }
