@@ -17,13 +17,13 @@
 @import "holguin-defaults";
 @import "holguin";
 
-@import "app/mainwindow/app-menu";
-@import "app/mainwindow/main-window";
-@import "app/mainwindow/menubar";
-@import "app/mainwindow/generic-filter";
-@import "app/mainwindow/table";
-@import "app/mainwindow/tree";
-@import "app/mainwindow/window";
+@import "app/app-menu";
+@import "app/main-window";
+@import "app/menubar";
+@import "app/generic-filter";
+@import "app/table";
+@import "app/tree";
+@import "app/window";
 
 .holguin {
   @include holguin;
