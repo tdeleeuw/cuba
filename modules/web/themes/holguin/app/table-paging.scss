@@ -12,33 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
+@mixin holguin-table-paging {
 
-@import "app/app-menu";
-@import "app/main-window";
-@import "app/menubar";
-@import "app/generic-filter";
-@import "app/table";
-@import "app/table-paging";
-@import "app/tree";
-@import "app/window";
-@import "app/login-window";
-
-.holguin {
-  @include holguin;
-
-  @include holguin-menubar;
-  @include holguin-table;
-  @include holguin-table-paging;
-  @include holguin-tree;
-  @include holguin-window;
-  @include holguin-login-window;
-
-  @include holguin-app-menu;
-  @include holguin-main-window;
-
-  @include holguin-generic-filter;
+  .v-button.c-paging-change-page {
+    height: auto;
+    width: 20px;
+  }
 }
