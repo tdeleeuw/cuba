@@ -17,18 +17,16 @@
 
 @mixin cuba-generic-filter($primary-stylename: c-generic-filter) {
 
-   $marginWidth: 5px;
-
    .#{$primary-stylename}-margin-top {
-     padding-top: $marginWidth;
+     padding-top: $v-layout-margin-top;
    }
    .#{$primary-stylename}-margin-bottom {
-     padding-bottom: $marginWidth;
+     padding-bottom: $v-layout-margin-left;
    }
    .#{$primary-stylename}-margin-left {
-     padding-left: $marginWidth;
+     padding-left: $v-layout-margin-right;
    }
    .#{$primary-stylename}-margin-right {
-     padding-right: $marginWidth;
+     padding-right: $v-layout-margin-bottom;
    }
 }

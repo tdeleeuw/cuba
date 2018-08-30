@@ -15,11 +15,6 @@
  *
  */
 
-$cuba-table-header-background-color: #e6eaef !default;
-$cuba-table-header-hover-background-color: #f2f5f7 !default;
-$cuba-table-row-selection-background-color: #c3e1ff !default;
-$cuba-table-text-color: #1e1e0d !default;
-
 @mixin holguin-table($primary-stylename: v-table) {
 
   .#{$primary-stylename} {

@@ -33,8 +33,13 @@ $cuba-table-text-color: #1e1e0d !default;
 
 $cuba-datagrid-highlight-hover-row: true;
 
+$cuba-window-header-color: #2b4666 !default;
+
 $v-selection-color: rgb(77, 122, 178);
 $v-selection-item-selection-color: #4D7AB2;
+
+$cuba-tabsheet-tab-border-selected-color: $v-border-color !default;
+$cuba-tabsheet-tab-caption: #000000 !default;
 
 $v-textfield-border: 1px solid #A5C4E0;
 
@@ -58,6 +63,9 @@ $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
 $cuba-menubar-background-color: #315379;
 $cuba-menubar-border-color: #315379;
+
+$cuba-window-modal-header-height: ceil($v-unit-size * 1.4);
+$cuba-window-modal-header-buttons-line-height: $cuba-window-modal-header-height;
 
 $cuba-maintabsheet-tabcontainer-background-color: $v-app-background-color;
 

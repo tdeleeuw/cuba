@@ -15,36 +15,38 @@
  *
  */
 
-$v-border-color: #9bb3d3 !default;
-$v-app-workarea-background: #8398af !default;
-
 @mixin cuba-main-window {
-
-  .v-tabsheet-framed > .v-tabsheet-tabcontainer .v-tabsheet-tabitem .v-caption {
-    border-color: transparent;
-    background: transparent;
-    color: #ffffff;
-  }
-
-  .v-tabsheet.c-main-tabsheet.framed.padded-tabbar > .v-tabsheet-tabcontainer .v-tabsheet-tabitem-selected .v-caption {
-    border-color: $v-border-color;
-    background: $v-app-background-color;
-    color: $v-selection-item-selection-color;
-  }
 
   .v-tabsheet.c-main-tabsheet.framed.padded-tabbar > .v-tabsheet-tabcontainer {
     background-color: $v-app-workarea-background;
     box-shadow: inset 0px -6px 5px -5px rgba(0, 0, 0, 0.3);
+
+    .v-tabsheet-tabitem .v-caption {
+      border-color: transparent;
+      background: transparent;
+      color: #ffffff;
+    }
+
+    .v-tabsheet-tabitem-selected .v-caption {
+      background: $v-app-background-color;
+      color: $cuba-tabsheet-tab-caption;
+    }
   }
 
-  .v-tabsheet-tabitemcell .v-tabsheet-caption-close {
-    color: #64798f;
-    font-weight: 700;
-  }
+  .v-tabsheet-tabitemcell {
+    .v-caption {
+      color: $cuba-tabsheet-tab-caption;
+    }
 
-  .v-tabsheet-tabitemcell .v-tabsheet-caption-close:hover {
-    color: #cc3301;
-    text-shadow: black 1px 1px;
+    .v-tabsheet-caption-close {
+      color: #64798f;
+      font-weight: 700;
+    }
+
+    .v-tabsheet-caption-close:hover {
+      color: #cc3301;
+      text-shadow: black 1px 1px;
+    }
   }
 
   .v-label.c-user-select-label {

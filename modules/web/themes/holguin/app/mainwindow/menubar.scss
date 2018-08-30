@@ -17,23 +17,23 @@
 
 @mixin holguin-menubar($primary-stylename : v-menubar) {
 
-    .#{$primary-stylename}-menuitem {
-      text-shadow: black 1px 1px;
+  .#{$primary-stylename}-menuitem {
+    text-shadow: black 1px 1px;
 
-      span {
-        text-shadow: black 1px 1px;
-      }
-    }
-
-    .#{$primary-stylename}-menuitem-selected {
+    span {
       text-shadow: black 1px 1px;
     }
+  }
 
-    .#{$primary-stylename}-menuitem:hover {
-      text-shadow: black 1px 1px;
-    }
+  .#{$primary-stylename}-menuitem-selected {
+    text-shadow: black 1px 1px;
+  }
 
-    .#{$primary-stylename}-menuitem {
-      text-shadow: black 1px 1px;
-    }
+  .#{$primary-stylename}-menuitem:hover {
+    text-shadow: black 1px 1px;
+  }
+
+  .#{$primary-stylename}-menuitem {
+    text-shadow: black 1px 1px;
+  }
 }

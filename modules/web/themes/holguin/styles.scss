@@ -22,12 +22,14 @@
 @import "app/mainwindow/menubar";
 @import "app/mainwindow/generic-filter";
 @import "app/mainwindow/table";
+@import "app/mainwindow/window";
 
 .holguin {
   @include holguin;
 
   @include holguin-menubar;
   @include holguin-table;
+  @include holguin-window;
 
   @include cuba-app-menu;
   @include cuba-main-window;
