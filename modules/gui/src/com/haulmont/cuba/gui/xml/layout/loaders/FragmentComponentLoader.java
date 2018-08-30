@@ -17,7 +17,6 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.bali.datastruct.Pair;
-import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.config.WindowConfig;
@@ -34,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class FragmentComponentLoader extends ContainerLoader<Frame> {
 
     protected String frameId;
-    protected ComponentLoader frameLoader;
+    protected ComponentLoader fragmentLoader;
 
     protected WindowConfig getWindowConfig() {
         return beanLocator.get(WindowConfig.NAME);
@@ -43,10 +42,16 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
     @Override
     public void createComponent() {
         String src = element.attributeValue("src");
+        String fragmentClass = element.attributeValue("class");
         String screenId = element.attributeValue("screen");
-        if (src == null && screenId == null) {
+
+        if (src == null
+                && screenId == null
+                && fragmentClass == null) {
             throw new GuiDevelopmentException("Either 'src' or 'screen' must be specified for 'frame'", context.getFullFrameId());
         }
+
+        // todo fake WindowInfo for "src" loading
         if (src == null) {
             WindowInfo windowInfo = getWindowConfig().getWindowInfo(screenId);
             src = windowInfo.getTemplate();
@@ -70,8 +75,8 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         context.setCurrentFrameId(frameId);
         try {
             Pair<ComponentLoader, Element> loaderElementPair = layoutLoader.createFrameComponent(src, frameId, context.getParams());
-            frameLoader = loaderElementPair.getFirst();
-            resultComponent = (Frame) frameLoader.getResultComponent();
+            fragmentLoader = loaderElementPair.getFirst();
+            resultComponent = (Frame) fragmentLoader.getResultComponent();
         } finally {
             context.setCurrentFrameId(currentFrameId);
         }
@@ -87,8 +92,8 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
 
         loadAlign(resultComponent, element);
 
-        loadHeight(resultComponent, element, ComponentsHelper.getComponentHeight(resultComponent));
-        loadWidth(resultComponent, element, ComponentsHelper.getComponentWidth(resultComponent));
+        loadHeight(resultComponent, element);
+        loadWidth(resultComponent, element);
 
         loadIcon(resultComponent, element);
         loadCaption(resultComponent, element);
@@ -121,7 +126,7 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         String currentFrameId = context.getCurrentFrameId();
         try {
             context.setCurrentFrameId(frameId);
-            frameLoader.loadComponent();
+            fragmentLoader.loadComponent();
         } finally {
             context.setCurrentFrameId(currentFrameId);
             loadDescriptorWatch.stop();
@@ -129,8 +134,8 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
     }
 
     protected void loadAliases() {
-        if (frameLoader instanceof FragmentLoader) {
-            ComponentLoaderContext frameLoaderInnerContext = ((FragmentLoader) frameLoader).getInnerContext();
+        if (fragmentLoader instanceof FragmentLoader) {
+            ComponentLoaderContext frameLoaderInnerContext = ((FragmentLoader) fragmentLoader).getInnerContext();
             for (Element aliasElement : element.elements("dsAlias")) {
                 String aliasDatasourceId = aliasElement.attributeValue("alias");
                 String originalDatasourceId = aliasElement.attributeValue("datasource");

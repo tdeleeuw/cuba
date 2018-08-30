@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 public class WebExternalUIComponentsSource implements ExternalUIComponentsSource {
 
     protected static final String WINDOW_LOADER_EL = "windowLoader";
-    protected static final String FRAME_LOADER_EL = "frameLoader";
+    protected static final String FRAME_LOADER_EL = "fragmentLoader";
     protected static final String FRAGMENT_LOADER_EL = "fragmentLoader";
 
     protected static final Map<String, Class<? extends ComponentLoader>> loaders = ImmutableMap.of(

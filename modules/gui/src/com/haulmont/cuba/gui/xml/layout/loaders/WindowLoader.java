@@ -25,7 +25,7 @@ import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.model.impl.ScreenDataXmlLoader;
-import com.haulmont.cuba.gui.screen.ScreenControllerUtils;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -114,7 +114,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         Element dataEl = element.element("data");
         if (dataEl != null) {
             ScreenDataXmlLoader screenDataXmlLoader = beanLocator.get(ScreenDataXmlLoader.class);
-            ScreenData screenData = ScreenControllerUtils.getScreenData(window.getFrameOwner());
+            ScreenData screenData = UiControllerUtils.getScreenData(window.getFrameOwner());
             screenDataXmlLoader.load(screenData, dataEl);
         }
     }

@@ -322,7 +322,7 @@ public abstract class App {
 
         Screens screens = ui.getScreens();
 
-        Screen screen = screens.create(windowInfo.getScreenClass(), OpenMode.ROOT);
+        Screen screen = screens.create(windowInfo.asScreen(), OpenMode.ROOT);
         screens.show(screen);
     }
 

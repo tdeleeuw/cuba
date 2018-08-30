@@ -21,7 +21,7 @@ import com.haulmont.cuba.gui.FrameContext;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.sys.FrameImplementation;
-import com.haulmont.cuba.gui.screen.ScreenControllerUtils;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,7 +169,7 @@ public class WebFragment extends WebVBoxLayout implements Fragment, FrameImpleme
 
     @Override
     public WindowManager getWindowManager() {
-        return (WindowManager) ScreenControllerUtils.getScreenContext(getFrameOwner()).getScreens();
+        return (WindowManager) UiControllerUtils.getScreenContext(getFrameOwner()).getScreens();
     }
 
     @Override

@@ -98,7 +98,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
 
     @Deprecated
     default void removeListener(CloseListener listener) {
-        EventHub eventHub = ScreenControllerUtils.getEventHub(getFrameOwner());
+        EventHub eventHub = UiControllerUtils.getEventHub(getFrameOwner());
         eventHub.unsubscribe(AfterCloseEvent.class, new AfterCloseListenerAdapter(listener));
     }
 
@@ -115,7 +115,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
 
     @Deprecated
     default void removeCloseListener(CloseListener listener) {
-        EventHub eventHub = ScreenControllerUtils.getEventHub(getFrameOwner());
+        EventHub eventHub = UiControllerUtils.getEventHub(getFrameOwner());
         eventHub.unsubscribe(AfterCloseEvent.class, new AfterCloseListenerAdapter(listener));
     }
 
@@ -140,7 +140,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
      */
     @Deprecated
     default void applySettings(Settings settings) {
-        ScreenControllerUtils.applySettings(getFrameOwner(), settings);
+        UiControllerUtils.applySettings(getFrameOwner(), settings);
     }
 
     /**
@@ -149,7 +149,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
      */
     @Deprecated
     default void saveSettings() {
-        ScreenControllerUtils.saveSettings(getFrameOwner());
+        UiControllerUtils.saveSettings(getFrameOwner());
     }
 
     /**
@@ -157,7 +157,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
      */
     @Deprecated
     default void deleteSettings() {
-        ScreenControllerUtils.deleteSettings(getFrameOwner());
+        UiControllerUtils.deleteSettings(getFrameOwner());
     }
 
     /**
@@ -177,7 +177,7 @@ public interface Window extends Frame, Component.HasCaption, Component.HasIcon {
      */
     @Deprecated
     default Settings getSettings() {
-        return ScreenControllerUtils.getSettings(getFrameOwner());
+        return UiControllerUtils.getSettings(getFrameOwner());
     }
 
     /**

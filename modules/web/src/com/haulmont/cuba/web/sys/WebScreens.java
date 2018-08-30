@@ -183,7 +183,7 @@ public class WebScreens implements Screens, WindowManager {
         // todo perf4j stop watches for lifecycle
 
         @SuppressWarnings("unchecked")
-        Class<T> resolvedScreenClass = (Class<T>) windowInfo.getScreenClass();
+        Class<T> resolvedScreenClass = (Class<T>) windowInfo.getControllerClass();
 
         Window window = createWindow(windowInfo, resolvedScreenClass, launchMode);
 
@@ -191,12 +191,12 @@ public class WebScreens implements Screens, WindowManager {
 
         T controller = createController(windowInfo, window, resolvedScreenClass, launchMode);
 
-        ScreenControllerUtils.setWindowId(controller, windowInfo.getId());
-        ScreenControllerUtils.setWindow(controller, window);
-        ScreenControllerUtils.setScreenContext(controller,
+        UiControllerUtils.setWindowId(controller, windowInfo.getId());
+        UiControllerUtils.setWindow(controller, window);
+        UiControllerUtils.setScreenContext(controller,
                 new ScreenContextImpl(windowInfo, options, this, dialogs, notifications)
         );
-        ScreenControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
+        UiControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
 
         WindowImplementation windowImpl = (WindowImplementation) window;
         windowImpl.setFrameOwner(controller);
@@ -212,10 +212,10 @@ public class WebScreens implements Screens, WindowManager {
         dependencyInjector.inject();
 
         InitEvent initEvent = new InitEvent(controller, options);
-        ScreenControllerUtils.fireEvent(controller, InitEvent.class, initEvent);
+        UiControllerUtils.fireEvent(controller, InitEvent.class, initEvent);
 
         AfterInitEvent afterInitEvent = new AfterInitEvent(controller, options);
-        ScreenControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
+        UiControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
 
         return controller;
     }
@@ -239,7 +239,7 @@ public class WebScreens implements Screens, WindowManager {
             componentLoaderContext.setCurrentFrameId(windowInfo.getId());
             componentLoaderContext.setFrame(window);
 
-            ComponentLoader windowLoader = createLayoutStructure(windowInfo, window, element, componentLoaderContext);
+            ComponentLoader<Window> windowLoader = createLayoutStructure(windowInfo, window, element, componentLoaderContext);
 
             if (controller instanceof LegacyFrame) {
                 screenViewsLoader.deployViews(element);
@@ -255,7 +255,7 @@ public class WebScreens implements Screens, WindowManager {
             windowLoader.loadComponent();
 
             if (!componentLoaderContext.getPostInitTasks().isEmpty()) {
-                EventHub eventHub = ScreenControllerUtils.getEventHub(controller);
+                EventHub eventHub = UiControllerUtils.getEventHub(controller);
                 eventHub.subscribe(AfterInitEvent.class, event ->
                         componentLoaderContext.executePostInitTasks()
                 );
@@ -301,8 +301,8 @@ public class WebScreens implements Screens, WindowManager {
         }
     }
 
-    protected ComponentLoader createLayoutStructure(WindowInfo windowInfo, Window window, Element rootElement,
-                                                    ComponentLoader.Context context) {
+    protected ComponentLoader<Window> createLayoutStructure(WindowInfo windowInfo, Window window, Element rootElement,
+                                                            ComponentLoader.Context context) {
         String descriptorPath = windowInfo.getTemplate();
 
         LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, context);
@@ -320,7 +320,7 @@ public class WebScreens implements Screens, WindowManager {
             layoutLoader.setMessagesPack(path);
         }
         //noinspection UnnecessaryLocalVariable
-        ComponentLoader windowLoader = layoutLoader.createWindowContent(window, rootElement, windowInfo.getId());
+        ComponentLoader<Window> windowLoader = layoutLoader.createWindowContent(window, rootElement, windowInfo.getId());
         return windowLoader;
     }
 
@@ -337,7 +337,7 @@ public class WebScreens implements Screens, WindowManager {
         // todo UI security
 
         BeforeShowEvent beforeShowEvent = new BeforeShowEvent(screen);
-        ScreenControllerUtils.fireEvent(screen, BeforeShowEvent.class, beforeShowEvent);
+        UiControllerUtils.fireEvent(screen, BeforeShowEvent.class, beforeShowEvent);
 
         LaunchMode launchMode = screen.getWindow().getContext().getLaunchMode();
 
@@ -370,14 +370,14 @@ public class WebScreens implements Screens, WindowManager {
         afterShowWindow(screen);
 
         AfterShowEvent afterShowEvent = new AfterShowEvent(screen);
-        ScreenControllerUtils.fireEvent(screen, AfterShowEvent.class, afterShowEvent);
+        UiControllerUtils.fireEvent(screen, AfterShowEvent.class, afterShowEvent);
     }
 
     protected void afterShowWindow(Screen screen) {
         WindowContext windowContext = screen.getWindow().getContext();
 
         if (!WindowParams.DISABLE_APPLY_SETTINGS.getBool(windowContext)) {
-            ScreenControllerUtils.applySettings(screen, getSettingsImpl(screen.getId()));
+            UiControllerUtils.applySettings(screen, getSettingsImpl(screen.getId()));
         }
 
         if (screen instanceof LegacyFrame) {
@@ -1296,7 +1296,7 @@ public class WebScreens implements Screens, WindowManager {
 
             String tabId;
 
-            ScreenContext screenContext = ScreenControllerUtils.getScreenContext(screen);
+            ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
 
             ScreenOptions options = screenContext.getScreenOptions();
             WindowInfo windowInfo = screenContext.getWindowInfo();
@@ -1656,10 +1656,10 @@ public class WebScreens implements Screens, WindowManager {
             if (initialized) {
                 if (saveSettingsAction == action) {
                     Screen screen = window.getFrameOwner();
-                    ScreenControllerUtils.saveSettings(screen);
+                    UiControllerUtils.saveSettings(screen);
                 } else if (restoreToDefaultsAction == action) {
                     Screen screen = window.getFrameOwner();
-                    ScreenControllerUtils.deleteSettings(screen);
+                    UiControllerUtils.deleteSettings(screen);
                 } else if (analyzeAction == action) {
                     LayoutAnalyzer analyzer = new LayoutAnalyzer();
                     List<LayoutTip> tipsList = analyzer.analyze(window);

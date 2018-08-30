@@ -122,7 +122,7 @@ public class UiControllerDependencyInjector {
         Class<? extends FrameOwner> clazz = frameOwner.getClass();
 
         List<Method> eventListenerMethods = reflectionInspector.getAnnotatedSubscribeMethods(clazz);
-        EventHub screenEvents = ScreenControllerUtils.getEventHub(frameOwner);
+        EventHub screenEvents = UiControllerUtils.getEventHub(frameOwner);
 
         for (Method method : eventListenerMethods) {
             Subscribe annotation = method.getAnnotation(Subscribe.class);
@@ -142,14 +142,14 @@ public class UiControllerDependencyInjector {
                     screenEvents.subscribe(parameterType, listener);
                 } else if (annotation.target() == Target.WINDOW) {
                     // window or fragment event
-                    Frame frame = ScreenControllerUtils.getFrame(frameOwner);
+                    Frame frame = UiControllerUtils.getFrame(frameOwner);
 
                     EventHub windowEvents = ((EventHubOwner) frame).getEventHub();
                     windowEvents.subscribe(parameterType, listener);
                 }
             } else {
                 // component event
-                Component component = ScreenControllerUtils.getFrame(frameOwner).getComponent(target);
+                Component component = UiControllerUtils.getFrame(frameOwner).getComponent(target);
                 if (component == null) {
                     throw new DevelopmentException("Unable to find @Subscribe target " + target);
                 }
@@ -268,7 +268,7 @@ public class UiControllerDependencyInjector {
     }
 
     protected Object getInjectedInstance(Class<?> type, String name, Class annotationClass, AnnotatedElement element) {
-        Frame frame = ScreenControllerUtils.getFrame(frameOwner);
+        Frame frame = UiControllerUtils.getFrame(frameOwner);
 
         if (annotationClass == WindowParam.class) {
             if (options instanceof MapScreenOptions) {
@@ -283,17 +283,17 @@ public class UiControllerDependencyInjector {
 
         } else if (InstanceContainer.class.isAssignableFrom(type)) {
             // Injecting a container
-            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
+            ScreenData data = UiControllerUtils.getScreenData(frameOwner);
             return data.getContainer(name);
 
         } else if (DataLoader.class.isAssignableFrom(type)) {
             // Injecting a loader
-            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
+            ScreenData data = UiControllerUtils.getScreenData(frameOwner);
             return data.getLoader(name);
 
         } else if (DataContext.class.isAssignableFrom(type)) {
             // Injecting the data context
-            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
+            ScreenData data = UiControllerUtils.getScreenData(frameOwner);
             return data.getDataContext();
 
         } else if (Datasource.class.isAssignableFrom(type)) {
@@ -333,15 +333,15 @@ public class UiControllerDependencyInjector {
 
         } else if (Screens.class == type) {
             // injecting screens
-            return ScreenControllerUtils.getScreenContext(frameOwner).getScreens();
+            return UiControllerUtils.getScreenContext(frameOwner).getScreens();
 
         } else if (Dialogs.class == type) {
             // injecting screens
-            return ScreenControllerUtils.getScreenContext(frameOwner).getDialogs();
+            return UiControllerUtils.getScreenContext(frameOwner).getDialogs();
 
         } else if (Notifications.class == type) {
             // injecting screens
-            return ScreenControllerUtils.getScreenContext(frameOwner).getNotifications();
+            return UiControllerUtils.getScreenContext(frameOwner).getNotifications();
 
         } else if (MessageBundle.class == type) {
             MessageBundle messageBundle = beanLocator.getPrototype(MessageBundle.NAME);

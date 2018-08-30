@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.config;
 
+import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
 import org.dom4j.Element;
 
@@ -74,8 +75,18 @@ public class WindowInfo {
     }
 
     @Nonnull
-    public Class<? extends Screen> getScreenClass() {
-        return windowAttributesProvider.getScreenClass(this);
+    public Class<? extends FrameOwner> getControllerClass() {
+        return windowAttributesProvider.getControllerClass(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends Screen> asScreen() {
+        Class<? extends FrameOwner> controllerClass = getControllerClass();
+        if (!Screen.class.isAssignableFrom(controllerClass)) {
+            throw new IllegalStateException("WindowInfo is not Screen " + this.toString());
+        }
+
+        return (Class<? extends Screen>) controllerClass;
     }
 
     /**
@@ -92,7 +103,7 @@ public class WindowInfo {
      * JavaDoc
      */
     @Nullable
-    public String getScreenClassName() {
+    public String getControllerClassName() {
         return screenClassName;
     }
 
@@ -116,13 +127,15 @@ public class WindowInfo {
     @Override
     public String toString() {
         String template = getTemplate();
-        return "id='" + id + '\'' +
+        return "WindowInfo{" +
+                "id='" + id + '\'' +
                 (template != null ? ", template=" + template : "") +
-                (screenClassName != null ? ", screenClass=" + screenClassName : "");
+                (screenClassName != null ? ", screenClass=" + screenClassName : "") +
+                "}";
     }
 
     /**
-     * Type of registered window.
+     * Type of registered controller.
      */
     public enum Type {
         SCREEN,

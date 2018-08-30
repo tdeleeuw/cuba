@@ -22,7 +22,7 @@ import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.screen.ScreenControllerUtils;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
@@ -57,7 +57,7 @@ public class ExtendedEditorActionsFragment extends ScreenFragment {
         Action commitAction = new BaseAction(WINDOW_COMMIT)
                 .withCaption(messages.getMainMessage("actions.Save"))
                 .withHandler(e ->
-                        ScreenControllerUtils.commitChanges(getParentScreen())
+                        UiControllerUtils.commitChanges(getParentScreen())
                                 .then(() -> commitActionPerformed = true)
                 );
 

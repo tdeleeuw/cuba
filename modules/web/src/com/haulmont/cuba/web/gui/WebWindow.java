@@ -32,7 +32,7 @@ import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.components.sys.WindowImplementation;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.Screen;
-import com.haulmont.cuba.gui.screen.ScreenControllerUtils;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.WebConfig;
 import com.haulmont.cuba.web.gui.components.WebComponentsHelper;
@@ -618,7 +618,7 @@ public class WebWindow implements Window, Component.Wrapper,
 
     @Override
     public WindowManager getWindowManager() {
-        return (WindowManager) ScreenControllerUtils.getScreenContext(getFrameOwner()).getScreens();
+        return (WindowManager) UiControllerUtils.getScreenContext(getFrameOwner()).getScreens();
     }
 
     @Override

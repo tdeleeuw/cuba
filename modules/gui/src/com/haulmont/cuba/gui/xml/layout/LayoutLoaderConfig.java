@@ -32,7 +32,7 @@ public class LayoutLoaderConfig {
     protected Map<String, Class<? extends ComponentLoader>> loaders = new ConcurrentHashMap<>();
 
     protected Class<? extends WindowLoader> windowLoader = WindowLoader.class;
-    protected Class<? extends FragmentLoader> frameLoader = FragmentLoader.class;
+    protected Class<? extends FragmentLoader> fragmentLoader = FragmentLoader.class;
 
     public LayoutLoaderConfig() {
         initStandardLoaders();
@@ -132,8 +132,8 @@ public class LayoutLoaderConfig {
         return windowLoader;
     }
 
-    public Class<? extends ComponentLoader> getFrameLoader() {
-        return frameLoader;
+    public Class<? extends ComponentLoader> getFragmentLoader() {
+        return fragmentLoader;
     }
 
     public Class<? extends ComponentLoader> getLoader(String name) {
@@ -145,7 +145,7 @@ public class LayoutLoaderConfig {
     }
 
     public void registerFragmentLoader(Class<? extends FragmentLoader> loader) {
-        frameLoader = loader;
+        fragmentLoader = loader;
     }
 
     protected void register(String tagName, Class<? extends ComponentLoader> loaderClass) {

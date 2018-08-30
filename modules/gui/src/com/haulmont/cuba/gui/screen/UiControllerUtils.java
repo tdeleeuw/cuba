@@ -26,7 +26,7 @@ import com.haulmont.cuba.gui.util.OperationResult;
 /**
  * Internal methods used in WindowManager implementations.
  */
-public final class ScreenControllerUtils {
+public final class UiControllerUtils {
 
     public static void setWindowId(Screen screen, String id) {
         screen.setId(id);

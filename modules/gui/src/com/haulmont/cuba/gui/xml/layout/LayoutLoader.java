@@ -17,9 +17,9 @@
 package com.haulmont.cuba.gui.xml.layout;
 
 import com.haulmont.bali.datastruct.Pair;
-import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
+import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.xml.layout.loaders.FragmentLoader;
 import com.haulmont.cuba.gui.xml.layout.loaders.WindowLoader;
@@ -85,6 +85,12 @@ public class LayoutLoader {
         return initLoader(element, loaderClass);
     }
 
+    protected FragmentLoader getFragmentLoader(Element element) {
+        Class<? extends ComponentLoader> loaderClass = config.getFragmentLoader();
+
+        return (FragmentLoader) initLoader(element, loaderClass);
+    }
+
     protected WindowLoader getWindowLoader(Element element) {
         Class<? extends ComponentLoader> loaderClass = config.getWindowLoader();
 
@@ -121,7 +127,7 @@ public class LayoutLoader {
 
     public Pair<ComponentLoader, Element> createFrameComponent(String resourcePath, String id,
                                                                Map<String, Object> params) {
-        ScreenXmlLoader screenXmlLoader = AppBeans.get(ScreenXmlLoader.class); // todo use injection
+        ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
         Element element = screenXmlLoader.load(resourcePath, id, params);
 
         ComponentLoader loader = getLoader(element);
@@ -140,15 +146,21 @@ public class LayoutLoader {
         return loader;
     }
 
-    public ComponentLoader createWindow(Element element, String windowId) {
-        ComponentLoader loader = getLoader(element);
-        ((WindowLoader) loader).setWindowId(windowId);
+    public ComponentLoader<Fragment> createFragmentContent(Fragment fragment, Element element, String fragmentId) {
+        FragmentLoader fragmentLoader = getFragmentLoader(element);
 
-        loader.createComponent();
-        return loader;
+        fragmentLoader.setFrameId(fragmentId);
+        fragmentLoader.setResultComponent(fragment);
+
+        Element layout = element.element("layout");
+        if (layout != null) {
+            fragmentLoader.createContent(layout);
+        }
+
+        return fragmentLoader;
     }
 
-    public ComponentLoader createWindowContent(Window window, Element element, String windowId) {
+    public ComponentLoader<Window> createWindowContent(Window window, Element element, String windowId) {
         WindowLoader windowLoader = getWindowLoader(element);
 
         windowLoader.setWindowId(windowId);

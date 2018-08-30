@@ -16,6 +16,7 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.AppConfig;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.FrameContext;
@@ -31,6 +32,7 @@ import com.haulmont.cuba.gui.logging.UIPerformanceLogger;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.sys.*;
 import com.haulmont.cuba.gui.xml.data.DsContextLoader;
+import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.perf4j.StopWatch;
@@ -39,9 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class FragmentLoader extends ContainerLoader<Fragment> {
+public class FragmentLoader extends ContainerLoader<Fragment> implements ComponentRootLoader<Fragment> {
 
-    protected Element layoutElement;
     protected ComponentLoaderContext innerContext;
 
     protected String frameId;
@@ -110,16 +111,24 @@ public class FragmentLoader extends ContainerLoader<Fragment> {
         innerContext.setParent(parentContext);
         setContext(innerContext);
 
-        layoutElement = element.element("layout");
-        if (layoutElement == null) {
-            throw new GuiDevelopmentException("Required element 'layout' is not found", this.context.getFullFrameId());
-        }
-
-        createSubComponents(clientSpecificFrame, layoutElement);
+        Element layoutElement = element.element("layout");
+        createContent(layoutElement);
 
         setContext(parentContext);
 
         resultComponent = clientSpecificFrame;
+    }
+
+    public void setResultComponent(Fragment fragment) {
+        this.resultComponent = fragment;
+    }
+
+    @Override
+    public void createContent(Element layoutElement) {
+        if (layoutElement == null) {
+            throw new DevelopmentException("Missing required 'layout' element");
+        }
+        createSubComponents(resultComponent, layoutElement);
     }
 
     @Override
@@ -133,6 +142,11 @@ public class FragmentLoader extends ContainerLoader<Fragment> {
                 context.getDsContext(), innerContext.getAliasesMap());
 
         assignXmlDescriptor(resultComponent, element);
+
+        Element layoutElement = element.element("layout");
+        if (layoutElement == null) {
+            throw new GuiDevelopmentException("Required 'layout' element is not found", context.getFullFrameId());
+        }
 
         loadVisible(resultComponent, layoutElement);
         loadActions(resultComponent, element);
