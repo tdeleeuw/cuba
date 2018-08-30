@@ -20,7 +20,9 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
-import groovy.lang.Binding;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.InitTask;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.InjectTask;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader.PostInitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,12 +35,10 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     protected Frame frame;
     protected String fullFrameId;
     protected String currentFrameId;
-    protected transient Binding binding;
 
-    protected List<ComponentLoader.PostInitTask> postInitTasks = new ArrayList<>();
-    protected List<ComponentLoader.InjectTask> injectTasks = new ArrayList<>();
-    protected List<ComponentLoader.PostWrapTask> postWrapTasks = new ArrayList<>();
-    protected List<ComponentLoader.InitTask> initTasks = new ArrayList<>();
+    protected List<PostInitTask> postInitTasks = new ArrayList<>();
+    protected List<InjectTask> injectTasks = new ArrayList<>();
+    protected List<InitTask> initTasks = new ArrayList<>();
 
     protected Map<String, Object> parameters;
     protected Map<String, String> aliasesMap = new HashMap<>();
@@ -61,18 +61,6 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
 
     public void setDsContext(DsContext dsContext) {
         this.dsContext = dsContext;
-    }
-
-    @Override
-    public Binding getBinding() {
-        if (binding == null) {
-            binding = new Binding();
-            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                String name = entry.getKey().replace('$', '_');
-                binding.setVariable(name, entry.getValue());
-            }
-        }
-        return binding;
     }
 
     @Override
@@ -106,7 +94,7 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     @Override
-    public void addPostInitTask(ComponentLoader.PostInitTask task) {
+    public void addPostInitTask(PostInitTask task) {
         postInitTasks.add(task);
     }
 
@@ -128,19 +116,7 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     @Override
-    public void addPostWrapTask(ComponentLoader.PostWrapTask task) {
-        postWrapTasks.add(task);
-    }
-
-    @Override
-    public void executePostWrapTasks() {
-        if (!getPostWrapTasks().isEmpty()) {
-            new PostWrapTaskExecutor(getPostWrapTasks().get(0)).run();
-        }
-    }
-
-    @Override
-    public void addInjectTask(ComponentLoader.InjectTask task) {
+    public void addInjectTask(InjectTask task) {
         injectTasks.add(task);
     }
 
@@ -152,7 +128,7 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     @Override
-    public void addInitTask(ComponentLoader.InitTask task) {
+    public void addInitTask(InitTask task) {
         initTasks.add(task);
     }
 
@@ -163,41 +139,31 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
         }
     }
 
-    public List<ComponentLoader.InjectTask> getInjectTasks() {
+    public List<InjectTask> getInjectTasks() {
         return injectTasks;
     }
 
-    public List<ComponentLoader.PostInitTask> getPostInitTasks() {
+    public List<PostInitTask> getPostInitTasks() {
         return postInitTasks;
     }
 
-    public List<ComponentLoader.PostWrapTask> getPostWrapTasks() {
-        return postWrapTasks;
-    }
-
-    public List<ComponentLoader.InitTask> getInitTasks() {
+    public List<InitTask> getInitTasks() {
         return initTasks;
     }
 
-    protected void removeTask(ComponentLoader.PostInitTask task, ComponentLoaderContext context) {
+    protected void removeTask(PostInitTask task, ComponentLoaderContext context) {
         if (context.getPostInitTasks().remove(task) && context.getParent() != null) {
             removeTask(task, (ComponentLoaderContext) context.getParent());
         }
     }
 
-    protected void removeTask(ComponentLoader.InjectTask task, ComponentLoaderContext context) {
+    protected void removeTask(InjectTask task, ComponentLoaderContext context) {
         if (context.getInjectTasks().remove(task) && context.getParent() != null) {
             removeTask(task, (ComponentLoaderContext) context.getParent());
         }
     }
 
-    protected void removeTask(ComponentLoader.PostWrapTask task, ComponentLoaderContext context) {
-        if (context.getPostWrapTasks().remove(task) && context.getParent() != null) {
-            removeTask(task, (ComponentLoaderContext) context.getParent());
-        }
-    }
-
-    protected void removeTask(ComponentLoader.InitTask task, ComponentLoaderContext context) {
+    protected void removeTask(InitTask task, ComponentLoaderContext context) {
         if (context.getInitTasks().remove(task) && context.getParent() != null) {
             removeTask(task, (ComponentLoaderContext) context.getParent());
         }
@@ -210,9 +176,9 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
 
     protected class TaskExecutor implements Runnable {
 
-        private final ComponentLoader.PostInitTask task;
+        private final PostInitTask task;
 
-        public TaskExecutor(ComponentLoader.PostInitTask task) {
+        public TaskExecutor(PostInitTask task) {
             this.task = task;
         }
 
@@ -227,9 +193,9 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     }
 
     protected class InjectTaskExecutor implements Runnable {
-        private final ComponentLoader.InjectTask task;
+        private final InjectTask task;
 
-        public InjectTaskExecutor(ComponentLoader.InjectTask task) {
+        public InjectTaskExecutor(InjectTask task) {
             this.task = task;
         }
 
@@ -243,27 +209,10 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
         }
     }
 
-    protected class PostWrapTaskExecutor implements Runnable {
-        private final ComponentLoader.PostWrapTask task;
-
-        public PostWrapTaskExecutor(ComponentLoader.PostWrapTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void run() {
-            removeTask(task, ComponentLoaderContext.this);
-            task.execute(ComponentLoaderContext.this, frame);
-            if (!getPostWrapTasks().isEmpty()) {
-                new PostWrapTaskExecutor(getPostWrapTasks().get(0)).run();
-            }
-        }
-    }
-
     protected class InitTaskExecutor implements Runnable {
-        private final ComponentLoader.InitTask task;
+        private final InitTask task;
 
-        public InitTaskExecutor(ComponentLoader.InitTask task) {
+        public InitTaskExecutor(InitTask task) {
             this.task = task;
         }
 

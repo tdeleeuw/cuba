@@ -17,24 +17,22 @@
 package com.haulmont.cuba.gui.components;
 
 import com.haulmont.cuba.client.ClientConfig;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.core.global.DevelopmentException;
-import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.FrameContext;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.Frame.NotificationType;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.screen.MessageBundle;
-import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,6 +84,18 @@ public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, Lega
      *               {@code screens.xml} for this registered screen
      */
     public void init(Map<String, Object> params) {
+    }
+
+    @Order(Events.HIGHEST_PLATFORM_PRECEDENCE + 10)
+    @Subscribe
+    protected void init(InitEvent initEvent) {
+        Map<String, Object> params = Collections.emptyMap();
+        ScreenOptions options = initEvent.getOptions();
+        if (options instanceof MapScreenOptions) {
+            params = ((MapScreenOptions) options).getParams();
+        }
+
+        init(params);
     }
 
     @Override

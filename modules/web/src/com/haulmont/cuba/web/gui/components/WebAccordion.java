@@ -487,7 +487,6 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
             component.addSelectedTabChangeListener(event -> {
                 if (context != null) {
                     context.executeInjectTasks();
-                    context.executePostWrapTasks();
                     context.executeInitTasks();
                 }
                 // Fire GUI listener

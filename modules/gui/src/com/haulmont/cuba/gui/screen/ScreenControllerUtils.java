@@ -21,6 +21,7 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.settings.Settings;
+import com.haulmont.cuba.gui.util.OperationResult;
 
 /**
  * Internal methods used in WindowManager implementations.
@@ -89,5 +90,9 @@ public final class ScreenControllerUtils {
             return ((Screen) frameOwner).getWindow();
         }
         return ((ScreenFragment) frameOwner).getFragment();
+    }
+
+    public static OperationResult commitChanges(Screen screen) {
+        return screen.commitChanges();
     }
 }

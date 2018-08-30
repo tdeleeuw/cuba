@@ -16,16 +16,50 @@
 
 package com.haulmont.cuba.gui.screen.actions;
 
+import com.haulmont.cuba.client.ClientConfig;
+import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.Messages;
+import com.haulmont.cuba.gui.components.Action;
+import com.haulmont.cuba.gui.components.Window;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
-import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
-@UiDescriptor("edit-window.actions.xml")
-@UiController("editWindowActions")
+import static com.haulmont.cuba.gui.screen.EditorScreen.WINDOW_CLOSE;
+import static com.haulmont.cuba.gui.screen.EditorScreen.WINDOW_COMMIT_AND_CLOSE;
+
+@UiDescriptor("editor-actions.xml")
+@UiController("editorActions")
 public class EditorActionsFragment extends ScreenFragment {
-    @Subscribe
-    protected void init(InitEvent initEvent) {
-        // todo init actions here
+    public EditorActionsFragment() {
+        addInitListener(this::init);
+    }
+
+    protected void init(@SuppressWarnings("unused") InitEvent initEvent) {
+        Window window = getParentScreen().getWindow();
+
+        Configuration configuration = getBeanLocator().get(Configuration.NAME);
+        Messages messages = getBeanLocator().get(Messages.NAME);
+
+        String commitShortcut = configuration.getConfig(ClientConfig.class).getCommitShortcut();
+
+        Action commitAction = new BaseAction(WINDOW_COMMIT_AND_CLOSE)
+                .withCaption(messages.getMainMessage("actions.Ok"))
+                .withPrimary(true)
+                .withShortcut(commitShortcut)
+                .withHandler(e ->
+                        getParentScreen().closeWithCommit()
+                );
+
+        window.addAction(commitAction);
+
+        Action closeAction = new BaseAction(WINDOW_CLOSE)
+                .withCaption(messages.getMainMessage("actions.Cancel"))
+                .withHandler(e ->
+                        getParentScreen().closeWithDiscard()
+                );
+
+        window.addAction(closeAction);
     }
 }

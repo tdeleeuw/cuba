@@ -677,24 +677,24 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, WindowInfo windowInfo) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(); // todo
     }
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, WindowInfo windowInfo,
                            Map<String, Object> params) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(); // todo
     }
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, @Nullable String id,
                            WindowInfo windowInfo, Map<String, Object> params) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(); // todo
     }
 
     @Override
     public void close(Window window) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(); // todo
     }
 
     @Override

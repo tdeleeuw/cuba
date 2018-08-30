@@ -20,6 +20,7 @@ import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.events.Subscription;
 import com.haulmont.bali.events.TriggerOnce;
 import com.haulmont.cuba.core.global.BeanLocator;
+import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.model.ScreenData;
 
@@ -46,6 +47,8 @@ public abstract class ScreenFragment implements FrameOwner {
 
     private BeanLocator beanLocator;
 
+    private FrameOwner parentController;
+
     @Inject
     protected void setBeanLocator(BeanLocator beanLocator) {
         this.beanLocator = beanLocator;
@@ -69,6 +72,22 @@ public abstract class ScreenFragment implements FrameOwner {
 
     public Fragment getFragment() {
         return fragment;
+    }
+
+    public FrameOwner getParentController() {
+        return parentController;
+    }
+
+    protected void setParentController(FrameOwner parentController) {
+        this.parentController = parentController;
+    }
+
+    protected Screen getParentScreen() {
+        Screen screen = ComponentsHelper.getScreen(this);
+        if (screen == null) {
+            throw new IllegalStateException("Unable to get screen for Fragment");
+        }
+        return screen;
     }
 
     /**

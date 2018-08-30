@@ -129,7 +129,8 @@ public class FragmentLoader extends ContainerLoader<Fragment> {
         Element dsContextElement = element.element("dsContext");
         DsContextLoader contextLoader = new DsContextLoader(context.getDsContext().getDataSupplier());
 
-        DsContext dsContext = contextLoader.loadDatasources(dsContextElement, context.getDsContext(), innerContext.getAliasesMap());
+        DsContext dsContext = contextLoader.loadDatasources(dsContextElement,
+                context.getDsContext(), innerContext.getAliasesMap());
 
         assignXmlDescriptor(resultComponent, element);
 
@@ -170,7 +171,6 @@ public class FragmentLoader extends ContainerLoader<Fragment> {
         parentContext.getInjectTasks().addAll(innerContext.getInjectTasks());
         parentContext.getInitTasks().addAll(innerContext.getInitTasks());
         parentContext.getPostInitTasks().addAll(innerContext.getPostInitTasks());
-        parentContext.getPostWrapTasks().addAll(innerContext.getPostWrapTasks());
 
         setContext(parentContext);
     }
@@ -245,7 +245,8 @@ public class FragmentLoader extends ContainerLoader<Fragment> {
                             UIPerformanceLogger.LifeCycle.INIT,
                             LoggerFactory.getLogger(UIPerformanceLogger.class));
 
-                    ((AbstractFrame) this.frame).init(params);
+                    // todo post Event here instead
+//                    ((AbstractFrame) this.frame).init(params);
 
                     initStopWatch.stop();
                 }

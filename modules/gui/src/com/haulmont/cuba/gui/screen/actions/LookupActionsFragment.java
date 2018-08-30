@@ -20,8 +20,8 @@ import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
-@UiDescriptor("lookup-window.actions.xml")
-@UiController("lookupWindowActions")
+@UiDescriptor("lookup-actions.xml")
+@UiController("lookupActions")
 public class LookupActionsFragment extends ScreenFragment {
 
 }

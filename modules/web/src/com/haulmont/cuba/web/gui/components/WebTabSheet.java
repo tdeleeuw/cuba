@@ -524,7 +524,6 @@ public class WebTabSheet extends WebAbstractComponent<CubaTabSheet>
             component.addSelectedTabChangeListener(event -> {
                 if (context != null) {
                     context.executeInjectTasks();
-                    context.executePostWrapTasks();
                     context.executeInitTasks();
                 }
                 // Fire GUI listener

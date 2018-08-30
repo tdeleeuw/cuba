@@ -35,6 +35,7 @@ import com.haulmont.cuba.gui.components.sys.ValuePathHelper;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
 import org.apache.commons.collections4.iterators.ReverseListIterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -338,6 +339,30 @@ public abstract class ComponentsHelper {
         return null;
     }
 
+    @Nullable
+    public static Screen getScreen(ScreenFragment frameOwner) {
+        Frame frame = frameOwner.getFragment();
+        while (frame != null) {
+            if (frame instanceof Window && frame.getFrame() == frame) {
+                return ((Window) frame).getFrameOwner();
+            }
+            frame = frame.getFrame();
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Window getParentWindow(ScreenFragment frameOwner) {
+        Frame frame = frameOwner.getFragment();
+        while (frame != null) {
+            if (frame instanceof Window && frame.getFrame() == frame) {
+                return (Window) frame;
+            }
+            frame = frame.getFrame();
+        }
+        return null;
+    }
+
     /**
      * Get the topmost window for the specified component.
      * @param component component instance
@@ -354,14 +379,6 @@ public abstract class ComponentsHelper {
                 return window instanceof Window.Wrapper ? ((Window.Wrapper) window).getWrappedWindow() : window;
             }
             frame = frame.getFrame();
-        }
-        return null;
-    }
-
-    // todo support legacy Frame
-    public static Screen getUIController(Frame frame) {
-        if (frame instanceof Window) {
-            return ((Window) frame).getFrameOwner();
         }
         return null;
     }
