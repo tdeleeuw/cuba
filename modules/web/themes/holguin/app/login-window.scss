@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2018 Haulmont.
+ * Copyright (c) 2008-2016 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,31 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
-
-@import "app/app-menu";
-@import "app/main-window";
-@import "app/menubar";
-@import "app/generic-filter";
-@import "app/table";
-@import "app/tree";
-@import "app/window";
-@import "app/login-window";
-
-.holguin {
-  @include holguin;
-
-  @include holguin-menubar;
-  @include holguin-table;
-  @include holguin-tree;
-  @include holguin-window;
-  @include holguin-login-window;
-
-  @include holguin-app-menu;
-  @include holguin-main-window;
-
-  @include holguin-generic-filter;
-}
+ @mixin holguin-login-window {
+   .c-login-form {
+     width: 300px;
+   }
+ }

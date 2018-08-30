@@ -15,7 +15,7 @@
  *
  */
 
-@mixin cuba-generic-filter($primary-stylename: c-generic-filter) {
+@mixin holguin-generic-filter($primary-stylename: c-generic-filter) {
 
    .#{$primary-stylename}-margin-top {
      padding-top: $v-layout-margin-top;
