@@ -12,29 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-@import "holguin-defaults";
-@import "holguin";
+@mixin holguin-tree($primary-stylename: v-tree) {
 
-@import "app/mainwindow/app-menu";
-@import "app/mainwindow/main-window";
-@import "app/mainwindow/menubar";
-@import "app/mainwindow/generic-filter";
-@import "app/mainwindow/table";
-@import "app/mainwindow/tree";
-@import "app/mainwindow/window";
-
-.holguin {
-  @include holguin;
-
-  @include holguin-menubar;
-  @include holguin-table;
-  @include holguin-tree;
-  @include holguin-window;
-
-  @include cuba-app-menu;
-  @include cuba-main-window;
-
-  @include cuba-generic-filter;
+ .#{$primary-stylename}:focus,
+ .#{$primary-stylename}-focus {
+   border-color: $v-selection-item-selection-color;
+ }
 }

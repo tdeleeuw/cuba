@@ -52,5 +52,15 @@
         color: $cuba-table-text-color;
       }
     }
+
+    .#{$primary-stylename}-header td:first-child .v-table-caption-container,
+    .#{$primary-stylename}-footer td:first-child {
+      padding-left: 7px;
+    }
+  }
+
+  .#{$primary-stylename}-body-focus .#{$primary-stylename}-body-wrapper,
+   .#{$primary-stylename}-body-wrapper:focus {
+    border-color: $v-selection-item-selection-color;
   }
 }
