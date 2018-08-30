@@ -32,13 +32,17 @@ public class LayoutLoaderConfig {
     protected Map<String, Class<? extends ComponentLoader>> loaders = new ConcurrentHashMap<>();
 
     protected Class<? extends WindowLoader> windowLoader = WindowLoader.class;
-    protected Class<? extends FrameLoader> frameLoader = FrameLoader.class;
+    protected Class<? extends FragmentLoader> frameLoader = FragmentLoader.class;
 
     public LayoutLoaderConfig() {
         initStandardLoaders();
     }
 
     protected void initStandardLoaders() {
+        loaders.put("iframe", FragmentComponentLoader.class); // for backward compatibility
+        loaders.put(Frame.NAME, FragmentComponentLoader.class); // for backward compatibility
+        loaders.put(Fragment.NAME, FragmentComponentLoader.class);
+
         loaders.put(HBoxLayout.NAME, HBoxLayoutLoader.class);
         loaders.put(VBoxLayout.NAME, VBoxLayoutLoader.class);
         loaders.put(GridLayout.NAME, GridLayoutLoader.class);
@@ -85,8 +89,6 @@ public class LayoutLoaderConfig {
 
         loaders.put(Calendar.NAME, CalendarLoader.class);
 
-        loaders.put(Frame.NAME, FrameComponentLoader.class);
-        loaders.put("iframe", FrameComponentLoader.class); // for backward compatibility
         loaders.put(RuntimePropertiesFrame.NAME, RuntimePropertiesFrameLoader.class);
         loaders.put(SplitPanel.NAME, SplitPanelLoader.class);
         loaders.put(Tree.NAME, TreeLoader.class);
@@ -142,7 +144,7 @@ public class LayoutLoaderConfig {
         windowLoader = loader;
     }
 
-    public void registerFrameLoader(Class<? extends FrameLoader> loader) {
+    public void registerFragmentLoader(Class<? extends FragmentLoader> loader) {
         frameLoader = loader;
     }
 

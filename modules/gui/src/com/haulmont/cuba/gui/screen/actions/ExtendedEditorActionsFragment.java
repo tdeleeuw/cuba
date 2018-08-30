@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.gui.screen.events;
+package com.haulmont.cuba.gui.screen.actions;
 
-import com.haulmont.bali.events.TriggerOnce;
-import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
 
-import java.util.EventObject;
-
-/**
- * JavaDoc
- */
-@TriggerOnce
-public class AfterShowEvent extends EventObject {
-    public AfterShowEvent(Screen source) {
-        super(source);
-    }
-
-    @Override
-    public Screen getSource() {
-        return (Screen) super.getSource();
+@UiController("extendedEditWindowActions")
+@UiDescriptor("extended-edit-window.actions.xml")
+public class ExtendedEditorActionsFragment extends ScreenFragment {
+    @Subscribe
+    protected void init(InitEvent initEvent) {
+        // todo init actions here
     }
 }

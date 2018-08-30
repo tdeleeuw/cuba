@@ -21,7 +21,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.Window;
-import com.haulmont.cuba.gui.xml.layout.loaders.FrameLoader;
+import com.haulmont.cuba.gui.xml.layout.loaders.FragmentLoader;
 import com.haulmont.cuba.gui.xml.layout.loaders.WindowLoader;
 import org.dom4j.Element;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -125,8 +125,8 @@ public class LayoutLoader {
         Element element = screenXmlLoader.load(resourcePath, id, params);
 
         ComponentLoader loader = getLoader(element);
-        FrameLoader frameLoader = (FrameLoader) loader;
-        frameLoader.setFrameId(id);
+        FragmentLoader fragmentLoader = (FragmentLoader) loader;
+        fragmentLoader.setFrameId(id);
 
         loader.createComponent();
 

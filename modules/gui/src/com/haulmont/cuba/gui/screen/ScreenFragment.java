@@ -17,15 +17,43 @@
 package com.haulmont.cuba.gui.screen;
 
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.bali.events.Subscription;
+import com.haulmont.bali.events.TriggerOnce;
+import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.components.Fragment;
+import com.haulmont.cuba.gui.model.ScreenData;
+
+import javax.inject.Inject;
+import java.util.EventObject;
+import java.util.function.Consumer;
 
 /**
- * JavaDoc
+ * Base class for all fragment controllers.
+ *
+ * @see Fragment
  */
 public abstract class ScreenFragment implements FrameOwner {
 
+    private String id;
+
+    private ScreenContext screenContext;
+
+    private ScreenData screenData;
+
     private Fragment fragment;
+
     private EventHub eventHub = new EventHub();
+
+    private BeanLocator beanLocator;
+
+    @Inject
+    protected void setBeanLocator(BeanLocator beanLocator) {
+        this.beanLocator = beanLocator;
+    }
+
+    protected BeanLocator getBeanLocator() {
+        return beanLocator;
+    }
 
     protected EventHub getEventHub() {
         return eventHub;
@@ -42,4 +70,67 @@ public abstract class ScreenFragment implements FrameOwner {
     public Fragment getFragment() {
         return fragment;
     }
+
+    /**
+     * JavaDoc
+     *
+     * @param id
+     */
+    protected void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    protected void setScreenContext(ScreenContext screenContext) {
+        this.screenContext = screenContext;
+    }
+
+    protected ScreenContext getScreenContext() {
+        return screenContext;
+    }
+
+    protected ScreenData getScreenData() {
+        return screenData;
+    }
+
+    protected void setScreenData(ScreenData data) {
+        this.screenData = data;
+    }
+
+    /**
+     * JavaDoc
+     *
+     * @param listener
+     * @return
+     */
+    protected Subscription addInitListener(Consumer<InitEvent> listener) {
+        return eventHub.subscribe(InitEvent.class, listener);
+    }
+
+    /**
+     * JavaDoc
+     */
+    @TriggerOnce
+    public static class InitEvent extends EventObject {
+        protected final ScreenOptions options;
+
+        public InitEvent(ScreenFragment source, ScreenOptions options) {
+            super(source);
+            this.options = options;
+        }
+
+        @Override
+        public ScreenFragment getSource() {
+            return (ScreenFragment) super.getSource();
+        }
+
+        public ScreenOptions getOptions() {
+            return options;
+        }
+    }
+
+    // todo events: attached / detached / events from parent
 }

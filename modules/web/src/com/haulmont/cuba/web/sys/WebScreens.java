@@ -49,14 +49,14 @@ import com.haulmont.cuba.gui.data.impl.DsContextImplementation;
 import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.screen.Screen.AfterInitEvent;
+import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.screen.compatibility.ScreenEditorWrapper;
 import com.haulmont.cuba.gui.screen.compatibility.ScreenLookupWrapper;
 import com.haulmont.cuba.gui.screen.compatibility.ScreenWrapper;
-import com.haulmont.cuba.gui.screen.events.AfterInitEvent;
-import com.haulmont.cuba.gui.screen.events.AfterShowEvent;
-import com.haulmont.cuba.gui.screen.events.BeforeShowEvent;
-import com.haulmont.cuba.gui.screen.events.InitEvent;
 import com.haulmont.cuba.gui.settings.Settings;
 import com.haulmont.cuba.gui.settings.SettingsImpl;
 import com.haulmont.cuba.gui.sys.*;
@@ -191,12 +191,12 @@ public class WebScreens implements Screens, WindowManager {
 
         T controller = createController(windowInfo, window, resolvedScreenClass, launchMode);
 
-        ScreenUtils.setWindowId(controller, windowInfo.getId());
-        ScreenUtils.setWindow(controller, window);
-        ScreenUtils.setScreenContext(controller,
+        ScreenControllerUtils.setWindowId(controller, windowInfo.getId());
+        ScreenControllerUtils.setWindow(controller, window);
+        ScreenControllerUtils.setScreenContext(controller,
                 new ScreenContextImpl(windowInfo, options, this, dialogs, notifications)
         );
-        ScreenUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
+        ScreenControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
 
         WindowImplementation windowImpl = (WindowImplementation) window;
         windowImpl.setFrameOwner(controller);
@@ -207,15 +207,15 @@ public class WebScreens implements Screens, WindowManager {
 
         loadScreenXml(windowInfo, window, controller, options);
 
-        ScreenDependencyInjector dependencyInjector =
-                beanLocator.getPrototype(ScreenDependencyInjector.NAME, controller, options);
+        UiControllerDependencyInjector dependencyInjector =
+                beanLocator.getPrototype(UiControllerDependencyInjector.NAME, controller, options);
         dependencyInjector.inject();
 
         InitEvent initEvent = new InitEvent(controller, options);
-        ScreenUtils.fireEvent(controller, InitEvent.class, initEvent);
+        ScreenControllerUtils.fireEvent(controller, InitEvent.class, initEvent);
 
         AfterInitEvent afterInitEvent = new AfterInitEvent(controller, options);
-        ScreenUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
+        ScreenControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
 
         return controller;
     }
@@ -255,7 +255,7 @@ public class WebScreens implements Screens, WindowManager {
             windowLoader.loadComponent();
 
             if (!componentLoaderContext.getPostInitTasks().isEmpty()) {
-                EventHub eventHub = ScreenUtils.getEventHub(controller);
+                EventHub eventHub = ScreenControllerUtils.getEventHub(controller);
                 eventHub.subscribe(AfterInitEvent.class, event ->
                         componentLoaderContext.executePostInitTasks()
                 );
@@ -337,7 +337,7 @@ public class WebScreens implements Screens, WindowManager {
         // todo UI security
 
         BeforeShowEvent beforeShowEvent = new BeforeShowEvent(screen);
-        ScreenUtils.fireEvent(screen, BeforeShowEvent.class, beforeShowEvent);
+        ScreenControllerUtils.fireEvent(screen, BeforeShowEvent.class, beforeShowEvent);
 
         LaunchMode launchMode = screen.getWindow().getContext().getLaunchMode();
 
@@ -370,14 +370,14 @@ public class WebScreens implements Screens, WindowManager {
         afterShowWindow(screen);
 
         AfterShowEvent afterShowEvent = new AfterShowEvent(screen);
-        ScreenUtils.fireEvent(screen, AfterShowEvent.class, afterShowEvent);
+        ScreenControllerUtils.fireEvent(screen, AfterShowEvent.class, afterShowEvent);
     }
 
     protected void afterShowWindow(Screen screen) {
         WindowContext windowContext = screen.getWindow().getContext();
 
         if (!WindowParams.DISABLE_APPLY_SETTINGS.getBool(windowContext)) {
-            ScreenUtils.applySettings(screen, getSettingsImpl(screen.getId()));
+            ScreenControllerUtils.applySettings(screen, getSettingsImpl(screen.getId()));
         }
 
         if (screen instanceof LegacyFrame) {
@@ -1296,7 +1296,7 @@ public class WebScreens implements Screens, WindowManager {
 
             String tabId;
 
-            ScreenContext screenContext = ScreenUtils.getScreenContext(screen);
+            ScreenContext screenContext = ScreenControllerUtils.getScreenContext(screen);
 
             ScreenOptions options = screenContext.getScreenOptions();
             WindowInfo windowInfo = screenContext.getWindowInfo();
@@ -1656,10 +1656,10 @@ public class WebScreens implements Screens, WindowManager {
             if (initialized) {
                 if (saveSettingsAction == action) {
                     Screen screen = window.getFrameOwner();
-                    ScreenUtils.saveSettings(screen);
+                    ScreenControllerUtils.saveSettings(screen);
                 } else if (restoreToDefaultsAction == action) {
                     Screen screen = window.getFrameOwner();
-                    ScreenUtils.deleteSettings(screen);
+                    ScreenControllerUtils.deleteSettings(screen);
                 } else if (analyzeAction == action) {
                     LayoutAnalyzer analyzer = new LayoutAnalyzer();
                     List<LayoutTip> tipsList = analyzer.analyze(window);

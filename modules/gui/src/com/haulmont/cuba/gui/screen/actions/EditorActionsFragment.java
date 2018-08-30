@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2016 Haulmont.
+ * Copyright (c) 2008-2018 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package com.haulmont.cuba.gui.components;
 
-public interface WrappedFrame {
+package com.haulmont.cuba.gui.screen.actions;
 
-    Frame wrapBy(Class<?> aClass);
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
 
-    Frame getWrapper();
+@UiDescriptor("edit-window.actions.xml")
+@UiController("editWindowActions")
+public class EditorActionsFragment extends ScreenFragment {
+    @Subscribe
+    protected void init(InitEvent initEvent) {
+        // todo init actions here
+    }
 }

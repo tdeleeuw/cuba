@@ -21,8 +21,6 @@ import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.gui.components.Window.Lookup;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.events.AfterInitEvent;
-import com.haulmont.cuba.gui.screen.events.InitEvent;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;

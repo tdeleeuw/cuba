@@ -16,15 +16,13 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.haulmont.bali.util.ReflectionHelper;
 import com.haulmont.cuba.gui.AppConfig;
 import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.FrameContext;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.AbstractFrame;
-import com.haulmont.cuba.gui.components.AbstractWindow;
+import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.Frame;
-import com.haulmont.cuba.gui.components.WrappedFrame;
 import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsContext;
@@ -41,37 +39,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
+public class FragmentLoader extends ContainerLoader<Fragment> {
 
     protected Element layoutElement;
     protected ComponentLoaderContext innerContext;
 
     protected String frameId;
-
-    protected Frame wrapByCustomClass(Frame frame) {
-        String screenClass = element.attributeValue("class");
-        if (StringUtils.isBlank(screenClass)) {
-            screenClass = AbstractFrame.class.getName();
-        }
-
-        Class<?> aClass = getScripting().loadClass(screenClass);
-        if (aClass == null) {
-            aClass = ReflectionHelper.getClass(screenClass);
-        }
-        if (aClass == null) {
-            throw new GuiDevelopmentException("Unable to load controller class", frame.getId());
-        }
-
-        if (AbstractWindow.class.isAssignableFrom(aClass)) {
-            LoggerFactory.getLogger(FrameLoader.class).warn(
-                    "Frame class '{}' should not be inherited from AbstractWindow. " +
-                            "It may cause problems with controller life cycle. " +
-                            "Frame controllers should inherit AbstractFrame.",
-                    aClass.getSimpleName());
-        }
-
-        return ((WrappedFrame) frame).wrapBy(aClass);
-    }
 
     protected void initWrapperFrame(Frame wrappingFrame, Element rootFrameElement, Map<String, Object> params,
                                     ComponentLoaderContext parentContext) {
@@ -83,7 +56,8 @@ public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
     }
 
     protected void initCompanion(Element companionsElem, AbstractFrame frame) {
-        Element element = companionsElem.element(AppConfig.getClientType().toString().toLowerCase());
+        String clientTypeId = AppConfig.getClientType().toString().toLowerCase();
+        Element element = companionsElem.element(clientTypeId);
         if (element != null) {
             String className = element.attributeValue("class");
             if (!StringUtils.isBlank(className)) {
@@ -105,10 +79,8 @@ public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
     protected void loadMessagesPack(Frame frame, Element element) {
         String msgPack = element.attributeValue("messagesPack");
         if (msgPack != null) {
-//            frame.setMessagesPack(msgPack); todo
             setMessagesPack(msgPack);
         } else {
-//            frame.setMessagesPack(this.messagesPack); todo
             setMessagesPack(this.messagesPack);
         }
     }
@@ -119,8 +91,7 @@ public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
 
     @Override
     public void createComponent() {
-        //noinspection unchecked
-        Frame clientSpecificFrame = (T) factory.createComponent(Frame.NAME);
+        Fragment clientSpecificFrame = factory.createComponent(Fragment.NAME);
         clientSpecificFrame.setId(frameId);
 
         loadMessagesPack(clientSpecificFrame, element);
@@ -148,8 +119,7 @@ public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
 
         setContext(parentContext);
 
-        //noinspection unchecked
-        resultComponent = (T) wrapByCustomClass(clientSpecificFrame);
+        resultComponent = clientSpecificFrame;
     }
 
     @Override
@@ -308,7 +278,7 @@ public class FrameLoader<T extends Frame> extends ContainerLoader<T> {
 
                 uiPermissionsWatch.stop();
 
-                FrameLoader.this.context.executePostInitTasks();
+                FragmentLoader.this.context.executePostInitTasks();
             }
         }
     }

@@ -21,7 +21,6 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.compatibility.AfterCloseListenerAdapter;
 import com.haulmont.cuba.gui.screen.LookupScreen;
 import com.haulmont.cuba.gui.screen.Screen;
-import com.haulmont.cuba.gui.screen.events.InitEvent;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;

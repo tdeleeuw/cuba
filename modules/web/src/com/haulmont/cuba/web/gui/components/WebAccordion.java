@@ -27,7 +27,7 @@ import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.data.impl.DsContextImplementation;
 import com.haulmont.cuba.gui.data.impl.compatibility.CompatibleAccordionSelectedTabChangeListener;
 import com.haulmont.cuba.gui.icons.Icons;
-import com.haulmont.cuba.gui.screen.ScreenUtils;
+import com.haulmont.cuba.gui.screen.ScreenControllerUtils;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.settings.Settings;
 import com.haulmont.cuba.gui.sys.TestIdManager;
@@ -565,7 +565,7 @@ public class WebAccordion extends WebAbstractComponent<CubaAccordion>
                     walkComponents(tabContent, (settingsComponent, name) -> {
                         if (settingsComponent.getId() != null
                                 && settingsComponent instanceof HasSettings) {
-                            Settings settings = ScreenUtils.getSettings(window.getFrameOwner());
+                            Settings settings = ScreenControllerUtils.getSettings(window.getFrameOwner());
                             if (settings != null) {
                                 Element e = settings.get(name);
                                 ((HasSettings) settingsComponent).applySettings(e);

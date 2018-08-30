@@ -26,9 +26,10 @@ import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.*;
+import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.Window;
+import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.sys.EventHubOwner;
 import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.data.Datasource;
@@ -41,9 +42,9 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
+import com.haulmont.cuba.gui.sys.UiControllerReflectionInspector.InjectElement;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.gui.theme.ThemeConstantsManager;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.slf4j.Logger;
@@ -52,13 +53,15 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
-import org.springframework.util.ReflectionUtils;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -69,20 +72,20 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * Wires {@link Inject}, {@link Named}, {@link WindowParam} fields/setters and {@link EventListener} methods.
  */
-@org.springframework.stereotype.Component(ScreenDependencyInjector.NAME)
+@org.springframework.stereotype.Component(UiControllerDependencyInjector.NAME)
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class ScreenDependencyInjector {
+public class UiControllerDependencyInjector {
 
-    public static final String NAME = "cuba_UIControllerDependencyInjector";
+    public static final String NAME = "cuba_UiControllerDependencyInjector";
 
-    protected Screen screen;
+    protected FrameOwner frameOwner;
     protected ScreenOptions options;
 
     protected BeanLocator beanLocator;
-    protected ScreenReflectionInspector screenReflectionInspector;
+    protected UiControllerReflectionInspector reflectionInspector;
 
-    public ScreenDependencyInjector(Screen screen, ScreenOptions options) {
-        this.screen = screen;
+    public UiControllerDependencyInjector(FrameOwner frameOwner, ScreenOptions options) {
+        this.frameOwner = frameOwner;
         this.options = options;
     }
 
@@ -92,60 +95,40 @@ public class ScreenDependencyInjector {
     }
 
     @Inject
-    public void setScreenReflectionInspector(ScreenReflectionInspector screenReflectionInspector) {
-        this.screenReflectionInspector = screenReflectionInspector;
+    public void setReflectionInspector(UiControllerReflectionInspector reflectionInspector) {
+        this.reflectionInspector = reflectionInspector;
     }
 
     public void inject() {
-        Map<AnnotatedElement, Class> toInject = Collections.emptyMap(); // lazily initialized
+        injectValues(frameOwner);
 
-        @SuppressWarnings("unchecked")
-        List<Class<?>> classes = ClassUtils.getAllSuperclasses(screen.getClass());
-        classes.add(0, screen.getClass());
-        Collections.reverse(classes);
+        initSubscribeListeners(frameOwner);
 
-        for (Field field : getAllFields(classes)) {
-            Class aClass = injectionAnnotation(field);
-            if (aClass != null) {
-                if (toInject.isEmpty()) {
-                    toInject = new HashMap<>();
-                }
-                toInject.put(field, aClass);
-            }
+        initUiEventListeners(frameOwner);
+
+        // todo @PostConstruct ?
+    }
+
+    protected void injectValues(FrameOwner frameOwner) {
+        List<InjectElement> injectElements = reflectionInspector.getAnnotatedInjectElements(frameOwner.getClass());
+
+        for (InjectElement entry : injectElements) {
+            doInjection(entry.getElement(), entry.getAnnotationClass());
         }
-        for (Method method : ReflectionUtils.getUniqueDeclaredMethods(screen.getClass())) { // todo cache
-            Class aClass = injectionAnnotation(method);
-            if (aClass != null) {
-                if (toInject.isEmpty()) {
-                    toInject = new HashMap<>();
-                }
-                toInject.put(method, aClass);
-            }
-        }
-
-        for (Map.Entry<AnnotatedElement, Class> entry : toInject.entrySet()) {
-            doInjection(entry.getKey(), entry.getValue());
-        }
-
-        subscribeListenerMethods(screen);
-
-        subscribeUiEventListeners(screen);
-
-        // todo @PostConstruct
     }
 
     @SuppressWarnings("unchecked")
-    protected void subscribeListenerMethods(Screen screen) {
-        Class<? extends Screen> clazz = screen.getClass();
+    protected void initSubscribeListeners(FrameOwner frameOwner) {
+        Class<? extends FrameOwner> clazz = frameOwner.getClass();
 
-        List<Method> eventListenerMethods = screenReflectionInspector.getAnnotatedSubscribeMethods(clazz);
-        EventHub screenEvents = ScreenUtils.getEventHub(screen);
+        List<Method> eventListenerMethods = reflectionInspector.getAnnotatedSubscribeMethods(clazz);
+        EventHub screenEvents = ScreenControllerUtils.getEventHub(frameOwner);
 
         for (Method method : eventListenerMethods) {
             Subscribe annotation = method.getAnnotation(Subscribe.class);
             checkState(annotation != null);
 
-            Consumer listener = new DeclarativeSubscribeExecutor(screen, method);
+            Consumer listener = new DeclarativeSubscribeExecutor(frameOwner, method);
 
             String target = ScreenDescriptorUtils.getInferredSubscribeId(annotation);
 
@@ -159,12 +142,14 @@ public class ScreenDependencyInjector {
                     screenEvents.subscribe(parameterType, listener);
                 } else if (annotation.target() == Target.WINDOW) {
                     // window or fragment event
-                    EventHub windowEvents = ((EventHubOwner) screen.getWindow()).getEventHub();
+                    Frame frame = ScreenControllerUtils.getFrame(frameOwner);
+
+                    EventHub windowEvents = ((EventHubOwner) frame).getEventHub();
                     windowEvents.subscribe(parameterType, listener);
                 }
             } else {
                 // component event
-                Component component = screen.getWindow().getComponent(target);
+                Component component = ScreenControllerUtils.getFrame(frameOwner).getComponent(target);
                 if (component == null) {
                     throw new DevelopmentException("Unable to find @Subscribe target " + target);
                 }
@@ -178,19 +163,20 @@ public class ScreenDependencyInjector {
         }
     }
 
-    protected void subscribeUiEventListeners(Screen screen) {
-        Class<? extends Screen> clazz = screen.getClass();
+    protected void initUiEventListeners(FrameOwner frameOwner) {
+        Class<? extends FrameOwner> clazz = frameOwner.getClass();
 
-        List<Method> eventListenerMethods = screenReflectionInspector.getAnnotatedListenerMethods(clazz);
+        List<Method> eventListenerMethods = reflectionInspector.getAnnotatedListenerMethods(clazz);
 
         if (!eventListenerMethods.isEmpty()) {
             Events events = beanLocator.get(Events.NAME);
 
             List<ApplicationListener> listeners = eventListenerMethods.stream()
-                    .map(m -> new UiEventListenerMethodAdapter(screen, clazz, m, events))
+                    .map(m -> new UiEventListenerMethodAdapter(frameOwner, clazz, m, events))
                     .collect(Collectors.toList());
 
             // todo implement UiEvent listeners
+            // todo provide programmatic API for UiEvent listeners
             // ((Screen) screen).setUiEventListeners(listeners);
         }
     }
@@ -263,7 +249,7 @@ public class ScreenDependencyInjector {
             assignValue(element, instance);
         } else if (required) {
             Class<?> declaringClass = ((Member) element).getDeclaringClass();
-            Class<? extends Screen> frameClass = screen.getClass();
+            Class<? extends FrameOwner> frameClass = frameOwner.getClass();
 
             String msg;
             if (frameClass == declaringClass) {
@@ -276,13 +262,13 @@ public class ScreenDependencyInjector {
                         type, name, declaringClass.getCanonicalName(), frameClass.getCanonicalName());
             }
 
-            Logger log = LoggerFactory.getLogger(ScreenDependencyInjector.class);
+            Logger log = LoggerFactory.getLogger(UiControllerDependencyInjector.class);
             log.warn(msg);
         }
     }
 
     protected Object getInjectedInstance(Class<?> type, String name, Class annotationClass, AnnotatedElement element) {
-        Window window = screen.getWindow();
+        Frame frame = ScreenControllerUtils.getFrame(frameOwner);
 
         if (annotationClass == WindowParam.class) {
             if (options instanceof MapScreenOptions) {
@@ -293,46 +279,48 @@ public class ScreenDependencyInjector {
 
         } else if (Component.class.isAssignableFrom(type)) {
             // Injecting a UI component
-            return window.getComponent(name);
+            return frame.getComponent(name);
 
         } else if (InstanceContainer.class.isAssignableFrom(type)) {
             // Injecting a container
-            ScreenData data = ScreenUtils.getScreenData(screen);
+            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
             return data.getContainer(name);
 
         } else if (DataLoader.class.isAssignableFrom(type)) {
             // Injecting a loader
-            ScreenData data = ScreenUtils.getScreenData(screen);
+            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
             return data.getLoader(name);
 
         } else if (DataContext.class.isAssignableFrom(type)) {
             // Injecting the data context
-            ScreenData data = ScreenUtils.getScreenData(screen);
+            ScreenData data = ScreenControllerUtils.getScreenData(frameOwner);
             return data.getDataContext();
 
         } else if (Datasource.class.isAssignableFrom(type)) {
             // Injecting a datasource
-            return ((LegacyFrame) window.getFrameOwner()).getDsContext().get(name);
+            return ((LegacyFrame) frame.getFrameOwner()).getDsContext().get(name);
 
         } else if (DsContext.class.isAssignableFrom(type)) {
             // Injecting the DsContext
-            return ((LegacyFrame) window.getFrameOwner()).getDsContext();
+            return ((LegacyFrame) frame.getFrameOwner()).getDsContext();
 
         } else if (DataSupplier.class.isAssignableFrom(type)) {
             // Injecting the DataSupplier
-            return ((LegacyFrame) window.getFrameOwner()).getDsContext().getDataSupplier();
+            return ((LegacyFrame) frame.getFrameOwner()).getDsContext().getDataSupplier();
 
         } else if (FrameContext.class.isAssignableFrom(type)) {
             // Injecting the FrameContext
-            return window.getContext();
+            return frame.getContext();
 
         } else if (Action.class.isAssignableFrom(type)) {
             // Injecting an action
-            return ComponentsHelper.findAction(name, window);
+            return ComponentsHelper.findAction(name, frame);
 
         } else if (ExportDisplay.class.isAssignableFrom(type)) {
             // Injecting an ExportDisplay
-            return AppConfig.createExportDisplay(window);
+            ExportDisplay exportDisplay = beanLocator.get(ExportDisplay.NAME);
+            exportDisplay.setFrame(frame);
+            return exportDisplay;
 
         } else if (Config.class.isAssignableFrom(type)) {
             ClientConfiguration configuration = beanLocator.get(Configuration.NAME);
@@ -345,15 +333,15 @@ public class ScreenDependencyInjector {
 
         } else if (Screens.class == type) {
             // injecting screens
-            return ScreenUtils.getScreenContext(screen).getScreens();
+            return ScreenControllerUtils.getScreenContext(frameOwner).getScreens();
 
         } else if (Dialogs.class == type) {
             // injecting screens
-            return ScreenUtils.getScreenContext(screen).getDialogs();
+            return ScreenControllerUtils.getScreenContext(frameOwner).getDialogs();
 
         } else if (Notifications.class == type) {
             // injecting screens
-            return ScreenUtils.getScreenContext(screen).getNotifications();
+            return ScreenControllerUtils.getScreenContext(frameOwner).getNotifications();
 
         } else if (MessageBundle.class == type) {
             MessageBundle messageBundle = beanLocator.getPrototype(MessageBundle.NAME);
@@ -369,8 +357,8 @@ public class ScreenDependencyInjector {
 
             messageBundle.setMessagesPack(packageName);
 
-            if (window instanceof Component.HasXmlDescriptor) {
-                Element xmlDescriptor = ((Component.HasXmlDescriptor) window).getXmlDescriptor();
+            if (frame instanceof Component.HasXmlDescriptor) {
+                Element xmlDescriptor = ((Component.HasXmlDescriptor) frame).getXmlDescriptor();
                 String messagePack = xmlDescriptor.attributeValue("messagesPack");
                 if (messagePack != null) {
                     messageBundle.setMessagesPack(messagePack);
@@ -399,34 +387,37 @@ public class ScreenDependencyInjector {
             }
 
             // There are no Spring beans of required type - the last option is Companion
-            // todo
-            /*if (frame instanceof AbstractFrame) {
-                instance = ((AbstractFrame) frame).getCompanion();
+            if (frameOwner instanceof AbstractFrame) {
+                instance = ((AbstractFrame) frameOwner).getCompanion();
                 if (instance != null && type.isAssignableFrom(instance.getClass())) {
                     return instance;
                 }
-            }*/
+            }
         }
         return null;
     }
 
     protected void assignValue(AnnotatedElement element, Object value) {
+        // element is already marked as accessible in UiControllerReflectionInspector
+
         if (element instanceof Field) {
-            ((Field) element).setAccessible(true);
+            Field field = (Field) element;
+
             try {
-                ((Field) element).set(screen, value);
+                field.set(frameOwner, value);
             } catch (IllegalAccessException e) {
-                throw new RuntimeException("CDI - Unable to assign value to field " + ((Field) element).getName(), e);
+                throw new RuntimeException("CDI - Unable to assign value to field " + field.getName(), e);
             }
         } else {
+            Method method = (Method) element;
+
             Object[] params = new Object[1];
             params[0] = value;
-            ((Method) element).setAccessible(true);
             try {
-                ((Method) element).invoke(screen, params);
+                method.invoke(frameOwner, params);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException("CDI - Unable to assign value through setter "
-                        + ((Method) element).getName(), e);
+                        + method.getName(), e);
             }
         }
     }

@@ -33,7 +33,9 @@ import com.haulmont.cuba.gui.components.mainwindow.AppWorkArea;
 import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.components.sys.ValuePathHelper;
 import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
+import org.apache.commons.collections4.iterators.ReverseListIterator;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -321,8 +323,7 @@ public abstract class ComponentsHelper {
     /**
      * Get the topmost window for the specified component.
      * @param component component instance
-     * @return          topmost window in the hierarchy of frames for this component.
-     * <br>If the window has a controller class, an instance of the controller is returned.
+     * @return topmost window in the hierarchy of frames for this component.
      * <br>Can be null only if the component wasn't properly initialized.
      */
     @Nullable
@@ -330,8 +331,7 @@ public abstract class ComponentsHelper {
         Frame frame = component.getFrame();
         while (frame != null) {
             if (frame instanceof Window && frame.getFrame() == frame) {
-                Window window = (Window) frame;
-                return window instanceof WrappedWindow ? ((WrappedWindow) window).getWrapper() : window;
+                return (Window) frame;
             }
             frame = frame.getFrame();
         }
@@ -366,25 +366,29 @@ public abstract class ComponentsHelper {
         return null;
     }
 
-    public static Frame getFrameController(Frame frame) {
-        if (frame instanceof WrappedFrame) {
-            return  ((WrappedFrame) frame).getWrapper();
-        } else if (frame instanceof WrappedWindow) {
-            return ((WrappedWindow) frame).getWrapper();
-        } else {
-            return frame;
-        }
+    /**
+     * @deprecated Simply use {@link Frame#getFrameOwner()} call.
+     */
+    @Deprecated
+    public static FrameOwner getFrameController(Frame frame) {
+        return frame.getFrameOwner();
     }
 
     public static String getFullFrameId(Frame frame) {
-        LinkedList<String> frameIds = new LinkedList<>();
-        frameIds.addFirst(frame.getId());
+        if (frame instanceof Window) {
+            return frame.getId();
+        }
+
+        List<String> frameIds = new ArrayList<>(4);
+        frameIds.add(frame.getId());
         while (frame != null && !(frame instanceof Window) && frame != frame.getFrame()) {
             frame = frame.getFrame();
-            if (frame != null)
-                frameIds.addFirst(frame.getId());
+            if (frame != null) {
+                frameIds.add(frame.getId());
+            }
         }
-        return StringUtils.join(frameIds, '.');
+
+        return StringUtils.join(new ReverseListIterator<>(frameIds), '.');
     }
 
     /**

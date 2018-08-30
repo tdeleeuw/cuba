@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package com.haulmont.cuba.gui.screen.events;
+package com.haulmont.cuba.gui.screen.actions;
 
-import com.haulmont.bali.events.TriggerOnce;
-import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
 
-import java.util.EventObject;
+@UiDescriptor("lookup-window.actions.xml")
+@UiController("lookupWindowActions")
+public class LookupActionsFragment extends ScreenFragment {
 
-/**
- * JavaDoc
- */
-@TriggerOnce
-public class BeforeShowEvent extends EventObject {
-    public BeforeShowEvent(Screen source) {
-        super(source);
-    }
-
-    @Override
-    public Screen getSource() {
-        return (Screen) super.getSource();
-    }
 }

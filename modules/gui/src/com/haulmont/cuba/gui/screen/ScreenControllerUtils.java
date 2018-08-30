@@ -17,6 +17,7 @@
 package com.haulmont.cuba.gui.screen;
 
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.settings.Settings;
@@ -24,7 +25,7 @@ import com.haulmont.cuba.gui.settings.Settings;
 /**
  * Internal methods used in WindowManager implementations.
  */
-public final class ScreenUtils {
+public final class ScreenControllerUtils {
 
     public static void setWindowId(Screen screen, String id) {
         screen.setId(id);
@@ -38,16 +39,22 @@ public final class ScreenUtils {
         screen.fireEvent(eventType, event);
     }
 
-    public static EventHub getEventHub(Screen screen) {
-        return screen.getEventHub();
+    public static EventHub getEventHub(FrameOwner frameOwner) {
+        if (frameOwner instanceof Screen) {
+            return ((Screen) frameOwner).getEventHub();
+        }
+        return ((ScreenFragment) frameOwner).getEventHub();
     }
 
     public static void setScreenContext(Screen screen, ScreenContext screenContext) {
         screen.setScreenContext(screenContext);
     }
 
-    public static ScreenContext getScreenContext(Screen screen) {
-        return screen.getScreenContext();
+    public static ScreenContext getScreenContext(FrameOwner frameOwner) {
+        if (frameOwner instanceof Screen) {
+            return ((Screen) frameOwner).getScreenContext();
+        }
+        return ((ScreenFragment) frameOwner).getScreenContext();
     }
 
     public static void setScreenData(Screen screen, ScreenData screenData) {
@@ -70,7 +77,17 @@ public final class ScreenUtils {
         return screen.getSettings();
     }
 
-    public static ScreenData getScreenData(FrameOwner screen) {
-        return ((Screen) screen).getScreenData(); // todo support Fragment
+    public static ScreenData getScreenData(FrameOwner frameOwner) {
+        if (frameOwner instanceof Screen) {
+            return ((Screen) frameOwner).getScreenData();
+        }
+        return ((ScreenFragment) frameOwner).getScreenData();
+    }
+
+    public static Frame getFrame(FrameOwner frameOwner) {
+        if (frameOwner instanceof Screen) {
+            return ((Screen) frameOwner).getWindow();
+        }
+        return ((ScreenFragment) frameOwner).getFragment();
     }
 }
