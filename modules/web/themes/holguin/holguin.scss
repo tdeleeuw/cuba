@@ -26,20 +26,22 @@
 @import "components/table/table";
 @import "components/table/table-paging";
 @import "components/table/table-presentations";
+@import "components/datagrid/datagrid";
 
 @mixin holguin {
   @include halo;
 
-  @include holguin-menubar;
   @include holguin-table;
   @include holguin-table-paging;
   @include holguin-table-presentations;
+  @include holguin-datagrid;
   @include holguin-tree;
+  @include holguin-app-menu;
+  @include holguin-menubar;
+
+  @include holguin-main-window;
   @include holguin-window;
   @include holguin-login-window;
-
-  @include holguin-app-menu;
-  @include holguin-main-window;
 
   @include holguin-generic-filter;
 }
