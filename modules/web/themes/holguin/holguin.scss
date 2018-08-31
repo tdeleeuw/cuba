@@ -20,11 +20,12 @@
 @import "app/main-window";
 @import "app/menubar";
 @import "app/generic-filter";
-@import "app/table/table";
-@import "app/table/table-paging";
 @import "app/tree";
 @import "app/window";
 @import "app/login-window";
+@import "components/table/table";
+@import "components/table/table-paging";
+@import "components/table/table-presentations";
 
 @mixin holguin {
   @include halo;
@@ -32,6 +33,7 @@
   @include holguin-menubar;
   @include holguin-table;
   @include holguin-table-paging;
+  @include holguin-table-presentations;
   @include holguin-tree;
   @include holguin-window;
   @include holguin-login-window;
