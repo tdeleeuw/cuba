@@ -17,28 +17,6 @@
 @import "holguin-defaults";
 @import "holguin";
 
-@import "app/app-menu";
-@import "app/main-window";
-@import "app/menubar";
-@import "app/generic-filter";
-@import "app/table";
-@import "app/table-paging";
-@import "app/tree";
-@import "app/window";
-@import "app/login-window";
-
 .holguin {
   @include holguin;
-
-  @include holguin-menubar;
-  @include holguin-table;
-  @include holguin-table-paging;
-  @include holguin-tree;
-  @include holguin-window;
-  @include holguin-login-window;
-
-  @include holguin-app-menu;
-  @include holguin-main-window;
-
-  @include holguin-generic-filter;
 }

@@ -16,6 +16,28 @@
 
 @import "../halo/halo";
 
+@import "app/app-menu";
+@import "app/main-window";
+@import "app/menubar";
+@import "app/generic-filter";
+@import "app/table/table";
+@import "app/table/table-paging";
+@import "app/tree";
+@import "app/window";
+@import "app/login-window";
+
 @mixin holguin {
   @include halo;
+
+  @include holguin-menubar;
+  @include holguin-table;
+  @include holguin-table-paging;
+  @include holguin-tree;
+  @include holguin-window;
+  @include holguin-login-window;
+
+  @include holguin-app-menu;
+  @include holguin-main-window;
+
+  @include holguin-generic-filter;
 }

@@ -17,6 +17,14 @@
 
  @mixin holguin-login-window {
    .c-login-form {
-     width: 300px;
+     width: 270px;
+   }
+
+   .c-login-panel {
+     padding: 10px 40px 10px 40px !important;
+   }
+
+   .c-login-locale {
+     width: 120px
    }
  }
