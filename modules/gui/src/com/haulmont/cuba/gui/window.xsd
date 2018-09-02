@@ -2619,7 +2619,6 @@
                 <xs:attribute name="src" type="xs:string"/>
 
                 <xs:attribute name="screen" type="xs:string"/>
-                <xs:attribute name="class" type="xs:string"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

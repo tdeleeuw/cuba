@@ -26,10 +26,7 @@ import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.*;
-import com.haulmont.cuba.gui.components.AbstractFrame;
-import com.haulmont.cuba.gui.components.Action;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.Frame;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.sys.EventHubOwner;
 import com.haulmont.cuba.gui.data.DataSupplier;
 import com.haulmont.cuba.gui.data.Datasource;
@@ -58,6 +55,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.lang.reflect.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -276,6 +274,14 @@ public class UiControllerDependencyInjector {
             }
             //Injecting a parameter
             return null;
+
+        } else if (ScreenFragment.class.isAssignableFrom(type)) {
+            // Injecting inner fragment controller
+            Component fragment = frame.getComponent(name);
+            if (fragment == null) {
+                return null;
+            }
+            return ((Fragment) fragment).getFrameOwner();
 
         } else if (Component.class.isAssignableFrom(type)) {
             // Injecting a UI component

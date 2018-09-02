@@ -21,13 +21,16 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
+import com.haulmont.cuba.gui.config.WindowAttributesProvider;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.config.WindowInfo;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
 import com.haulmont.cuba.gui.model.ScreenData;
+import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.sys.ScreenContextImpl;
@@ -35,8 +38,11 @@ import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.LayoutLoader;
 import com.haulmont.cuba.gui.xml.layout.ScreenXmlLoader;
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.perf4j.StopWatch;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -56,7 +62,6 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
     @Override
     public void createComponent() {
         String src = element.attributeValue("src");
-        String fragmentClass = element.attributeValue("class");
         String screenId = element.attributeValue("screen");
 
         if (element.attributeValue("id") != null) {
@@ -64,14 +69,11 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         }
 
         if (src == null
-                && screenId == null
-                && fragmentClass == null) {
-            throw new GuiDevelopmentException("Either 'src', 'class' or 'screen' must be specified for 'frame'",
+                && screenId == null) {
+            throw new GuiDevelopmentException("Either 'src' or 'screen' must be specified for 'frame'",
                     context.getFullFrameId(), "fragment", fragmentId);
         }
 
-        // todo fake WindowInfo for "src" loading
-        // todo support fragmentClass
         WindowInfo windowInfo;
         if (src == null) {
             windowInfo = getWindowConfig().getWindowInfo(screenId);
@@ -82,7 +84,7 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
                 );
             }
         } else {
-            throw new UnsupportedOperationException(); // todo
+            windowInfo = createFakeWindowInfo(src, fragmentId);
         }
 
         ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
@@ -133,6 +135,48 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         this.resultComponent = fragment;
     }
 
+    @SuppressWarnings("unchecked")
+    protected WindowInfo createFakeWindowInfo(String src, String fragmentId) {
+        Element screenElement = DocumentHelper.createElement("screen");
+        screenElement.addAttribute("template", src);
+        screenElement.addAttribute("id", fragmentId);
+
+        ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
+
+        Element windowElement = screenXmlLoader.load(src, fragmentId, Collections.emptyMap());
+        Class<? extends ScreenFragment> fragmentClass;
+
+        String className = windowElement.attributeValue("class");
+        if (StringUtils.isNotEmpty(className)) {
+            fragmentClass = (Class<? extends ScreenFragment>) getScripting().loadClassNN(className);
+        } else {
+            fragmentClass = AbstractFrame.class;
+        }
+
+        return new WindowInfo(fragmentId, new WindowAttributesProvider() {
+            @Override
+            public WindowInfo.Type getType(WindowInfo windowInfo1) {
+                return WindowInfo.Type.FRAGMENT;
+            }
+
+            @Override
+            public String getTemplate(WindowInfo windowInfo1) {
+                return src;
+            }
+
+            @Override
+            public boolean isMultiOpen(WindowInfo windowInfo1) {
+                return false;
+            }
+
+            @Nonnull
+            @Override
+            public Class<? extends FrameOwner> getControllerClass(WindowInfo windowInfo1) {
+                return fragmentClass;
+            }
+        }, screenElement);
+    }
+
     protected <T extends ScreenFragment> T createController(WindowInfo windowInfo, Fragment fragment,
                                                             Class<T> screenClass) {
         Constructor<T> constructor;
@@ -173,9 +217,11 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
             }
         }
 
-        LifeCycle.LOAD.withStopWatch(screenPath, () ->
-                fragmentLoader.loadComponent()
-        );
+        StopWatch stopWatch = LifeCycle.LOAD.createStopWatch(screenPath);
+
+        fragmentLoader.loadComponent();
+
+        stopWatch.stop();
 
         // load properties after inner context, they must override values defined inside of fragment
 

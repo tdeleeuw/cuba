@@ -30,6 +30,7 @@ import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
+import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
@@ -63,6 +64,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
                     frame.setCompanion(companion);
 
                     CompanionDependencyInjector cdi = new CompanionDependencyInjector(frame, companion);
+                    cdi.setBeanLocator(beanLocator);
                     cdi.inject();
                 } catch (Exception e) {
                     throw new RuntimeException("Unable to init companion for frame", e);
@@ -111,16 +113,21 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
     @Override
     public void loadComponent() {
-        getScreenViewsLoader().deployViews(element); // todo get rid of this in new screens
+        if (resultComponent.getFrameOwner() instanceof AbstractFrame) {
+            getScreenViewsLoader().deployViews(element);
+        }
 
         Element dsContextElement = element.element("dsContext");
 
         DsContext dsContext = null;
-        if (context.getDsContext() != null) {
-            DsContextLoader contextLoader = new DsContextLoader(context.getDsContext().getDataSupplier());
+        DsContext parentDsContext = context.getParent().getDsContext();
+        if (parentDsContext != null) {
+            DsContextLoader contextLoader = new DsContextLoader(parentDsContext.getDataSupplier());
 
             dsContext = contextLoader.loadDatasources(dsContextElement,
-                    context.getDsContext(), getContext().getAliasesMap());
+                    parentDsContext, getContext().getAliasesMap());
+
+            ((ComponentLoaderContext) context).setDsContext(dsContext);
         }
 
         assignXmlDescriptor(resultComponent, element);
@@ -179,11 +186,11 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
     }
 
     protected class FrameInjectPostInitTask implements InjectTask {
-        protected final Fragment wrappingFrame;
+        protected final Fragment fragment;
         protected final Map<String, Object> params;
 
-        public FrameInjectPostInitTask(Fragment wrappingFrame, Map<String, Object> params) {
-            this.wrappingFrame = wrappingFrame;
+        public FrameInjectPostInitTask(Fragment fragment, Map<String, Object> params) {
+            this.fragment = fragment;
             this.params = params;
         }
 
@@ -191,24 +198,23 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         public void execute(Context context, Frame window) {
             String loggingId = context.getFullFrameId();
             try {
-                if (wrappingFrame.getFrameOwner() instanceof AbstractFrame) {
+                if (fragment.getFrameOwner() instanceof AbstractFrame) {
                     Element companionsElem = element.element("companions");
                     if (companionsElem != null) {
                         StopWatch companionStopWatch = new Slf4JStopWatch(loggingId + LifeCycle.COMPANION.getSuffix(),
                                 LoggerFactory.getLogger(UIPerformanceLogger.class));
 
-                        initCompanion(companionsElem, (AbstractFrame) wrappingFrame.getFrameOwner());
+                        initCompanion(companionsElem, (AbstractFrame) fragment.getFrameOwner());
 
                         companionStopWatch.stop();
                     }
                 }
 
-                StopWatch injectStopWatch = new Slf4JStopWatch(loggingId + LifeCycle.INJECTION.getSuffix(),
-                        LoggerFactory.getLogger(UIPerformanceLogger.class));
+                StopWatch injectStopWatch = LifeCycle.INJECTION.createStopWatch(loggingId);
 
-                // todo injection
-                ControllerDependencyInjector dependencyInjector =
-                        beanLocator.getPrototype(ControllerDependencyInjector.NAME, wrappingFrame, params);
+                FrameOwner controller = fragment.getFrameOwner();
+                UiControllerDependencyInjector dependencyInjector =
+                        beanLocator.getPrototype(UiControllerDependencyInjector.NAME, controller, NO_OPTIONS);
                 dependencyInjector.inject();
 
                 injectStopWatch.stop();
@@ -231,13 +237,15 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         public void execute(Context context, Frame window) {
             String loggingId = ComponentsHelper.getFullFrameId(this.fragment);
 
-            LifeCycle.INIT.withStopWatch(loggingId, () -> {
-                ScreenFragment frameOwner = fragment.getFrameOwner();
+            StopWatch stopWatch = LifeCycle.INIT.createStopWatch(loggingId);
 
-                UiControllerUtils.fireEvent(frameOwner,
-                        ScreenFragment.InitEvent.class,
-                        new ScreenFragment.InitEvent(frameOwner, NO_OPTIONS));
-            });
+            ScreenFragment frameOwner = fragment.getFrameOwner();
+
+            UiControllerUtils.fireEvent(frameOwner,
+                    ScreenFragment.InitEvent.class,
+                    new ScreenFragment.InitEvent(frameOwner, NO_OPTIONS));
+
+            stopWatch.stop();
         }
     }
 
@@ -252,10 +260,12 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         public void execute(Context context, Frame window) {
             String loggingId = ComponentsHelper.getFullFrameId(this.frame);
 
-            LifeCycle.UI_PERMISSIONS.withStopWatch(loggingId, () -> {
-                // apply ui permissions
-                WindowCreationHelper.applyUiPermissions(this.frame);
-            });
+            StopWatch stopWatch = LifeCycle.UI_PERMISSIONS.createStopWatch(loggingId);
+
+            // apply ui permissions
+            WindowCreationHelper.applyUiPermissions(this.frame);
+
+            stopWatch.stop();
 
             FragmentLoader.this.context.executePostInitTasks();
         }
