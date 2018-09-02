@@ -16,24 +16,38 @@
  */
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
-import com.haulmont.bali.datastruct.Pair;
+import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.Frame;
+import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.config.WindowInfo;
-import com.haulmont.cuba.gui.logging.UIPerformanceLogger;
+import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
+import com.haulmont.cuba.gui.model.ScreenData;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.sys.ScreenContextImpl;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.LayoutLoader;
+import com.haulmont.cuba.gui.xml.layout.ScreenXmlLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
-import org.perf4j.StopWatch;
-import org.perf4j.slf4j.Slf4JStopWatch;
-import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+
+import static com.haulmont.cuba.gui.screen.FrameOwner.NO_OPTIONS;
 
 public class FragmentComponentLoader extends ContainerLoader<Frame> {
 
-    protected String frameId;
+    protected String fragmentId;
     protected ComponentLoader fragmentLoader;
+    protected ComponentLoaderContext innerContext;
 
     protected WindowConfig getWindowConfig() {
         return beanLocator.get(WindowConfig.NAME);
@@ -45,60 +59,101 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         String fragmentClass = element.attributeValue("class");
         String screenId = element.attributeValue("screen");
 
+        if (element.attributeValue("id") != null) {
+            fragmentId = element.attributeValue("id");
+        }
+
         if (src == null
                 && screenId == null
                 && fragmentClass == null) {
-            throw new GuiDevelopmentException("Either 'src' or 'screen' must be specified for 'frame'", context.getFullFrameId());
+            throw new GuiDevelopmentException("Either 'src', 'class' or 'screen' must be specified for 'frame'",
+                    context.getFullFrameId(), "fragment", fragmentId);
         }
 
         // todo fake WindowInfo for "src" loading
+        // todo support fragmentClass
+        WindowInfo windowInfo;
         if (src == null) {
-            WindowInfo windowInfo = getWindowConfig().getWindowInfo(screenId);
-            src = windowInfo.getTemplate();
-            if (src == null) {
+            windowInfo = getWindowConfig().getWindowInfo(screenId);
+            if (windowInfo.getTemplate() == null) {
                 throw new GuiDevelopmentException(
                         String.format("Screen %s doesn't have template path configured", screenId),
                         context.getFullFrameId()
                 );
             }
+        } else {
+            throw new UnsupportedOperationException(); // todo
         }
 
-        if (element.attributeValue("id") != null) {
-            frameId = element.attributeValue("id");
+        ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
+
+        Element windowElement = screenXmlLoader.load(windowInfo.getTemplate(), windowInfo.getId(),
+                Collections.emptyMap()); // todo pass params
+
+        Fragment fragment = factory.createComponent(Fragment.NAME);
+        ScreenFragment controller = createController(windowInfo, fragment, windowInfo.asFragment());
+
+        // setup screen and controller
+
+        UiControllerUtils.setWindowId(controller, windowInfo.getId());
+        UiControllerUtils.setFrame(controller, fragment);
+        UiControllerUtils.setScreenContext(controller,
+                new ScreenContextImpl(windowInfo, NO_OPTIONS,
+                        beanLocator.get(Screens.NAME),
+                        beanLocator.get(Dialogs.NAME),
+                        beanLocator.get(Notifications.NAME))
+        );
+        UiControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
+
+        FragmentImplementation fragmentImpl = (FragmentImplementation) fragment;
+        fragmentImpl.setFrameOwner(controller);
+        fragmentImpl.setId(controller.getId());
+
+        // load from XML
+
+        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
+
+        String frameId = fragmentId;
+        if (parentContext.getFullFrameId() != null) {
+            frameId = parentContext.getFullFrameId() + "." + frameId;
         }
 
-        LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, context);
+        innerContext = new ComponentLoaderContext(context.getParams());
+        innerContext.setCurrentFrameId(fragmentId);
+        innerContext.setFullFrameId(frameId);
+        innerContext.setFrame(fragment);
+        innerContext.setParent(parentContext);
+
+        LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, innerContext);
         layoutLoader.setLocale(getLocale());
-        layoutLoader.setMessagesPack(getMessagesPack());
+        layoutLoader.setMessagesPack(getMessagesPack()); // todo set by template or controller
 
-        String currentFrameId = context.getCurrentFrameId();
-        context.setCurrentFrameId(frameId);
+        this.fragmentLoader = layoutLoader.createFragmentContent(fragment, windowElement, fragmentId);
+
+        this.resultComponent = fragment;
+    }
+
+    protected <T extends ScreenFragment> T createController(WindowInfo windowInfo, Fragment fragment,
+                                                            Class<T> screenClass) {
+        Constructor<T> constructor;
         try {
-            Pair<ComponentLoader, Element> loaderElementPair = layoutLoader.createFrameComponent(src, frameId, context.getParams());
-            fragmentLoader = loaderElementPair.getFirst();
-            resultComponent = (Frame) fragmentLoader.getResultComponent();
-        } finally {
-            context.setCurrentFrameId(currentFrameId);
+            constructor = screenClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new DevelopmentException("No accessible constructor for screen class " + screenClass);
         }
+
+        T controller;
+        try {
+            controller = constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Unable to create instance of screen class " + screenClass);
+        }
+
+        return controller;
     }
 
     @Override
     public void loadComponent() {
-        assignXmlDescriptor(resultComponent, element);
-        loadVisible(resultComponent, element);
-
-        loadStyleName(resultComponent, element);
-        loadResponsive(resultComponent, element);
-
-        loadAlign(resultComponent, element);
-
-        loadHeight(resultComponent, element);
-        loadWidth(resultComponent, element);
-
-        loadIcon(resultComponent, element);
-        loadCaption(resultComponent, element);
-        loadDescription(resultComponent, element);
-
         loadAliases();
 
         if (context.getFrame() != null) {
@@ -118,24 +173,40 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
             }
         }
 
-        StopWatch loadDescriptorWatch = new Slf4JStopWatch(screenPath + "#" +
-                UIPerformanceLogger.LifeCycle.LOAD,
-                LoggerFactory.getLogger(UIPerformanceLogger.class));
-        loadDescriptorWatch.start();
+        LifeCycle.LOAD.withStopWatch(screenPath, () ->
+                fragmentLoader.loadComponent()
+        );
 
-        String currentFrameId = context.getCurrentFrameId();
-        try {
-            context.setCurrentFrameId(frameId);
-            fragmentLoader.loadComponent();
-        } finally {
-            context.setCurrentFrameId(currentFrameId);
-            loadDescriptorWatch.stop();
-        }
+        // load properties after inner context, they must override values defined inside of fragment
+
+        assignXmlDescriptor(resultComponent, element);
+        loadVisible(resultComponent, element);
+        loadEnable(resultComponent, element);
+
+        loadStyleName(resultComponent, element);
+        loadResponsive(resultComponent, element);
+
+        loadAlign(resultComponent, element);
+
+        loadHeight(resultComponent, element);
+        loadWidth(resultComponent, element);
+
+        loadIcon(resultComponent, element);
+        loadCaption(resultComponent, element);
+        loadDescription(resultComponent, element);
+
+        // propagate init phases
+
+        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
+
+        parentContext.getInjectTasks().addAll(innerContext.getInjectTasks());
+        parentContext.getInitTasks().addAll(innerContext.getInitTasks());
+        parentContext.getPostInitTasks().addAll(innerContext.getPostInitTasks());
     }
 
     protected void loadAliases() {
         if (fragmentLoader instanceof FragmentLoader) {
-            ComponentLoaderContext frameLoaderInnerContext = ((FragmentLoader) fragmentLoader).getInnerContext();
+            ComponentLoaderContext frameLoaderInnerContext = (ComponentLoaderContext) fragmentLoader.getContext();
             for (Element aliasElement : element.elements("dsAlias")) {
                 String aliasDatasourceId = aliasElement.attributeValue("alias");
                 String originalDatasourceId = aliasElement.attributeValue("datasource");

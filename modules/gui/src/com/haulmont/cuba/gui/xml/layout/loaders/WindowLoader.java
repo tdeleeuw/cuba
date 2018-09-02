@@ -65,8 +65,6 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
 
     @Override
     public void loadComponent() {
-        context.setFrame(resultComponent);
-
         loadScreenData(resultComponent, element);
 
         loadDialogOptions(resultComponent, element);

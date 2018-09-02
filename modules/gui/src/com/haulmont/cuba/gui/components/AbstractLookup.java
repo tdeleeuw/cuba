@@ -73,7 +73,7 @@ public class AbstractLookup extends AbstractWindow implements Lookup {
 
     @Override
     public void initLookupLayout() {
-        Action selectAction = getAction(Window.Lookup.LOOKUP_SELECT_ACTION_ID);
+        Action selectAction = getAction(LOOKUP_SELECT_ACTION_ID);
 
         if (selectAction != null && selectAction.getOwner() == null) {
             // todo load `lookupWindowActions` here and insert at the end of layout
@@ -83,6 +83,8 @@ public class AbstractLookup extends AbstractWindow implements Lookup {
             Button selectBtn = componentsFactory.createComponent(Button.NAME);
             selectBtn.setAction(selectAction);
             getFrame().add(selectBtn);
+
+            selectAction.setVisible(false);
         }
 
         Element element = ((Component.HasXmlDescriptor) getFrame()).getXmlDescriptor();
@@ -111,5 +113,11 @@ public class AbstractLookup extends AbstractWindow implements Lookup {
     @Override
     public void setSelectHandler(Consumer lookupHandler) {
         this.lookupHandler = lookupHandler;
+
+        if (lookupHandler != null) {
+            // todo here we should show lookup actions frame
+            Action selectAction = getAction(LOOKUP_SELECT_ACTION_ID);
+            selectAction.setVisible(true);
+        }
     }
 }

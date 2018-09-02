@@ -18,6 +18,7 @@ package com.haulmont.cuba.gui.config;
 
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
 import org.dom4j.Element;
 
 import javax.annotation.Nonnull;
@@ -83,10 +84,20 @@ public class WindowInfo {
     public Class<? extends Screen> asScreen() {
         Class<? extends FrameOwner> controllerClass = getControllerClass();
         if (!Screen.class.isAssignableFrom(controllerClass)) {
-            throw new IllegalStateException("WindowInfo is not Screen " + this.toString());
+            throw new IllegalStateException("WindowInfo is not Screen - " + this.toString());
         }
 
         return (Class<? extends Screen>) controllerClass;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends ScreenFragment> asFragment() {
+        Class<? extends FrameOwner> controllerClass = getControllerClass();
+        if (!ScreenFragment.class.isAssignableFrom(controllerClass)) {
+            throw new IllegalStateException("WindowInfo is not ScreenFragment - " + this.toString());
+        }
+
+        return (Class<? extends ScreenFragment>) controllerClass;
     }
 
     /**

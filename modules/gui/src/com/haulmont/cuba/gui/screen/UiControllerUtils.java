@@ -17,6 +17,7 @@
 package com.haulmont.cuba.gui.screen;
 
 import com.haulmont.bali.events.EventHub;
+import com.haulmont.cuba.gui.components.Fragment;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.model.ScreenData;
@@ -28,16 +29,28 @@ import com.haulmont.cuba.gui.util.OperationResult;
  */
 public final class UiControllerUtils {
 
-    public static void setWindowId(Screen screen, String id) {
-        screen.setId(id);
+    public static void setWindowId(FrameOwner screen, String id) {
+        if (screen instanceof Screen) {
+            ((Screen) screen).setId(id);
+        } else if (screen instanceof ScreenFragment) {
+            ((ScreenFragment) screen).setId(id);
+        }
     }
 
-    public static void setWindow(Screen screen, Window window) {
-        screen.setWindow(window);
+    public static void setFrame(FrameOwner screen, Frame window) {
+        if (screen instanceof Screen) {
+            ((Screen) screen).setWindow((Window) window);
+        } else if (screen instanceof ScreenFragment) {
+            ((ScreenFragment) screen).setFragment((Fragment) window);
+        }
     }
 
-    public static <E> void fireEvent(Screen screen, Class<E> eventType, E event) {
-        screen.fireEvent(eventType, event);
+    public static <E> void fireEvent(FrameOwner screen, Class<E> eventType, E event) {
+        if (screen instanceof Screen) {
+            ((Screen) screen).fireEvent(eventType, event);
+        } else if (screen instanceof ScreenFragment) {
+            ((ScreenFragment) screen).fireEvent(eventType, event);
+        }
     }
 
     public static EventHub getEventHub(FrameOwner frameOwner) {
@@ -47,8 +60,12 @@ public final class UiControllerUtils {
         return ((ScreenFragment) frameOwner).getEventHub();
     }
 
-    public static void setScreenContext(Screen screen, ScreenContext screenContext) {
-        screen.setScreenContext(screenContext);
+    public static void setScreenContext(FrameOwner screen, ScreenContext screenContext) {
+        if (screen instanceof Screen) {
+            ((Screen) screen).setScreenContext(screenContext);
+        } else if (screen instanceof ScreenFragment) {
+            ((ScreenFragment) screen).setScreenContext(screenContext);
+        }
     }
 
     public static ScreenContext getScreenContext(FrameOwner frameOwner) {
@@ -58,8 +75,12 @@ public final class UiControllerUtils {
         return ((ScreenFragment) frameOwner).getScreenContext();
     }
 
-    public static void setScreenData(Screen screen, ScreenData screenData) {
-        screen.setScreenData(screenData);
+    public static void setScreenData(FrameOwner screen, ScreenData screenData) {
+        if (screen instanceof Screen) {
+            ((Screen) screen).setScreenData(screenData);
+        } else if (screen instanceof ScreenFragment) {
+            ((ScreenFragment) screen).setScreenData(screenData);
+        }
     }
 
     public static void applySettings(Screen screen, Settings settings) {

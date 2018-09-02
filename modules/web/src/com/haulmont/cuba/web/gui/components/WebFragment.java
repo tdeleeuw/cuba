@@ -20,7 +20,7 @@ import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.FrameContext;
 import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.sys.FrameImplementation;
+import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import org.slf4j.Logger;
@@ -34,7 +34,7 @@ import java.util.Map;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
 
-public class WebFragment extends WebVBoxLayout implements Fragment, FrameImplementation {
+public class WebFragment extends WebVBoxLayout implements Fragment, FragmentImplementation {
 
     private static final Logger log = LoggerFactory.getLogger(WebFragment.class);
 
@@ -210,5 +210,10 @@ public class WebFragment extends WebVBoxLayout implements Fragment, FrameImpleme
     @Override
     public Action getAction(String id) {
         return actionsHolder.getAction(id);
+    }
+
+    @Override
+    public void setFrameOwner(ScreenFragment controller) {
+        this.frameOwner = controller;
     }
 }

@@ -146,13 +146,13 @@ public class LayoutLoader {
         return loader;
     }
 
-    public ComponentLoader<Fragment> createFragmentContent(Fragment fragment, Element element, String fragmentId) {
-        FragmentLoader fragmentLoader = getFragmentLoader(element);
+    public ComponentLoader<Fragment> createFragmentContent(Fragment fragment, Element rootWindowElement, String fragmentId) {
+        FragmentLoader fragmentLoader = getFragmentLoader(rootWindowElement);
 
         fragmentLoader.setFrameId(fragmentId);
         fragmentLoader.setResultComponent(fragment);
 
-        Element layout = element.element("layout");
+        Element layout = rootWindowElement.element("layout");
         if (layout != null) {
             fragmentLoader.createContent(layout);
         }
@@ -160,13 +160,13 @@ public class LayoutLoader {
         return fragmentLoader;
     }
 
-    public ComponentLoader<Window> createWindowContent(Window window, Element element, String windowId) {
-        WindowLoader windowLoader = getWindowLoader(element);
+    public ComponentLoader<Window> createWindowContent(Window window, Element rootWindowElement, String windowId) {
+        WindowLoader windowLoader = getWindowLoader(rootWindowElement);
 
         windowLoader.setWindowId(windowId);
         windowLoader.setResultComponent(window);
 
-        Element layout = element.element("layout");
+        Element layout = rootWindowElement.element("layout");
         if (layout != null) {
             windowLoader.createContent(layout);
         }

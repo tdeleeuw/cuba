@@ -17,6 +17,10 @@
 
 package com.haulmont.cuba.gui.logging;
 
+import org.perf4j.StopWatch;
+import org.perf4j.slf4j.Slf4JStopWatch;
+import org.slf4j.LoggerFactory;
+
 /**
  * Logger class for UI performance stats.
  * Contains constants for screen life cycle.
@@ -55,6 +59,19 @@ public final class UIPerformanceLogger {
 
         public String getSuffix() {
             return suffix;
+        }
+
+        public StopWatch createStopWatch(String loggingId) {
+            return new Slf4JStopWatch(loggingId + getSuffix(), LoggerFactory.getLogger(UIPerformanceLogger.class));
+        }
+
+        public void withStopWatch(String loggingId, Runnable runnable) {
+            StopWatch sw = createStopWatch(loggingId);
+            try {
+                runnable.run();
+            } finally {
+                sw.stop();
+            }
         }
     }
 }

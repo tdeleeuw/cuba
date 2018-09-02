@@ -29,6 +29,9 @@ import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger;
+import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.sys.*;
 import com.haulmont.cuba.gui.xml.data.DsContextLoader;
@@ -41,20 +44,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
+import static com.haulmont.cuba.gui.screen.FrameOwner.NO_OPTIONS;
+
 public class FragmentLoader extends ContainerLoader<Fragment> implements ComponentRootLoader<Fragment> {
 
-    protected ComponentLoaderContext innerContext;
-
     protected String frameId;
-
-    protected void initWrapperFrame(Frame wrappingFrame, Element rootFrameElement, Map<String, Object> params,
-                                    ComponentLoaderContext parentContext) {
-        parentContext.addInjectTask(new FrameInjectPostInitTask(wrappingFrame, params));
-
-        boolean wrapped = StringUtils.isNotBlank(rootFrameElement.attributeValue("class"));
-        parentContext.addInitTask(new FrameLoaderInitTask(wrappingFrame, params, wrapped));
-        parentContext.addPostInitTask(new FrameLoaderPostInitTask(wrappingFrame, params, wrapped));
-    }
 
     protected void initCompanion(Element companionsElem, AbstractFrame frame) {
         String clientTypeId = AppConfig.getClientType().toString().toLowerCase();
@@ -92,31 +86,15 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
     @Override
     public void createComponent() {
-        Fragment clientSpecificFrame = factory.createComponent(Fragment.NAME);
-        clientSpecificFrame.setId(frameId);
+        Fragment fragment = factory.createComponent(Fragment.NAME);
+        fragment.setId(frameId);
 
-        loadMessagesPack(clientSpecificFrame, element);
-
-        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
-
-        String frameId = parentContext.getCurrentFrameId();
-        if (parentContext.getFullFrameId() != null) {
-            frameId = parentContext.getFullFrameId() + "." + frameId;
-        }
-
-        innerContext = new ComponentLoaderContext(context.getParams());
-        innerContext.setCurrentFrameId(parentContext.getCurrentFrameId());
-        innerContext.setFullFrameId(frameId);
-        innerContext.setFrame(clientSpecificFrame);
-        innerContext.setParent(parentContext);
-        setContext(innerContext);
+        loadMessagesPack(fragment, element);
 
         Element layoutElement = element.element("layout");
         createContent(layoutElement);
 
-        setContext(parentContext);
-
-        resultComponent = clientSpecificFrame;
+        resultComponent = fragment;
     }
 
     public void setResultComponent(Fragment fragment) {
@@ -136,10 +114,14 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         getScreenViewsLoader().deployViews(element); // todo get rid of this in new screens
 
         Element dsContextElement = element.element("dsContext");
-        DsContextLoader contextLoader = new DsContextLoader(context.getDsContext().getDataSupplier());
 
-        DsContext dsContext = contextLoader.loadDatasources(dsContextElement,
-                context.getDsContext(), innerContext.getAliasesMap());
+        DsContext dsContext = null;
+        if (context.getDsContext() != null) {
+            DsContextLoader contextLoader = new DsContextLoader(context.getDsContext().getDataSupplier());
+
+            dsContext = contextLoader.loadDatasources(dsContextElement,
+                    context.getDsContext(), getContext().getAliasesMap());
+        }
 
         assignXmlDescriptor(resultComponent, element);
 
@@ -148,7 +130,12 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
             throw new GuiDevelopmentException("Required 'layout' element is not found", context.getFullFrameId());
         }
 
+        loadIcon(resultComponent, layoutElement);
+        loadCaption(resultComponent, layoutElement);
+        loadDescription(resultComponent, layoutElement);
+
         loadVisible(resultComponent, layoutElement);
+        loadEnable(resultComponent, layoutElement);
         loadActions(resultComponent, element);
 
         loadSpacing(resultComponent, layoutElement);
@@ -158,10 +145,7 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         loadStyleName(resultComponent, layoutElement);
         loadResponsive(resultComponent, layoutElement);
 
-        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
-        setContext(innerContext);
-
-        FrameContext frameContext = new FrameContextImpl(resultComponent, context.getParams());
+        FrameContext frameContext = new FrameContextImpl(resultComponent, context.getParams()); // todo with options
         ((FrameImplementation) resultComponent).setContext(frameContext);
 
         if (dsContext != null) {
@@ -176,17 +160,14 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
             dsContext.setFrameContext(frameContext);
         }
 
-        innerContext.setDsContext(dsContext);
-
         loadSubComponentsAndExpand(resultComponent, layoutElement);
 
-        initWrapperFrame(resultComponent, element, parentContext.getParams(), parentContext);
+        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext().getParent();
+        Map<String, Object> params = parentContext.getParams();
 
-        parentContext.getInjectTasks().addAll(innerContext.getInjectTasks());
-        parentContext.getInitTasks().addAll(innerContext.getInitTasks());
-        parentContext.getPostInitTasks().addAll(innerContext.getPostInitTasks());
-
-        setContext(parentContext);
+        parentContext.addInjectTask(new FrameInjectPostInitTask(resultComponent, params));
+        parentContext.addInitTask(new FrameLoaderInitTask(resultComponent, params));
+        parentContext.addPostInitTask(new FrameLoaderPostInitTask(resultComponent));
     }
 
     public String getFrameId() {
@@ -198,10 +179,10 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
     }
 
     protected class FrameInjectPostInitTask implements InjectTask {
-        protected final Frame wrappingFrame;
+        protected final Fragment wrappingFrame;
         protected final Map<String, Object> params;
 
-        public FrameInjectPostInitTask(Frame wrappingFrame, Map<String, Object> params) {
+        public FrameInjectPostInitTask(Fragment wrappingFrame, Map<String, Object> params) {
             this.wrappingFrame = wrappingFrame;
             this.params = params;
         }
@@ -210,23 +191,22 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         public void execute(Context context, Frame window) {
             String loggingId = context.getFullFrameId();
             try {
-                if (wrappingFrame instanceof AbstractFrame) {
+                if (wrappingFrame.getFrameOwner() instanceof AbstractFrame) {
                     Element companionsElem = element.element("companions");
                     if (companionsElem != null) {
-                        StopWatch companionStopWatch = new Slf4JStopWatch(loggingId + "#" +
-                                UIPerformanceLogger.LifeCycle.COMPANION,
+                        StopWatch companionStopWatch = new Slf4JStopWatch(loggingId + LifeCycle.COMPANION.getSuffix(),
                                 LoggerFactory.getLogger(UIPerformanceLogger.class));
 
-                        initCompanion(companionsElem, (AbstractFrame) wrappingFrame);
+                        initCompanion(companionsElem, (AbstractFrame) wrappingFrame.getFrameOwner());
 
                         companionStopWatch.stop();
                     }
                 }
 
-                StopWatch injectStopWatch = new Slf4JStopWatch(loggingId + "#" +
-                        UIPerformanceLogger.LifeCycle.INJECTION,
+                StopWatch injectStopWatch = new Slf4JStopWatch(loggingId + LifeCycle.INJECTION.getSuffix(),
                         LoggerFactory.getLogger(UIPerformanceLogger.class));
 
+                // todo injection
                 ControllerDependencyInjector dependencyInjector =
                         beanLocator.getPrototype(ControllerDependencyInjector.NAME, wrappingFrame, params);
                 dependencyInjector.inject();
@@ -239,66 +219,45 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
     }
 
     protected class FrameLoaderInitTask implements InitTask {
-        protected final Frame frame;
+        protected final Fragment fragment;
         protected final Map<String, Object> params;
-        protected final boolean wrapped;
 
-        public FrameLoaderInitTask(Frame frame, Map<String, Object> params, boolean wrapped) {
-            this.frame = frame;
+        public FrameLoaderInitTask(Fragment fragment, Map<String, Object> params) {
+            this.fragment = fragment;
             this.params = params;
-            this.wrapped = wrapped;
         }
 
         @Override
         public void execute(Context context, Frame window) {
-            if (wrapped) {
-                String loggingId = ComponentsHelper.getFullFrameId(this.frame);
+            String loggingId = ComponentsHelper.getFullFrameId(this.fragment);
 
-                if (this.frame instanceof AbstractFrame) {
-                    StopWatch initStopWatch = new Slf4JStopWatch(loggingId + "#" +
-                            UIPerformanceLogger.LifeCycle.INIT,
-                            LoggerFactory.getLogger(UIPerformanceLogger.class));
+            LifeCycle.INIT.withStopWatch(loggingId, () -> {
+                ScreenFragment frameOwner = fragment.getFrameOwner();
 
-                    // todo post Event here instead
-//                    ((AbstractFrame) this.frame).init(params);
-
-                    initStopWatch.stop();
-                }
-            }
+                UiControllerUtils.fireEvent(frameOwner,
+                        ScreenFragment.InitEvent.class,
+                        new ScreenFragment.InitEvent(frameOwner, NO_OPTIONS));
+            });
         }
     }
 
     protected class FrameLoaderPostInitTask implements PostInitTask {
         protected final Frame frame;
-        protected final Map<String, Object> params;
-        protected final boolean wrapped;
 
-        public FrameLoaderPostInitTask(Frame frame, Map<String, Object> params, boolean wrapped) {
+        public FrameLoaderPostInitTask(Frame frame) {
             this.frame = frame;
-            this.params = params;
-            this.wrapped = wrapped;
         }
 
         @Override
         public void execute(Context context, Frame window) {
-            if (wrapped) {
-                String loggingId = ComponentsHelper.getFullFrameId(this.frame);
+            String loggingId = ComponentsHelper.getFullFrameId(this.frame);
 
-                StopWatch uiPermissionsWatch = new Slf4JStopWatch(loggingId + "#" +
-                        UIPerformanceLogger.LifeCycle.UI_PERMISSIONS,
-                        LoggerFactory.getLogger(UIPerformanceLogger.class));
-
+            LifeCycle.UI_PERMISSIONS.withStopWatch(loggingId, () -> {
                 // apply ui permissions
-                WindowCreationHelper.applyUiPermissions(window);
+                WindowCreationHelper.applyUiPermissions(this.frame);
+            });
 
-                uiPermissionsWatch.stop();
-
-                FragmentLoader.this.context.executePostInitTasks();
-            }
+            FragmentLoader.this.context.executePostInitTasks();
         }
-    }
-
-    public ComponentLoaderContext getInnerContext() {
-        return innerContext;
     }
 }

@@ -25,6 +25,7 @@ import com.haulmont.cuba.core.global.Resources;
 import com.haulmont.cuba.core.global.Scripting;
 import com.haulmont.cuba.core.sys.AppContext;
 import com.haulmont.cuba.gui.NoSuchScreenException;
+import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.sys.ScreenDescriptorUtils;
@@ -133,7 +134,8 @@ public class WindowConfig {
             }
 
             if (Strings.isNullOrEmpty(className)) {
-                throw new IllegalStateException("Window descriptor does not declare class attribute");
+                // fallback for legacy frames
+                return AbstractFrame.class;
             }
 
             return (Class<? extends FrameOwner>) scripting.loadClassNN(className);

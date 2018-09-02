@@ -59,6 +59,13 @@ public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, Lega
     }
 
     @Override
+    protected void setFragment(Fragment fragment) {
+        super.setFragment(fragment);
+
+        this.frame = fragment;
+    }
+
+    @Override
     public WindowManager getWindowManager() {
         return windowManager;
     }
@@ -99,13 +106,8 @@ public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, Lega
     }
 
     @Override
-    public String getId() {
-        return frame.getId();
-    }
-
-    @Override
     public void setId(String id) {
-        frame.setId(id);
+        super.setId(id);
     }
 
     @Override

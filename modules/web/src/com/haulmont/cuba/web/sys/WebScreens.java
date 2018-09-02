@@ -16,7 +16,6 @@
  */
 package com.haulmont.cuba.web.sys;
 
-import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.bali.util.ReflectionHelper;
 import com.haulmont.cuba.client.ClientConfig;
@@ -187,12 +186,10 @@ public class WebScreens implements Screens, WindowManager {
 
         Window window = createWindow(windowInfo, resolvedScreenClass, launchMode);
 
-        ui.beforeTopLevelWindowInit();
-
         T controller = createController(windowInfo, window, resolvedScreenClass, launchMode);
 
         UiControllerUtils.setWindowId(controller, windowInfo.getId());
-        UiControllerUtils.setWindow(controller, window);
+        UiControllerUtils.setFrame(controller, window);
         UiControllerUtils.setScreenContext(controller,
                 new ScreenContextImpl(windowInfo, options, this, dialogs, notifications)
         );
@@ -205,14 +202,23 @@ public class WebScreens implements Screens, WindowManager {
         WindowContext windowContext = new WindowContextImpl(window, launchMode, options);
         ((WindowImplementation) window).setContext(windowContext);
 
-        loadScreenXml(windowInfo, window, controller, options);
+        ComponentLoaderContext componentLoaderContext = loadScreenXml(windowInfo, window, controller, options);
 
         UiControllerDependencyInjector dependencyInjector =
                 beanLocator.getPrototype(UiControllerDependencyInjector.NAME, controller, options);
         dependencyInjector.inject();
 
+        if (componentLoaderContext != null) {
+            componentLoaderContext.executeInjectTasks();
+        }
+
         InitEvent initEvent = new InitEvent(controller, options);
         UiControllerUtils.fireEvent(controller, InitEvent.class, initEvent);
+
+        if (componentLoaderContext != null) {
+            componentLoaderContext.executeInitTasks();
+            componentLoaderContext.executePostInitTasks();
+        }
 
         AfterInitEvent afterInitEvent = new AfterInitEvent(controller, options);
         UiControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
@@ -220,13 +226,12 @@ public class WebScreens implements Screens, WindowManager {
         return controller;
     }
 
-    protected <T extends Screen> void loadScreenXml(WindowInfo windowInfo, Window window, T controller,
-                                                    ScreenOptions options) {
+    @Nullable
+    protected <T extends Screen> ComponentLoaderContext loadScreenXml(WindowInfo windowInfo, Window window, T controller,
+                                                                      ScreenOptions options) {
         String templatePath = windowInfo.getTemplate();
 
         if (StringUtils.isNotEmpty(templatePath)) {
-            // todo support relative design path
-
             Map<String, Object> params = Collections.emptyMap();
             if (options instanceof MapScreenOptions) {
                 params = ((MapScreenOptions) options).getParams();
@@ -254,13 +259,10 @@ public class WebScreens implements Screens, WindowManager {
 
             windowLoader.loadComponent();
 
-            if (!componentLoaderContext.getPostInitTasks().isEmpty()) {
-                EventHub eventHub = UiControllerUtils.getEventHub(controller);
-                eventHub.subscribe(AfterInitEvent.class, event ->
-                        componentLoaderContext.executePostInitTasks()
-                );
-            }
+            return componentLoaderContext;
         }
+
+        return null;
     }
 
     protected  <T extends Screen> void initDsContext(Window window, Element element,

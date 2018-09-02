@@ -61,12 +61,10 @@ import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 public class WebExternalUIComponentsSource implements ExternalUIComponentsSource {
 
     protected static final String WINDOW_LOADER_EL = "windowLoader";
-    protected static final String FRAME_LOADER_EL = "fragmentLoader";
     protected static final String FRAGMENT_LOADER_EL = "fragmentLoader";
 
     protected static final Map<String, Class<? extends ComponentLoader>> loaders = ImmutableMap.of(
             WINDOW_LOADER_EL, WindowLoader.class,
-            FRAME_LOADER_EL, FragmentLoader.class,
             FRAGMENT_LOADER_EL, FragmentLoader.class
     );
 
@@ -203,13 +201,8 @@ public class WebExternalUIComponentsSource implements ExternalUIComponentsSource
             layoutLoaderConfig.registerWindowLoader(windowLoader);
         }
 
-        Class frameLoader = loadWindowLoader(rootElement, FRAME_LOADER_EL);
-        if (frameLoader != null) {
-            layoutLoaderConfig.registerFragmentLoader(frameLoader);
-        }
-
         Class fragmentLoader = loadWindowLoader(rootElement, FRAGMENT_LOADER_EL);
-        if (frameLoader != null) {
+        if (fragmentLoader != null) {
             layoutLoaderConfig.registerFragmentLoader(fragmentLoader);
         }
     }
@@ -224,7 +217,6 @@ public class WebExternalUIComponentsSource implements ExternalUIComponentsSource
         Class clazz = scripting.loadClassNN(loaderClass);
 
         if (loaders.get(loaderElem).isAssignableFrom(clazz)) {
-            //noinspection unchecked
             return clazz;
         }
 
