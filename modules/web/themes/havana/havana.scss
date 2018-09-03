@@ -25,6 +25,7 @@
 @import "app/login-window";
 @import "app/notifications";
 @import "app/contextmenu";
+@import "app/entity-inspector-browse";
 @import "components/table/table";
 @import "components/table/table-paging";
 @import "components/table/table-presentations";
@@ -48,4 +49,6 @@
   @include havana-login-window;
 
   @include havana-generic-filter;
+
+  @include cuba-entity-inspector-browse;
 }
