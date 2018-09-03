@@ -23,6 +23,7 @@
 @import "app/tree";
 @import "app/window";
 @import "app/login-window";
+@import "app/notifications";
 @import "components/table/table";
 @import "components/table/table-paging";
 @import "components/table/table-presentations";
@@ -38,6 +39,7 @@
   @include holguin-tree;
   @include holguin-app-menu;
   @include holguin-menubar;
+  @include holguin-notification;
 
   @include holguin-main-window;
   @include holguin-window;

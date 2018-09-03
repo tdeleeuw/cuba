@@ -22,6 +22,10 @@ $v-layout-margin-left: 5px;
 $v-layout-margin-right: 5px;
 $v-layout-margin-bottom: 5px;
 
+$v-font-size--h1: 20px;
+$v-font-size--h2: 16px;
+$v-font-size--h3: 14px;
+
 $v-table-row-height: 25px;
 $v-table-header-font-size: 12px;
 
@@ -34,6 +38,7 @@ $cuba-table-text-color: #1e1e0d !default;
 $cuba-datagrid-highlight-hover-row: true;
 
 $cuba-window-header-color: #2b4666 !default;
+$cuba-window-modal-header-font-weight: 700;
 
 $v-selection-color: rgb(77, 122, 178);
 $v-selection-item-selection-color: #4D7AB2;
