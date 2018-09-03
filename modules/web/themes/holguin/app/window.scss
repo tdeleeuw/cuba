@@ -27,22 +27,15 @@
        color: #ffffff;
      }
 
+     .#{$primary-stylename}-maximizebox,
+     .#{$primary-stylename}-restorebox,
      .#{$primary-stylename}-closebox {
        color: #ffffff;
      }
 
-     .#{$primary-stylename}-closebox:hover {
-       color: #cc3301;
-       text-shadow: black 1px 1px;
-     }
-
-     .#{$primary-stylename}-maximizebox,
-     .#{$primary-stylename}-restorebox {
-       color: #ffffff;
-     }
-
      .#{$primary-stylename}-maximizebox:hover,
-     .#{$primary-stylename}-restorebox:hover {
+     .#{$primary-stylename}-restorebox:hover,
+     .#{$primary-stylename}-closebox:hover {
        color: #cc3301;
        text-shadow: black 1px 1px;
      }

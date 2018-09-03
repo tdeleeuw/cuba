@@ -105,4 +105,16 @@ $v-notification-border-radius: 3px !default;
      margin: 8px 10px 5px;
    }
  }
+
+ .#{$primary-stylename}.system {
+   background-color: #ff0a0a;
+   color: #ffffff;
+   filter: alpha(opacity=70);
+   max-width:100%;
+   opacity: 0.7;
+
+   u {
+    text-decoration: underline;
+   }
+ }
 }
