@@ -102,7 +102,7 @@
         <property name="cuba.web.widgetSet" value="com.haulmont.cuba.web.widgets.WidgetSet"/>
         <property name="cuba.web.componentsConfig" value=""/>
         <property name="cuba.themeConfig"
-                  value="havana-theme.properties halo-theme.properties hover-theme.properties holguin-theme.properties"/>
+                  value="halo-theme.properties hover-theme.properties holguin-theme.properties"/>
 
         <property name="cuba.dispatcherBaseUrl" value="http://${cuba.webHostName}:${cuba.webPort}/${cuba.webContextName}/dispatch"/>
         <property name="cuba.useLocalServiceInvocation" value="true"/>

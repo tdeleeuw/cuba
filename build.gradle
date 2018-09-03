@@ -740,18 +740,18 @@ configure(webModule) {
         exclude '**/web.xml'
     }
 
-    task buildHavana(type: CubaWebScssThemeCreation) {
-        themes = ['havana']
-//        compress = true
-//        sprites = true
-//        cleanup = true
-    }
+//    task buildHavana(type: CubaWebScssThemeCreation) {
+//        themes = ['havana']
+////        compress = true
+////        sprites = true
+////        cleanup = true
+//    }
 
-    task deployHavana(type: Copy, dependsOn: buildHavana) {
-        from file("$webModule.buildDir/web/VAADIN/themes/havana")
-        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/havana"
-        exclude '**/web.xml'
-    }
+//    task deployHavana(type: Copy, dependsOn: buildHavana) {
+//        from file("$webModule.buildDir/web/VAADIN/themes/havana")
+//        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/havana"
+//        exclude '**/web.xml'
+//    }
 
     def webOutDir = file("$buildDir/web")
     task webArchive(dependsOn: buildScssThemes, type: Zip) {
