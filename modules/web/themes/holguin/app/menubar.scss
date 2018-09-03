@@ -19,8 +19,15 @@
 
   .#{$primary-stylename} {
     .#{$primary-stylename}-menuitem {
-     text-shadow: black 1px 1px;
+      text-shadow: black 1px 1px;
+      outline: none;
     }
+  }
+
+  .#{$primary-stylename}-submenu .#{$primary-stylename}-separator span {
+    background: $cuba-menubar-text-color;
+    border-top: 3px solid $cuba-menubar-background-color;
+    border-bottom: $cuba-menubar-background-color;
   }
 
   .#{$primary-stylename}-popup.c-main-menu-popup {
@@ -34,6 +41,35 @@
 
     .#{$primary-stylename}-menuitem {
       text-shadow: black 1px 1px;
+      outline: none;
+    }
+  }
+
+  .c-main-menu.#{$primary-stylename}-submenu {
+    outline: solid 2px #506d8d;
+    margin: -2px -2px;
+    background-color: $cuba-menubar-background-color;
+    color: $main-menu-popup-text-color;
+
+   .#{$primary-stylename}-menuitem {
+    text-shadow: black 1px 1px;
+    outline: none;
+   }
+  }
+
+  .v-ie11 & {
+
+    .c-main-menu.#{$primary-stylename}-submenu .#{$primary-stylename}-menuitem-selected {
+      background: $v-selection-item-selection-color;
+    }
+
+    .c-main-menu.v-menubar-submenu .v-menubar-menuitem-selected .v-menubar-submenu-indicator,
+    .c-main-menu.v-menubar-submenu .v-menubar-menuitem-selected .v-menubar-menuitem-shortcut {
+      border-left: solid 1px transparent;
+    }
+
+    .c-main-menu.v-menubar-submenu .v-menubar-menuitem-selected .v-menubar-menuitem-caption {
+      border-right: solid 1px transparent;
     }
   }
 }

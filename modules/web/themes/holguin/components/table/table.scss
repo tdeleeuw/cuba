@@ -53,8 +53,8 @@
       }
     }
 
-    .#{$primary-stylename}-header td:first-child .v-table-caption-container,
-    .#{$primary-stylename}-footer td:first-child {
+    .v-ch & .#{$primary-stylename}-header td:first-child .v-table-caption-container,
+    .v-ch & .#{$primary-stylename}-footer td:first-child {
       padding-left: 8px;
     }
   }

@@ -24,6 +24,7 @@
 @import "app/window";
 @import "app/login-window";
 @import "app/notifications";
+@import "app/contextmenu";
 @import "components/table/table";
 @import "components/table/table-paging";
 @import "components/table/table-presentations";
@@ -40,6 +41,7 @@
   @include holguin-app-menu;
   @include holguin-menubar;
   @include holguin-notification;
+  @include holguin-vaadin-contextmenu-addon;
 
   @include holguin-main-window;
   @include holguin-window;
