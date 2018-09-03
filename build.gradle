@@ -691,8 +691,7 @@ configure(webModule) {
     task enhanceTestModel(type: CubaTestEnhancing)
 
     task buildScssThemes(type: CubaWebScssThemeCreation) {
-        themes = ['halo', 'hover', 'holguin'
-                  /* vaadin8 , 'havana'*/]
+        themes = ['halo', 'hover', 'havana']
 //        compress = true
 //        sprites = true
 //        cleanup = true
@@ -714,19 +713,6 @@ configure(webModule) {
         exclude '**/web.xml'
     }
 
-    task buildHolguin(type: CubaWebScssThemeCreation) {
-        themes = ['holguin']
-//        compress = true
-//        sprites = true
-//        cleanup = true
-    }
-
-    task deployHolguin(type: Copy, dependsOn: buildHolguin) {
-        from file("$webModule.buildDir/web/VAADIN/themes/holguin")
-        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/holguin"
-        exclude '**/web.xml'
-    }
-
     task buildHalo(type: CubaWebScssThemeCreation) {
         themes = ['halo']
 //        compress = true
@@ -740,18 +726,18 @@ configure(webModule) {
         exclude '**/web.xml'
     }
 
-//    task buildHavana(type: CubaWebScssThemeCreation) {
-//        themes = ['havana']
-////        compress = true
-////        sprites = true
-////        cleanup = true
-//    }
+    task buildHavana(type: CubaWebScssThemeCreation) {
+        themes = ['havana']
+//        compress = true
+//        sprites = true
+//        cleanup = true
+    }
 
-//    task deployHavana(type: Copy, dependsOn: buildHavana) {
-//        from file("$webModule.buildDir/web/VAADIN/themes/havana")
-//        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/havana"
-//        exclude '**/web.xml'
-//    }
+    task deployHavana(type: Copy, dependsOn: buildHavana) {
+        from file("$webModule.buildDir/web/VAADIN/themes/havana")
+        into "${cuba.tomcat.dir}/webapps/cuba/VAADIN/themes/havana"
+        exclude '**/web.xml'
+    }
 
     def webOutDir = file("$buildDir/web")
     task webArchive(dependsOn: buildScssThemes, type: Zip) {

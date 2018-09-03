@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@mixin holguin-datagrid($primary-stylename: v-grid) {
+@mixin havana-datagrid($primary-stylename: v-grid) {
 
   .#{$primary-stylename}-row-selected > .#{$primary-stylename}-cell {
     background-color: $cuba-table-row-selection-background-color;

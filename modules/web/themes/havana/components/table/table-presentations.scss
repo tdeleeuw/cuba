@@ -15,12 +15,20 @@
  *
  */
 
- @mixin holguin-login-window {
-   .c-login-form {
-     width: 270px;
-   }
+@mixin havana-table-presentations {
 
-   .c-login-locale {
-     width: 120px
+ .c-table-prefs-icon {
+   background: transparent;
+   background-image: url(images/table-presentations-icon.png); /** sprite-ref: application; */
+   background-repeat: no-repeat;
+   border: none;
+   border-radius: 0;
+   top: 5px;
+   width: 16px;
+   height: 16px;
+
+   &:before {
+     content: none;
    }
  }
+}

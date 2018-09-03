@@ -15,7 +15,7 @@
  *
  */
 
-@mixin holguin-menubar($primary-stylename : v-menubar) {
+@mixin havana-menubar($primary-stylename : v-menubar) {
 
   .#{$primary-stylename} {
     .#{$primary-stylename}-menuitem {

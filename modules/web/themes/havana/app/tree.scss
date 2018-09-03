@@ -15,7 +15,7 @@
  *
  */
 
-@mixin holguin-tree($primary-stylename: v-tree) {
+@mixin havana-tree($primary-stylename: v-tree) {
 
  .#{$primary-stylename}:focus,
  .#{$primary-stylename}-focus {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2018 Haulmont.
+ * Copyright (c) 2008-2016 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  *
  */
 
-@mixin holguin-vaadin-contextmenu-addon($primary-stylename: c-cm-item) {
+ @mixin havana-login-window {
+   .c-login-form {
+     width: 270px;
+   }
 
-  .v-menubar-submenu {
-    .v-menubar-menuitem.#{$primary-stylename} {
-      outline: none;
-    }
-  }
-}
+   .c-login-locale {
+     width: 120px
+   }
+ }

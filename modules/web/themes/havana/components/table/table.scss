@@ -15,7 +15,7 @@
  *
  */
 
-@mixin holguin-table($primary-stylename: v-table) {
+@mixin havana-table($primary-stylename: v-table) {
 
   .#{$primary-stylename} {
 

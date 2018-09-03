@@ -15,18 +15,11 @@
  *
  */
 
-@mixin holguin-generic-filter($primary-stylename: c-generic-filter) {
+@mixin havana-vaadin-contextmenu-addon($primary-stylename: c-cm-item) {
 
-   .#{$primary-stylename}-margin-top {
-     padding-top: $v-layout-margin-top;
-   }
-   .#{$primary-stylename}-margin-bottom {
-     padding-bottom: $v-layout-margin-left;
-   }
-   .#{$primary-stylename}-margin-left {
-     padding-left: $v-layout-margin-right;
-   }
-   .#{$primary-stylename}-margin-right {
-     padding-right: $v-layout-margin-bottom;
-   }
+  .v-menubar-submenu {
+    .v-menubar-menuitem.#{$primary-stylename} {
+      outline: none;
+    }
+  }
 }
