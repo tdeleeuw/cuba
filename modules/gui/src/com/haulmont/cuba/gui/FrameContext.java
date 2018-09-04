@@ -27,7 +27,6 @@ import java.util.Map;
  * Provides access to frame parameters and component values.
  */
 public interface FrameContext {
-
     Frame getFrame();
 
     /**
