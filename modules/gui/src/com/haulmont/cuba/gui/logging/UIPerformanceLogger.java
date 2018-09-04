@@ -31,6 +31,7 @@ public final class UIPerformanceLogger {
     }
 
     public enum LifeCycle {
+        CREATE("create", "#create"),
         LOAD("load", "#load"),
         XML("xml", "#xml"),
         INIT("init", "#init"),
@@ -60,18 +61,9 @@ public final class UIPerformanceLogger {
         public String getSuffix() {
             return suffix;
         }
+    }
 
-        public StopWatch createStopWatch(String loggingId) {
-            return new Slf4JStopWatch(loggingId + getSuffix(), LoggerFactory.getLogger(UIPerformanceLogger.class));
-        }
-
-        public void withStopWatch(String loggingId, Runnable runnable) {
-            StopWatch sw = createStopWatch(loggingId);
-            try {
-                runnable.run();
-            } finally {
-                sw.stop();
-            }
-        }
+    public static StopWatch createStopWatch(LifeCycle lifeCycle, String loggingId) {
+        return new Slf4JStopWatch(loggingId + lifeCycle.getSuffix(), LoggerFactory.getLogger(UIPerformanceLogger.class));
     }
 }

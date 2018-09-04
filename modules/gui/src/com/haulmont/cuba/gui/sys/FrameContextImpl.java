@@ -26,23 +26,29 @@ import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.HasValue.ValueChangeListener;
 import com.haulmont.cuba.gui.components.ListComponent;
 import com.haulmont.cuba.gui.components.sys.ValuePathHelper;
+import com.haulmont.cuba.gui.screen.MapScreenOptions;
+import com.haulmont.cuba.gui.screen.ScreenContext;
+import com.haulmont.cuba.gui.screen.ScreenOptions;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import org.apache.commons.lang3.ArrayUtils;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class FrameContextImpl implements FrameContext {
 
-    private final Frame frame;
-    private final Map<String, Object> params;
+    protected final Frame frame;
 
-    public FrameContextImpl(Frame window, Map<String, Object> params) {
+    protected ComponentLoader.Context loadingContext;
+
+    public FrameContextImpl(Frame window) {
         this.frame = window;
-        this.params = params;
     }
 
     public Collection<String> getParameterNames() {
         List<String> names = new ArrayList<>();
-        for (String s : params.keySet()) {
+        for (String s : getParams().keySet()) {
             names.add(s.substring("param$".length()));
         }
         return names;
@@ -50,7 +56,24 @@ public class FrameContextImpl implements FrameContext {
 
     public <T> T getParameterValue(String property) {
         //noinspection unchecked
-        return (T) params.get("param$" + property);
+        return (T) getParams().get("param$" + property);
+    }
+
+    protected Map<String, Object> getParamsMap(ScreenOptions options) {
+        if (options instanceof MapScreenOptions) {
+            return ((MapScreenOptions) options).getParams();
+        }
+        return Collections.emptyMap();
+    }
+
+    @Nullable
+    @Override
+    public ComponentLoader.Context getLoadingContext() {
+        return loadingContext;
+    }
+
+    public void setLoadingContext(ComponentLoader.Context loadingContext) {
+        this.loadingContext = loadingContext;
     }
 
     @Override
@@ -60,13 +83,18 @@ public class FrameContextImpl implements FrameContext {
 
     @Override
     public Map<String, Object> getParams() {
-        return params;
+        ScreenContext screenContext = UiControllerUtils.getScreenContext(frame.getFrameOwner());
+        if (screenContext.getScreenOptions() instanceof MapScreenOptions) {
+            return ((MapScreenOptions) screenContext.getScreenOptions()).getParams();
+        }
+
+        return Collections.emptyMap();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getParamValue(String param) {
-        return (T) params.get(param);
+        return (T) getParams().get(param);
     }
 
     @Override

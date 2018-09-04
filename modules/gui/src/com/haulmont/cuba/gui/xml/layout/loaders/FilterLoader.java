@@ -116,12 +116,12 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
         Frame frame = context.getFrame();
         String applyTo = element.attributeValue("applyTo");
         if (!StringUtils.isEmpty(applyTo)) {
-            context.addPostInitTask((context1, window) -> {
-                Component c = frame.getComponent(applyTo);
+            context.addPostInitTask((c, w) -> {
+                Component applyToComponent = frame.getComponent(applyTo);
                 if (c == null) {
-                    throw new GuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context1.getFullFrameId());
+                    throw new GuiDevelopmentException("Can't apply component to component with ID: " + applyTo, context.getFullFrameId());
                 }
-                resultComponent.setApplyTo(c);
+                resultComponent.setApplyTo(applyToComponent);
             });
         }
 

@@ -37,8 +37,8 @@ public final class ScreenDescriptorUtils {
         return id;
     }
 
-    public static String getInferredDesignTemplate(UiDescriptor uiDescriptor,
-                                                   Class<? extends FrameOwner> annotatedScreenClass) {
+    public static String getInferredTemplate(UiDescriptor uiDescriptor,
+                                             Class<? extends FrameOwner> annotatedScreenClass) {
         checkNotNullArgument(uiDescriptor);
 
         String templateLocation = uiDescriptor.value();

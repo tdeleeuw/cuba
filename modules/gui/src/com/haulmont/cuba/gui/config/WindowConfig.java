@@ -181,7 +181,7 @@ public class WindowConfig {
             if (annotation == null) {
                 return null;
             }
-            String template = ScreenDescriptorUtils.getInferredDesignTemplate(annotation, screenClass);
+            String template = ScreenDescriptorUtils.getInferredTemplate(annotation, screenClass);
             if (!template.startsWith("/")) {
                 String packageName = screenClass.getPackage().getName();
                 if (StringUtils.isNotEmpty(packageName)) {

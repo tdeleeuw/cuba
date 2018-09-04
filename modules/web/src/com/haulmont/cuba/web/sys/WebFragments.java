@@ -16,19 +16,30 @@
 
 package com.haulmont.cuba.web.sys;
 
+import com.haulmont.cuba.core.global.BeanLocator;
+import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.gui.Fragments;
+import com.haulmont.cuba.gui.FrameContext;
+import com.haulmont.cuba.gui.components.Fragment;
+import com.haulmont.cuba.gui.components.Frame;
+import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.config.WindowInfo;
-import com.haulmont.cuba.gui.screen.ScreenFragment;
-import com.haulmont.cuba.gui.screen.ScreenOptions;
-import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.model.ScreenData;
+import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.gui.sys.FrameContextImpl;
+import com.haulmont.cuba.gui.sys.ScreenContextImpl;
 import com.haulmont.cuba.gui.sys.ScreenDescriptorUtils;
+import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import com.haulmont.cuba.gui.xml.layout.ScreenXmlLoader;
 import com.haulmont.cuba.web.AppUI;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
 
@@ -40,6 +51,10 @@ public class WebFragments implements Fragments {
     protected ScreenXmlLoader screenXmlLoader;
     @Inject
     protected WindowConfig windowConfig;
+    @Inject
+    protected BeanLocator beanLocator;
+    @Inject
+    protected ComponentsFactory componentsFactory;
 
     protected AppUI ui;
 
@@ -48,13 +63,14 @@ public class WebFragments implements Fragments {
     }
 
     @Override
-    public <T extends ScreenFragment> T create(Class<T> requiredFragmentClass, ScreenOptions options) {
+    public <T extends ScreenFragment> T create(FrameOwner parent, Class<T> requiredFragmentClass, ScreenOptions options) {
+        checkNotNullArgument(parent);
         checkNotNullArgument(requiredFragmentClass);
         checkNotNullArgument(options);
 
         WindowInfo windowInfo = getFragmentInfo(requiredFragmentClass);
 
-        return createFragment(windowInfo, options);
+        return createFragment(parent, windowInfo, options);
     }
 
     protected <T extends ScreenFragment> WindowInfo getFragmentInfo(Class<T> fragmentClass) {
@@ -69,15 +85,62 @@ public class WebFragments implements Fragments {
     }
 
     @Override
-    public ScreenFragment create(WindowInfo windowInfo, ScreenOptions options) {
+    public ScreenFragment create(FrameOwner parent, WindowInfo windowInfo, ScreenOptions options) {
+        checkNotNullArgument(parent);
         checkNotNullArgument(windowInfo);
         checkNotNullArgument(options);
 
-        return createFragment(windowInfo, options);
+        return createFragment(parent, windowInfo, options);
     }
 
-    protected <T extends ScreenFragment> T createFragment(WindowInfo windowInfo, ScreenOptions options) {
+    protected <T extends ScreenFragment> T createFragment(FrameOwner parent, WindowInfo windowInfo,
+                                                          ScreenOptions options) {
+        Fragment fragment = componentsFactory.createComponent(Fragment.NAME);
+        ScreenFragment controller = createController(windowInfo, fragment, windowInfo.asFragment());
 
-        return null;
+        // setup screen and controller
+
+        UiControllerUtils.setWindowId(controller, windowInfo.getId());
+        UiControllerUtils.setFrame(controller, fragment);
+        UiControllerUtils.setScreenContext(controller,
+                new ScreenContextImpl(windowInfo, options,
+                        ui.getScreens(),
+                        ui.getDialogs(),
+                        ui.getNotifications(),
+                        this)
+        );
+        UiControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
+
+        FragmentImplementation fragmentImpl = (FragmentImplementation) fragment;
+        fragmentImpl.setFrameOwner(controller);
+        fragmentImpl.setId(controller.getId());
+
+        FrameContextImpl frameContext = new FrameContextImpl(fragment);
+        ((FrameImplementation) fragment).setContext(frameContext);
+
+        Frame parentFrame = UiControllerUtils.getFrame(parent);
+        FrameContext parentFrameContext = parentFrame.getContext();
+
+        //noinspection unchecked
+        return (T) controller;
+    }
+
+    protected <T extends ScreenFragment> T createController(WindowInfo windowInfo, Fragment fragment,
+                                                            Class<T> screenClass) {
+        Constructor<T> constructor;
+        try {
+            constructor = screenClass.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new DevelopmentException("No accessible constructor for screen class " + screenClass);
+        }
+
+        T controller;
+        try {
+            controller = constructor.newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException("Unable to create instance of screen class " + screenClass);
+        }
+
+        return controller;
     }
 }

@@ -29,15 +29,15 @@ public interface Fragments {
 
     String NAME = "cuba_Fragments";
 
-    default <T extends ScreenFragment> T create(Class<T> fragmentClass) {
-        return create(fragmentClass, FrameOwner.NO_OPTIONS);
+    default <T extends ScreenFragment> T create(FrameOwner parent, Class<T> fragmentClass) {
+        return create(parent, fragmentClass, FrameOwner.NO_OPTIONS);
     }
 
-    default ScreenFragment create(WindowInfo windowInfo) {
-        return create(windowInfo, FrameOwner.NO_OPTIONS);
+    default ScreenFragment create(FrameOwner parent, WindowInfo windowInfo) {
+        return create(parent, windowInfo, FrameOwner.NO_OPTIONS);
     }
 
-    <T extends ScreenFragment> T create(Class<T> fragmentClass, ScreenOptions options);
+    <T extends ScreenFragment> T create(FrameOwner parent, Class<T> fragmentClass, ScreenOptions options);
 
-    ScreenFragment create(WindowInfo windowInfo, ScreenOptions options);
+    ScreenFragment create(FrameOwner parent, WindowInfo windowInfo, ScreenOptions options);
 }

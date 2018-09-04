@@ -151,5 +151,29 @@ public abstract class ScreenFragment implements FrameOwner {
         }
     }
 
+    /**
+     * JavaDoc
+     *
+     * Used by UI components to perform actions after UiController initialized.
+     */
+    @TriggerOnce
+    public static class AfterInitEvent extends EventObject {
+        protected final ScreenOptions options;
+
+        public AfterInitEvent(ScreenFragment source, ScreenOptions options) {
+            super(source);
+            this.options = options;
+        }
+
+        @Override
+        public ScreenFragment getSource() {
+            return (ScreenFragment) super.getSource();
+        }
+
+        public ScreenOptions getOptions() {
+            return options;
+        }
+    }
+
     // todo events: attached / detached / events from parent
 }

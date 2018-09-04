@@ -266,6 +266,7 @@ public abstract class ComponentsHelper {
                         path;
                 __walkComponents(((com.haulmont.cuba.gui.components.ComponentContainer) component), visitor, p);
             } else if (component instanceof AppWorkArea) {
+                // todo generalize this case
                 AppWorkArea workArea = (AppWorkArea) component;
                 if (workArea.getState() == AppWorkArea.State.INITIAL_LAYOUT) {
                     VBoxLayout initialLayout = workArea.getInitialLayout();

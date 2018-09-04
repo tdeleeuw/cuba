@@ -19,17 +19,18 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
+import com.haulmont.cuba.gui.screen.MapScreenOptions;
+import com.haulmont.cuba.gui.screen.ScreenOptions;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader.InitTask;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader.InjectTask;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader.PostInitTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ComponentLoaderContext implements ComponentLoader.Context {
+
+    protected ScreenOptions options;
 
     protected DsContext dsContext;
     protected Frame frame;
@@ -44,9 +45,20 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
     protected Map<String, String> aliasesMap = new HashMap<>();
 
     protected ComponentLoader.Context parent;
+    protected Locale locale;
 
-    public ComponentLoaderContext(Map<String, Object> parameters) {
-        this.parameters = parameters;
+    public ComponentLoaderContext(ScreenOptions options) {
+        this.options = options;
+
+        this.parameters = Collections.emptyMap();
+        if (options instanceof MapScreenOptions) {
+            parameters = ((MapScreenOptions) options).getParams();
+        }
+    }
+
+    @Override
+    public ScreenOptions getOptions() {
+        return options;
     }
 
     @Override
@@ -110,9 +122,10 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
 
     @Override
     public void executePostInitTasks() {
-        if (!getPostInitTasks().isEmpty()) {
-            new TaskExecutor(getPostInitTasks().get(0)).run();
+        for (PostInitTask postInitTask : postInitTasks) {
+            postInitTask.execute(this, frame);
         }
+        postInitTasks.clear();
     }
 
     @Override
@@ -122,9 +135,10 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
 
     @Override
     public void executeInjectTasks() {
-        if (!getInjectTasks().isEmpty()) {
-            new InjectTaskExecutor(getInjectTasks().get(0)).run();
+        for (InjectTask injectTask : injectTasks) {
+            injectTask.execute(ComponentLoaderContext.this, frame);
         }
+        injectTasks.clear();
     }
 
     @Override
@@ -134,9 +148,10 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
 
     @Override
     public void executeInitTasks() {
-        if (!getInitTasks().isEmpty()) {
-            new InitTaskExecutor(getInitTasks().get(0)).run();
+        for (InitTask initTask : initTasks) {
+            initTask.execute(this, frame);
         }
+        initTasks.clear();
     }
 
     public List<InjectTask> getInjectTasks() {
@@ -151,78 +166,8 @@ public class ComponentLoaderContext implements ComponentLoader.Context {
         return initTasks;
     }
 
-    protected void removeTask(PostInitTask task, ComponentLoaderContext context) {
-        if (context.getPostInitTasks().remove(task) && context.getParent() != null) {
-            removeTask(task, (ComponentLoaderContext) context.getParent());
-        }
-    }
-
-    protected void removeTask(InjectTask task, ComponentLoaderContext context) {
-        if (context.getInjectTasks().remove(task) && context.getParent() != null) {
-            removeTask(task, (ComponentLoaderContext) context.getParent());
-        }
-    }
-
-    protected void removeTask(InitTask task, ComponentLoaderContext context) {
-        if (context.getInitTasks().remove(task) && context.getParent() != null) {
-            removeTask(task, (ComponentLoaderContext) context.getParent());
-        }
-    }
-
     @Override
     public Map<String, String> getAliasesMap() {
         return aliasesMap;
-    }
-
-    protected class TaskExecutor implements Runnable {
-
-        private final PostInitTask task;
-
-        public TaskExecutor(PostInitTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void run() {
-            removeTask(task, ComponentLoaderContext.this);
-            task.execute(ComponentLoaderContext.this, frame);
-            if (!getPostInitTasks().isEmpty()) {
-                new TaskExecutor(getPostInitTasks().get(0)).run();
-            }
-        }
-    }
-
-    protected class InjectTaskExecutor implements Runnable {
-        private final InjectTask task;
-
-        public InjectTaskExecutor(InjectTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void run() {
-            removeTask(task, ComponentLoaderContext.this);
-            task.execute(ComponentLoaderContext.this, frame);
-            if (!getInjectTasks().isEmpty()) {
-                new InjectTaskExecutor(getInjectTasks().get(0)).run();
-            }
-        }
-    }
-
-    protected class InitTaskExecutor implements Runnable {
-        private final InitTask task;
-
-        public InitTaskExecutor(InitTask task) {
-            this.task = task;
-        }
-
-        @Override
-        public void run() {
-            removeTask(task, ComponentLoaderContext.this);
-            task.execute(ComponentLoaderContext.this, frame);
-            if (!getInitTasks().isEmpty()) {
-                new InitTaskExecutor(getInitTasks().get(0)).run();
-            }
-        }
     }
 }

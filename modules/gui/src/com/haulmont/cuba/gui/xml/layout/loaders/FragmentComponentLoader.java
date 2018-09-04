@@ -17,14 +17,11 @@
 package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.cuba.core.global.DevelopmentException;
-import com.haulmont.cuba.gui.Dialogs;
-import com.haulmont.cuba.gui.GuiDevelopmentException;
-import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Fragment;
-import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.sys.FragmentImplementation;
+import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.gui.config.WindowAttributesProvider;
 import com.haulmont.cuba.gui.config.WindowConfig;
 import com.haulmont.cuba.gui.config.WindowInfo;
@@ -33,6 +30,7 @@ import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.sys.FrameContextImpl;
 import com.haulmont.cuba.gui.sys.ScreenContextImpl;
 import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import com.haulmont.cuba.gui.xml.layout.LayoutLoader;
@@ -47,9 +45,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 
+import static com.haulmont.cuba.gui.logging.UIPerformanceLogger.createStopWatch;
 import static com.haulmont.cuba.gui.screen.FrameOwner.NO_OPTIONS;
 
-public class FragmentComponentLoader extends ContainerLoader<Frame> {
+public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
     protected String fragmentId;
     protected ComponentLoader fragmentLoader;
@@ -90,7 +89,9 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
 
         Element windowElement = screenXmlLoader.load(windowInfo.getTemplate(), windowInfo.getId(),
-                Collections.emptyMap()); // todo pass params
+                getContext().getParams());
+
+        StopWatch createStopWatch = createStopWatch(LifeCycle.CREATE, windowInfo.getId());
 
         Fragment fragment = factory.createComponent(Fragment.NAME);
         ScreenFragment controller = createController(windowInfo, fragment, windowInfo.asFragment());
@@ -103,13 +104,17 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
                 new ScreenContextImpl(windowInfo, NO_OPTIONS,
                         beanLocator.get(Screens.NAME),
                         beanLocator.get(Dialogs.NAME),
-                        beanLocator.get(Notifications.NAME))
+                        beanLocator.get(Notifications.NAME),
+                        beanLocator.get(Fragments.NAME))
         );
         UiControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
 
         FragmentImplementation fragmentImpl = (FragmentImplementation) fragment;
         fragmentImpl.setFrameOwner(controller);
         fragmentImpl.setId(controller.getId());
+
+        FrameContext frameContext = new FrameContextImpl(fragment);
+        ((FrameImplementation) fragment).setContext(frameContext);
 
         // load from XML
 
@@ -120,7 +125,7 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
             frameId = parentContext.getFullFrameId() + "." + frameId;
         }
 
-        innerContext = new ComponentLoaderContext(context.getParams());
+        innerContext = new ComponentLoaderContext(context.getOptions());
         innerContext.setCurrentFrameId(fragmentId);
         innerContext.setFullFrameId(frameId);
         innerContext.setFrame(fragment);
@@ -131,6 +136,8 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         layoutLoader.setMessagesPack(getMessagesPack()); // todo set by template or controller
 
         this.fragmentLoader = layoutLoader.createFragmentContent(fragment, windowElement, fragmentId);
+
+        createStopWatch.stop();
 
         this.resultComponent = fragment;
     }
@@ -217,11 +224,9 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
             }
         }
 
-        StopWatch stopWatch = LifeCycle.LOAD.createStopWatch(screenPath);
+        StopWatch loadStopWatch = createStopWatch(LifeCycle.LOAD, screenPath);
 
         fragmentLoader.loadComponent();
-
-        stopWatch.stop();
 
         // load properties after inner context, they must override values defined inside of fragment
 
@@ -240,6 +245,8 @@ public class FragmentComponentLoader extends ContainerLoader<Frame> {
         loadIcon(resultComponent, element);
         loadCaption(resultComponent, element);
         loadDescription(resultComponent, element);
+
+        loadStopWatch.stop();
 
         // propagate init phases
 

@@ -20,6 +20,7 @@ import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.DsContext;
+import com.haulmont.cuba.gui.screen.ScreenOptions;
 import org.dom4j.Element;
 
 import java.util.Locale;
@@ -31,6 +32,8 @@ import java.util.Map;
 public interface ComponentLoader<T extends Component> {
 
     interface Context {
+        ScreenOptions getOptions();
+
         Map<String, Object> getParams();
         DsContext getDsContext();
 
@@ -78,7 +81,7 @@ public interface ComponentLoader<T extends Component> {
         /**
          * This method will be invoked after window components loading before window initialization.
          *
-         * @param context loader context
+         * @param context top-most loader context
          * @param window top-most window
          */
         void execute(Context context, Frame window);

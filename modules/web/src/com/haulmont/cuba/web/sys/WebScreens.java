@@ -46,6 +46,7 @@ import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.data.impl.DsContextImplementation;
 import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
+import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.Screen.AfterInitEvent;
@@ -83,6 +84,7 @@ import com.vaadin.ui.Layout;
 import com.vaadin.ui.VerticalLayout;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.perf4j.StopWatch;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -95,6 +97,7 @@ import java.util.*;
 import static com.haulmont.bali.util.Preconditions.checkNotNullArgument;
 import static com.haulmont.cuba.gui.ComponentsHelper.walkComponents;
 import static com.haulmont.cuba.gui.components.Window.CLOSE_ACTION_ID;
+import static com.haulmont.cuba.gui.logging.UIPerformanceLogger.createStopWatch;
 
 @Scope(UIScope.NAME)
 @Component(Screens.NAME)
@@ -127,17 +130,6 @@ public class WebScreens implements Screens, WindowManager {
     protected WebConfig webConfig;
     @Inject
     protected ClientConfig clientConfig;
-
-    // UI scoped beans
-
-    @Inject
-    protected Dialogs dialogs;
-    @Inject
-    protected Notifications notifications;
-    @Inject
-    protected WebBrowserTools webBrowserTools;
-    @Inject
-    protected Fragments fragments;
 
     protected AppUI ui;
 
@@ -188,10 +180,12 @@ public class WebScreens implements Screens, WindowManager {
 
         T controller = createController(windowInfo, window, resolvedScreenClass, launchMode);
 
+        // setup screen and controller
+
         UiControllerUtils.setWindowId(controller, windowInfo.getId());
         UiControllerUtils.setFrame(controller, window);
         UiControllerUtils.setScreenContext(controller,
-                new ScreenContextImpl(windowInfo, options, this, dialogs, notifications)
+                new ScreenContextImpl(windowInfo, options, this, ui.getDialogs(), ui.getNotifications(), ui.getFragments())
         );
         UiControllerUtils.setScreenData(controller, beanLocator.get(ScreenData.NAME));
 
@@ -199,50 +193,54 @@ public class WebScreens implements Screens, WindowManager {
         windowImpl.setFrameOwner(controller);
         windowImpl.setId(controller.getId());
 
-        WindowContext windowContext = new WindowContextImpl(window, launchMode, options);
+        WindowContextImpl windowContext = new WindowContextImpl(window, launchMode);
         ((WindowImplementation) window).setContext(windowContext);
 
-        ComponentLoaderContext componentLoaderContext = loadScreenXml(windowInfo, window, controller, options);
+        // load from XML
+
+        ComponentLoaderContext componentLoaderContext = new ComponentLoaderContext(options);
+        componentLoaderContext.setFullFrameId(windowInfo.getId());
+        componentLoaderContext.setCurrentFrameId(windowInfo.getId());
+        componentLoaderContext.setFrame(window);
+
+        loadScreenXml(windowInfo, window, controller, componentLoaderContext);
+
+        // inject top level screen dependencies
+
+        StopWatch injectStopWatch = createStopWatch(LifeCycle.INJECTION, windowInfo.getId());
 
         UiControllerDependencyInjector dependencyInjector =
                 beanLocator.getPrototype(UiControllerDependencyInjector.NAME, controller, options);
         dependencyInjector.inject();
 
-        if (componentLoaderContext != null) {
-            componentLoaderContext.executeInjectTasks();
-        }
+        injectStopWatch.stop();
+
+        // injection in fragments
+        componentLoaderContext.executeInjectTasks();
+
+        // run init
 
         InitEvent initEvent = new InitEvent(controller, options);
         UiControllerUtils.fireEvent(controller, InitEvent.class, initEvent);
 
-        if (componentLoaderContext != null) {
-            componentLoaderContext.executeInitTasks();
-            componentLoaderContext.executePostInitTasks();
-        }
+        componentLoaderContext.executeInitTasks();
+        componentLoaderContext.executePostInitTasks();
 
         AfterInitEvent afterInitEvent = new AfterInitEvent(controller, options);
         UiControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
 
+        // loaded
+        windowContext.setLoadingContext(null);
+
         return controller;
     }
 
-    @Nullable
-    protected <T extends Screen> ComponentLoaderContext loadScreenXml(WindowInfo windowInfo, Window window, T controller,
-                                                                      ScreenOptions options) {
+    protected <T extends Screen> void loadScreenXml(WindowInfo windowInfo, Window window, T controller,
+                                                    ComponentLoaderContext componentLoaderContext) {
         String templatePath = windowInfo.getTemplate();
 
         if (StringUtils.isNotEmpty(templatePath)) {
-            Map<String, Object> params = Collections.emptyMap();
-            if (options instanceof MapScreenOptions) {
-                params = ((MapScreenOptions) options).getParams();
-            }
-
-            Element element = screenXmlLoader.load(templatePath, windowInfo.getId(), params);
-
-            ComponentLoaderContext componentLoaderContext = new ComponentLoaderContext(params);
-            componentLoaderContext.setFullFrameId(windowInfo.getId());
-            componentLoaderContext.setCurrentFrameId(windowInfo.getId());
-            componentLoaderContext.setFrame(window);
+            Element element = screenXmlLoader.load(templatePath, windowInfo.getId(), componentLoaderContext.getParams());
 
             ComponentLoader<Window> windowLoader = createLayoutStructure(windowInfo, window, element, componentLoaderContext);
 
@@ -258,15 +256,10 @@ public class WebScreens implements Screens, WindowManager {
             }
 
             windowLoader.loadComponent();
-
-            return componentLoaderContext;
         }
-
-        return null;
     }
 
-    protected  <T extends Screen> void initDsContext(Window window, Element element,
-                                                     ComponentLoaderContext componentLoaderContext) {
+    protected void initDsContext(Window window, Element element, ComponentLoaderContext componentLoaderContext) {
         DsContext dsContext = loadDsContext(element);
         initDatasources(window, dsContext, componentLoaderContext.getParams());
 
@@ -706,14 +699,14 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showNotification(String caption) {
-        notifications.create()
+        ui.getNotifications().create()
                 .setCaption(caption)
                 .show();
     }
 
     @Override
     public void showNotification(String caption, Frame.NotificationType type) {
-        notifications.create()
+        ui.getNotifications().create()
                 .setCaption(caption)
                 .setContentMode(Frame.NotificationType.isHTML(type) ? ContentMode.HTML : ContentMode.TEXT)
                 .setType(convertNotificationType(type))
@@ -722,7 +715,7 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showNotification(String caption, String description, Frame.NotificationType type) {
-        notifications.create()
+        ui.getNotifications().create()
                 .setCaption(caption)
                 .setDescription(description)
                 .setContentMode(Frame.NotificationType.isHTML(type) ? ContentMode.HTML : ContentMode.TEXT)
@@ -755,7 +748,7 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showMessageDialog(String title, String message, Frame.MessageType messageType) {
-        MessageDialog messageDialog = dialogs.createMessageDialog()
+        MessageDialog messageDialog = ui.getDialogs().createMessageDialog()
                 .setCaption(title)
                 .setMessage(message)
                 .setType(convertMessageType(messageType.getMessageMode()))
@@ -796,7 +789,7 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showOptionDialog(String title, String message, Frame.MessageType messageType, Action[] actions) {
-        OptionDialog optionDialog = dialogs.createOptionDialog()
+        OptionDialog optionDialog = ui.getDialogs().createOptionDialog()
                 .setCaption(title)
                 .setMessage(message)
                 .setType(convertMessageType(messageType.getMessageMode()))
@@ -819,7 +812,7 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showExceptionDialog(Throwable throwable, @Nullable String caption, @Nullable String message) {
-        dialogs.createExceptionDialog()
+        ui.getDialogs().createExceptionDialog()
                 .setCaption(caption)
                 .setMessage(message)
                 .setThrowable(throwable)
@@ -828,7 +821,7 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public void showWebPage(String url, @Nullable Map<String, Object> params) {
-        webBrowserTools.showWebPage(url, params);
+        ui.getWebBrowserTools().showWebPage(url, params);
     }
 
     /**

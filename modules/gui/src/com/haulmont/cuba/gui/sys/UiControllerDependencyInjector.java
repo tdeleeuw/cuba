@@ -46,6 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Scope;
@@ -215,8 +216,11 @@ public class UiControllerDependencyInjector {
         }
 
         boolean required = true;
-        if (element.isAnnotationPresent(WindowParam.class))
+        if (element.isAnnotationPresent(WindowParam.class)) {
             required = element.getAnnotation(WindowParam.class).required();
+        } else if (element.isAnnotationPresent(Autowired.class)) {
+            required = element.getAnnotation(Autowired.class).required();
+        }
 
         if (element instanceof Field) {
             type = ((Field) element).getType();
@@ -272,7 +276,7 @@ public class UiControllerDependencyInjector {
             if (options instanceof MapScreenOptions) {
                 return ((MapScreenOptions) options).getParams().get(name);
             }
-            //Injecting a parameter
+            // Injecting a parameter
             return null;
 
         } else if (ScreenFragment.class.isAssignableFrom(type)) {
@@ -349,6 +353,10 @@ public class UiControllerDependencyInjector {
             // injecting screens
             return UiControllerUtils.getScreenContext(frameOwner).getNotifications();
 
+        } else if (Fragments.class == type) {
+            // injecting fragments
+            return UiControllerUtils.getScreenContext(frameOwner).getFragments();
+
         } else if (MessageBundle.class == type) {
             MessageBundle messageBundle = beanLocator.getPrototype(MessageBundle.NAME);
 
@@ -365,15 +373,17 @@ public class UiControllerDependencyInjector {
 
             if (frame instanceof Component.HasXmlDescriptor) {
                 Element xmlDescriptor = ((Component.HasXmlDescriptor) frame).getXmlDescriptor();
-                String messagePack = xmlDescriptor.attributeValue("messagesPack");
-                if (messagePack != null) {
-                    messageBundle.setMessagesPack(messagePack);
+                if (xmlDescriptor != null) {
+                    String messagePack = xmlDescriptor.attributeValue("messagesPack");
+                    if (messagePack != null) {
+                        messageBundle.setMessagesPack(messagePack);
+                    }
                 }
             }
 
             return messageBundle;
 
-        } else if (ThemeConstants.class.isAssignableFrom(type)) {
+        } else if (ThemeConstants.class == type) {
             // Injecting a Theme
             ThemeConstantsManager themeManager = beanLocator.get(ThemeConstantsManager.NAME);
             return themeManager.getConstants();

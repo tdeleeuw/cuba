@@ -20,10 +20,10 @@ import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
 import com.haulmont.cuba.gui.components.CaptionMode;
 import com.haulmont.cuba.gui.components.DatasourceComponent;
-import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.screen.FrameOwner;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
@@ -96,7 +96,7 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
         }
     }
 
-    protected void loadNewOptionHandler(final LookupField component, Element element) {
+    protected void loadNewOptionHandler(LookupField component, Element element) {
         String newOptionAllowed = element.attributeValue("newOptionAllowed");
         if (StringUtils.isNotEmpty(newOptionAllowed)) {
             component.setNewOptionAllowed(Boolean.parseBoolean(newOptionAllowed));
@@ -104,29 +104,28 @@ public class LookupFieldLoader extends AbstractFieldLoader<LookupField> {
 
         String newOptionHandlerMethod = element.attributeValue("newOptionHandler");
         if (StringUtils.isNotEmpty(newOptionHandlerMethod)) {
-            // todo artamonov use PostWrap task here
-            context.addPostInitTask((context1, window) -> {
-                Method newOptionHandler;
+            FrameOwner controller = context.getFrame().getFrameOwner();
+            Class<? extends FrameOwner> windowClass = controller.getClass();
+
+            Method newOptionHandler;
+            try {
+                newOptionHandler = windowClass.getMethod(newOptionHandlerMethod, LookupField.class, String.class);
+            } catch (NoSuchMethodException e) {
+                Map<String, Object> params = ParamsMap.of(
+                        "LookupField Id", component.getId(),
+                        "Method name", newOptionHandlerMethod
+                );
+
+                throw new GuiDevelopmentException("Unable to find new option handler method for lookup field",
+                        context.getFullFrameId(), params);
+            }
+
+            component.setNewOptionHandler(caption -> {
                 try {
-                    Class<? extends Frame> windowClass = window.getClass();
-                    newOptionHandler = windowClass.getMethod(newOptionHandlerMethod, LookupField.class, String.class);
-                } catch (NoSuchMethodException e) {
-                    Map<String, Object> params = ParamsMap.of(
-                            "LookupField Id", component.getId(),
-                            "Method name", newOptionHandlerMethod
-                    );
-
-                    throw new GuiDevelopmentException("Unable to find new option handler method for lookup field",
-                            context1.getFullFrameId(), params);
+                    newOptionHandler.invoke(controller, component, caption);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException("Unable to invoke new option handler", e);
                 }
-
-                component.setNewOptionHandler(caption -> {
-                    try {
-                        newOptionHandler.invoke(window, component, caption);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException("Unable to invoke new option handler", e);
-                    }
-                });
             });
         }
     }
