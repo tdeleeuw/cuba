@@ -105,8 +105,12 @@
   }
 
   .#{$primary-stylename} [class*="-row"].v-selected {
-   .#{$primary-stylename}-cell-content {
-     border-color: $v-border-color;
-   }
+    + .v-selected {
+      background: $cuba-table-row-selection-background-color;
+    }
+
+    .#{$primary-stylename}-cell-content {
+      border-color: $v-border-color;
+    }
   }
 }

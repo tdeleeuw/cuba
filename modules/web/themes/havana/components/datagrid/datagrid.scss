@@ -21,22 +21,22 @@
     border-color: $v-border-color;
     color: $cuba-table-text-color;
 
-    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%,$cuba-table-row-selection-background-color 100%);
+    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%, $cuba-table-row-selection-background-color 100%);
   }
 
   .#{$primary-stylename}-body .#{$primary-stylename}-row-selected:hover > td {
     background-color: $cuba-table-row-selection-background-color;
     color: $cuba-table-text-color;
 
-    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%,$cuba-table-row-selection-background-color 100%);
+    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%, $cuba-table-row-selection-background-color 100%);
   }
 
   .#{$primary-stylename}-cell .boolean-value-true {
-     height: round($v-unit-size/2);
-     width: round($v-unit-size/2);
-     background: no-repeat left center;
-     margin-left: $v-table-cell-padding-horizontal;
-     background-image: url(images//checkbox-checked.png); /** sprite-ref: components; */
+    height: round($v-unit-size/2);
+    width: round($v-unit-size/2);
+    background: no-repeat left center;
+    margin-left: $v-table-cell-padding-horizontal;
+    background-image: url(images//checkbox-checked.png); /** sprite-ref: components; */
 
     &:before {
       content: none;
