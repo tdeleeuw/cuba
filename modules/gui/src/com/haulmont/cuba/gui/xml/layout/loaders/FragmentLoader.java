@@ -26,6 +26,7 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
+import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
 import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
@@ -108,16 +109,23 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
             getScreenViewsLoader().deployViews(element);
         }
 
+        if (context.getParent() == null) {
+            throw new IllegalStateException("FragmentLoader is always called within parent ComponentLoaderContext");
+        }
+
         Element dsContextElement = element.element("dsContext");
 
         DsContext dsContext = null;
-        DsContext parentDsContext = context.getParent().getDsContext();
-        if (parentDsContext != null) {
-            DsContextLoader contextLoader = new DsContextLoader(parentDsContext.getDataSupplier());
+        if (resultComponent.getFrameOwner() instanceof LegacyFrame) {
+            DsContextLoader contextLoader;
+            DsContext parentDsContext = context.getParent().getDsContext();
+            if (parentDsContext != null){
+                contextLoader = new DsContextLoader(parentDsContext.getDataSupplier());
+            } else {
+                contextLoader = new DsContextLoader(new GenericDataSupplier());
+            }
 
-            dsContext = contextLoader.loadDatasources(dsContextElement,
-                    parentDsContext, getContext().getAliasesMap());
-
+            dsContext = contextLoader.loadDatasources(dsContextElement, parentDsContext, getContext().getAliasesMap());
             ((ComponentLoaderContext) context).setDsContext(dsContext);
         }
 
@@ -165,7 +173,6 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
 
         parentContext.addInjectTask(new FragmentLoaderInjectTask(resultComponent, options));
         parentContext.addInitTask(new FragmentLoaderInitTask(resultComponent, options));
-        parentContext.addPostInitTask(new FragmentLoaderPostInitTask(resultComponent, options));
     }
 
     public String getFrameId() {
@@ -176,26 +183,8 @@ public class FragmentLoader extends ContainerLoader<Fragment> implements Compone
         this.frameId = frameId;
     }
 
-    protected class FragmentLoaderPostInitTask implements PostInitTask {
-        protected final Frame frame;
-
-        public FragmentLoaderPostInitTask(Frame frame, ScreenOptions options) {
-            this.frame = frame;
-        }
-
-        @Override
-        public void execute(Context context, Frame window) {
-            String loggingId = ComponentsHelper.getFullFrameId(this.frame);
-
-            StopWatch stopWatch = createStopWatch(LifeCycle.UI_PERMISSIONS, loggingId);
-
-            // apply ui permissions
-            WindowCreationHelper.applyUiPermissions(this.frame);
-
-            stopWatch.stop();
-
-            FragmentLoader.this.context.executePostInitTasks();
-        }
+    protected WindowCreationHelper getWindowCreationHelper() {
+        return beanLocator.get(WindowCreationHelper.NAME);
     }
 
     protected class FragmentLoaderInjectTask implements InjectTask {

@@ -30,17 +30,13 @@ import com.haulmont.cuba.gui.screen.MapScreenOptions;
 import com.haulmont.cuba.gui.screen.ScreenContext;
 import com.haulmont.cuba.gui.screen.ScreenOptions;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
-import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 import org.apache.commons.lang3.ArrayUtils;
 
-import javax.annotation.Nullable;
 import java.util.*;
 
 public class FrameContextImpl implements FrameContext {
 
     protected final Frame frame;
-
-    protected ComponentLoader.Context loadingContext;
 
     public FrameContextImpl(Frame window) {
         this.frame = window;
@@ -64,16 +60,6 @@ public class FrameContextImpl implements FrameContext {
             return ((MapScreenOptions) options).getParams();
         }
         return Collections.emptyMap();
-    }
-
-    @Nullable
-    @Override
-    public ComponentLoader.Context getLoadingContext() {
-        return loadingContext;
-    }
-
-    public void setLoadingContext(ComponentLoader.Context loadingContext) {
-        this.loadingContext = loadingContext;
     }
 
     @Override

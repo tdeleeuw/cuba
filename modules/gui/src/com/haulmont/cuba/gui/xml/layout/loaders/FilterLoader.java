@@ -36,6 +36,7 @@ import org.dom4j.Element;
 public class FilterLoader extends AbstractComponentLoader<Filter> {
 
     public static final String DEFAULT_FILTER_ID = "filterWithoutId";
+    public static final String FTS_MODE_VALUE = "fts";
 
     @Override
     protected void loadId(Component component, Element element) {
@@ -48,7 +49,7 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
 
     @Override
     public void createComponent() {
-        resultComponent = (Filter) factory.createComponent(Filter.NAME);
+        resultComponent = factory.createComponent(Filter.NAME);
         loadId(resultComponent, element);
     }
 
@@ -126,12 +127,14 @@ public class FilterLoader extends AbstractComponentLoader<Filter> {
         }
 
         String modeSwitchVisible = element.attributeValue("modeSwitchVisible");
-        resultComponent.setModeSwitchVisible(modeSwitchVisible == null || Boolean.parseBoolean(modeSwitchVisible));
+        if (StringUtils.isNotEmpty(modeSwitchVisible)) {
+            resultComponent.setModeSwitchVisible(Boolean.parseBoolean(modeSwitchVisible));
+        }
 
         context.addPostInitTask((context1, window) -> {
             ((FilterImplementation) resultComponent).loadFiltersAndApplyDefault();
             String defaultMode = element.attributeValue("defaultMode");
-            if ("fts".equals(defaultMode)) {
+            if (FTS_MODE_VALUE.equals(defaultMode)) {
                 resultComponent.switchFilterMode(FilterDelegate.FilterMode.FTS_MODE);
             }
         });

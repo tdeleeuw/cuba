@@ -20,18 +20,13 @@ import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.compatibility.ComponentValueListenerWrapper;
 import com.haulmont.cuba.gui.data.ValueListener;
-import com.haulmont.cuba.gui.xml.layout.ComponentLoader;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
  * Provides access to frame parameters and component values.
  */
 public interface FrameContext {
-    @Nullable
-    ComponentLoader.Context getLoadingContext();
-
     Frame getFrame();
 
     /**

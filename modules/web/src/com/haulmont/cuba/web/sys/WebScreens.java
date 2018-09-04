@@ -53,10 +53,7 @@ import com.haulmont.cuba.gui.screen.Screen.AfterInitEvent;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.InitEvent;
-import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
-import com.haulmont.cuba.gui.screen.compatibility.ScreenEditorWrapper;
-import com.haulmont.cuba.gui.screen.compatibility.ScreenLookupWrapper;
-import com.haulmont.cuba.gui.screen.compatibility.ScreenWrapper;
+import com.haulmont.cuba.gui.screen.compatibility.*;
 import com.haulmont.cuba.gui.settings.Settings;
 import com.haulmont.cuba.gui.settings.SettingsImpl;
 import com.haulmont.cuba.gui.sys.*;
@@ -125,6 +122,10 @@ public class WebScreens implements Screens, WindowManager {
     protected IconResolver iconResolver;
     @Inject
     protected Messages messages;
+    @Inject
+    protected WindowCreationHelper windowCreationHelper;
+    @Inject
+    protected AttributeAccessSupport attributeAccessSupport;
 
     @Inject
     protected WebConfig webConfig;
@@ -229,9 +230,6 @@ public class WebScreens implements Screens, WindowManager {
         AfterInitEvent afterInitEvent = new AfterInitEvent(controller, options);
         UiControllerUtils.fireEvent(controller, AfterInitEvent.class, afterInitEvent);
 
-        // loaded
-        windowContext.setLoadingContext(null);
-
         return controller;
     }
 
@@ -242,7 +240,11 @@ public class WebScreens implements Screens, WindowManager {
         if (StringUtils.isNotEmpty(templatePath)) {
             Element element = screenXmlLoader.load(templatePath, windowInfo.getId(), componentLoaderContext.getParams());
 
-            ComponentLoader<Window> windowLoader = createLayoutStructure(windowInfo, window, element, componentLoaderContext);
+            LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, componentLoaderContext);
+            layoutLoader.setLocale(getLocale());
+            layoutLoader.setMessagesPack(getMessagePack(windowInfo.getTemplate()));
+
+            ComponentLoader<Window> windowLoader = layoutLoader.createWindowContent(window, element, windowInfo.getId());
 
             if (controller instanceof LegacyFrame) {
                 screenViewsLoader.deployViews(element);
@@ -296,27 +298,15 @@ public class WebScreens implements Screens, WindowManager {
         }
     }
 
-    protected ComponentLoader<Window> createLayoutStructure(WindowInfo windowInfo, Window window, Element rootElement,
-                                                            ComponentLoader.Context context) {
-        String descriptorPath = windowInfo.getTemplate();
-
-        LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, context);
-        layoutLoader.setLocale(getLocale());
-
-        if (StringUtils.isNotEmpty(descriptorPath)) {
-            if (descriptorPath.contains("/")) {
-                descriptorPath = StringUtils.substring(descriptorPath, 0, descriptorPath.lastIndexOf("/"));
-            }
-
-            String path = descriptorPath.replaceAll("/", ".");
-            int start = path.startsWith(".") ? 1 : 0;
-            path = path.substring(start);
-
-            layoutLoader.setMessagesPack(path);
+    protected String getMessagePack(String descriptorPath) {
+        if (descriptorPath.contains("/")) {
+            descriptorPath = StringUtils.substring(descriptorPath, 0, descriptorPath.lastIndexOf("/"));
         }
-        //noinspection UnnecessaryLocalVariable
-        ComponentLoader<Window> windowLoader = layoutLoader.createWindowContent(window, rootElement, windowInfo.getId());
-        return windowLoader;
+
+        String messagesPack = descriptorPath.replaceAll("/", ".");
+        int start = messagesPack.startsWith(".") ? 1 : 0;
+        messagesPack = messagesPack.substring(start);
+        return messagesPack;
     }
 
     protected Locale getLocale() {
@@ -329,7 +319,11 @@ public class WebScreens implements Screens, WindowManager {
 
         checkMultiOpen(screen);
 
-        // todo UI security
+        StopWatch uiPermissionsWatch = createStopWatch(LifeCycle.UI_PERMISSIONS, screen.getId());
+
+        windowCreationHelper.applyUiPermissions(screen.getWindow());
+
+        uiPermissionsWatch.stop();
 
         BeforeShowEvent beforeShowEvent = new BeforeShowEvent(screen);
         UiControllerUtils.fireEvent(screen, BeforeShowEvent.class, beforeShowEvent);
@@ -388,7 +382,6 @@ public class WebScreens implements Screens, WindowManager {
             AbstractWindow abstractWindow = (AbstractWindow) screen;
 
             if (abstractWindow.isAttributeAccessControlEnabled()) {
-                AttributeAccessSupport attributeAccessSupport = AppBeans.get(AttributeAccessSupport.NAME);
                 attributeAccessSupport.applyAttributeAccess(abstractWindow, false);
             }
         }
@@ -672,19 +665,50 @@ public class WebScreens implements Screens, WindowManager {
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, WindowInfo windowInfo) {
-        throw new UnsupportedOperationException(); // todo
+        return openFrame(parentFrame, parent, windowInfo, Collections.emptyMap());
     }
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, WindowInfo windowInfo,
                            Map<String, Object> params) {
-        throw new UnsupportedOperationException(); // todo
+        return openFrame(parentFrame, parent, null, windowInfo, params);
     }
 
     @Override
     public Frame openFrame(Frame parentFrame, com.haulmont.cuba.gui.components.Component parent, @Nullable String id,
                            WindowInfo windowInfo, Map<String, Object> params) {
-        throw new UnsupportedOperationException(); // todo
+        ScreenFragment screenFragment;
+
+        Fragments fragments = ui.getFragments();
+
+        if (params != null && !params.isEmpty()) {
+            screenFragment = fragments.create(parentFrame.getFrameOwner(), windowInfo, new MapScreenOptions(params));
+        } else {
+            screenFragment = fragments.create(parentFrame.getFrameOwner(), windowInfo);
+        }
+
+        if (id != null) {
+            screenFragment.getFragment().setId(id);
+        }
+
+        if (parent instanceof ComponentContainer) {
+            ComponentContainer container = (ComponentContainer) parent;
+            for (com.haulmont.cuba.gui.components.Component c : container.getComponents()) {
+                if (c instanceof com.haulmont.cuba.gui.components.Component.Disposable) {
+                    com.haulmont.cuba.gui.components.Component.Disposable disposable =
+                            (com.haulmont.cuba.gui.components.Component.Disposable) c;
+                    if (!disposable.isDisposed()) {
+                        disposable.dispose();
+                    }
+                }
+                container.remove(c);
+            }
+            container.add(screenFragment.getFragment());
+        }
+
+        fragments.initialize(screenFragment);
+
+        return screenFragment instanceof Frame ? (Frame) screenFragment : new ScreenFragmentWrapper(screenFragment);
     }
 
     @Override

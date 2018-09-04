@@ -40,4 +40,6 @@ public interface Fragments {
     <T extends ScreenFragment> T create(FrameOwner parent, Class<T> fragmentClass, ScreenOptions options);
 
     ScreenFragment create(FrameOwner parent, WindowInfo windowInfo, ScreenOptions options);
+
+    void initialize(ScreenFragment fragment);
 }

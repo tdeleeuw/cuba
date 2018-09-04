@@ -20,7 +20,6 @@ import com.haulmont.cuba.client.ClientConfig;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.FrameContext;
 import com.haulmont.cuba.gui.WindowManager;
-import com.haulmont.cuba.gui.components.Frame.NotificationType;
 import com.haulmont.cuba.gui.data.DsContext;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
@@ -39,7 +38,7 @@ import java.util.Map;
 /**
  * Base class for frame controllers.
  */
-public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, LegacyFrame {
+public class AbstractFrame extends ScreenFragment implements Frame, Frame.Wrapper, LegacyFrame {
 
     protected Frame frame;
 
@@ -304,6 +303,11 @@ public class AbstractFrame extends ScreenFragment implements Frame.Wrapper, Lega
     @Override
     public ExpandDirection getExpandDirection() {
         return ExpandDirection.VERTICAL;
+    }
+
+    @Override
+    public FrameOwner getFrameOwner() {
+        return this;
     }
 
     @Override

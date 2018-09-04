@@ -46,11 +46,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 
 import static com.haulmont.cuba.gui.logging.UIPerformanceLogger.createStopWatch;
-import static com.haulmont.cuba.gui.screen.FrameOwner.NO_OPTIONS;
 
 public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
-    protected String fragmentId;
     protected ComponentLoader fragmentLoader;
     protected ComponentLoaderContext innerContext;
 
@@ -62,15 +60,19 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
     public void createComponent() {
         String src = element.attributeValue("src");
         String screenId = element.attributeValue("screen");
-
-        if (element.attributeValue("id") != null) {
-            fragmentId = element.attributeValue("id");
-        }
-
         if (src == null
                 && screenId == null) {
             throw new GuiDevelopmentException("Either 'src' or 'screen' must be specified for 'frame'",
-                    context.getFullFrameId(), "fragment", fragmentId);
+                    context.getFullFrameId(), "fragment", element.attributeValue("id"));
+        }
+
+        String fragmentId;
+        if (element.attributeValue("id") != null) {
+            fragmentId = element.attributeValue("id");
+        } else if (screenId != null){
+            fragmentId = screenId;
+        } else {
+            fragmentId = src;
         }
 
         WindowInfo windowInfo;
@@ -86,22 +88,18 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
             windowInfo = createFakeWindowInfo(src, fragmentId);
         }
 
-        ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
-
-        Element windowElement = screenXmlLoader.load(windowInfo.getTemplate(), windowInfo.getId(),
-                getContext().getParams());
-
         StopWatch createStopWatch = createStopWatch(LifeCycle.CREATE, windowInfo.getId());
 
         Fragment fragment = factory.createComponent(Fragment.NAME);
         ScreenFragment controller = createController(windowInfo, fragment, windowInfo.asFragment());
 
         // setup screen and controller
+        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
 
         UiControllerUtils.setWindowId(controller, windowInfo.getId());
         UiControllerUtils.setFrame(controller, fragment);
         UiControllerUtils.setScreenContext(controller,
-                new ScreenContextImpl(windowInfo, NO_OPTIONS,
+                new ScreenContextImpl(windowInfo, parentContext.getOptions(),
                         beanLocator.get(Screens.NAME),
                         beanLocator.get(Dialogs.NAME),
                         beanLocator.get(Notifications.NAME),
@@ -111,35 +109,51 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
         FragmentImplementation fragmentImpl = (FragmentImplementation) fragment;
         fragmentImpl.setFrameOwner(controller);
-        fragmentImpl.setId(controller.getId());
+        fragmentImpl.setId(fragmentId);
 
         FrameContext frameContext = new FrameContextImpl(fragment);
         ((FrameImplementation) fragment).setContext(frameContext);
 
-        // load from XML
+        // load from XML if needed
 
-        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
+        if (windowInfo.getTemplate() != null) {
+            String frameId = fragmentId;
+            if (parentContext.getFullFrameId() != null) {
+                frameId = parentContext.getFullFrameId() + "." + frameId;
+            }
 
-        String frameId = fragmentId;
-        if (parentContext.getFullFrameId() != null) {
-            frameId = parentContext.getFullFrameId() + "." + frameId;
+            innerContext = new ComponentLoaderContext(context.getOptions());
+            innerContext.setCurrentFrameId(fragmentId);
+            innerContext.setFullFrameId(frameId);
+            innerContext.setFrame(fragment);
+            innerContext.setParent(parentContext);
+
+            LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, innerContext);
+            layoutLoader.setLocale(getLocale());
+            layoutLoader.setMessagesPack(getMessagePack(windowInfo.getTemplate()));
+
+            ScreenXmlLoader screenXmlLoader = beanLocator.get(ScreenXmlLoader.NAME);
+
+            Element windowElement = screenXmlLoader.load(windowInfo.getTemplate(), windowInfo.getId(),
+                    getContext().getParams());
+
+            this.fragmentLoader = layoutLoader.createFragmentContent(fragment, windowElement, fragmentId);
         }
-
-        innerContext = new ComponentLoaderContext(context.getOptions());
-        innerContext.setCurrentFrameId(fragmentId);
-        innerContext.setFullFrameId(frameId);
-        innerContext.setFrame(fragment);
-        innerContext.setParent(parentContext);
-
-        LayoutLoader layoutLoader = beanLocator.getPrototype(LayoutLoader.NAME, innerContext);
-        layoutLoader.setLocale(getLocale());
-        layoutLoader.setMessagesPack(getMessagesPack()); // todo set by template or controller
-
-        this.fragmentLoader = layoutLoader.createFragmentContent(fragment, windowElement, fragmentId);
 
         createStopWatch.stop();
 
         this.resultComponent = fragment;
+    }
+
+    protected String getMessagePack(String descriptorPath) {
+        if (descriptorPath.contains("/")) {
+            descriptorPath = StringUtils.substring(descriptorPath, 0, descriptorPath.lastIndexOf("/"));
+        }
+
+        String messagesPack = descriptorPath.replaceAll("/", ".");
+        int start = messagesPack.startsWith(".") ? 1 : 0;
+        messagesPack = messagesPack.substring(start);
+        return messagesPack;
     }
 
     @SuppressWarnings("unchecked")
@@ -162,23 +176,23 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
         return new WindowInfo(fragmentId, new WindowAttributesProvider() {
             @Override
-            public WindowInfo.Type getType(WindowInfo windowInfo1) {
+            public WindowInfo.Type getType(WindowInfo wi) {
                 return WindowInfo.Type.FRAGMENT;
             }
 
             @Override
-            public String getTemplate(WindowInfo windowInfo1) {
+            public String getTemplate(WindowInfo wi) {
                 return src;
             }
 
             @Override
-            public boolean isMultiOpen(WindowInfo windowInfo1) {
+            public boolean isMultiOpen(WindowInfo wi) {
                 return false;
             }
 
             @Nonnull
             @Override
-            public Class<? extends FrameOwner> getControllerClass(WindowInfo windowInfo1) {
+            public Class<? extends FrameOwner> getControllerClass(WindowInfo wi) {
                 return fragmentClass;
             }
         }, screenElement);
@@ -226,7 +240,11 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
         StopWatch loadStopWatch = createStopWatch(LifeCycle.LOAD, screenPath);
 
-        fragmentLoader.loadComponent();
+        // if fragment has XML descriptor
+
+        if (fragmentLoader != null) {
+            fragmentLoader.loadComponent();
+        }
 
         // load properties after inner context, they must override values defined inside of fragment
 
@@ -250,11 +268,13 @@ public class FragmentComponentLoader extends ContainerLoader<Fragment> {
 
         // propagate init phases
 
-        ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
+        if (innerContext != null) {
+            ComponentLoaderContext parentContext = (ComponentLoaderContext) getContext();
 
-        parentContext.getInjectTasks().addAll(innerContext.getInjectTasks());
-        parentContext.getInitTasks().addAll(innerContext.getInitTasks());
-        parentContext.getPostInitTasks().addAll(innerContext.getPostInitTasks());
+            parentContext.getInjectTasks().addAll(innerContext.getInjectTasks());
+            parentContext.getInitTasks().addAll(innerContext.getInitTasks());
+            parentContext.getPostInitTasks().addAll(innerContext.getPostInitTasks());
+        }
     }
 
     protected void loadAliases() {

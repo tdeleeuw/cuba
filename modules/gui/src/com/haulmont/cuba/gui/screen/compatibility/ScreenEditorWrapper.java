@@ -26,6 +26,7 @@ import com.haulmont.cuba.gui.screen.Screen;
 /**
  * Wrapper object for compatibility with legacy code.
  */
+@Deprecated
 public class ScreenEditorWrapper extends AbstractEditor {
 
     private Screen screen;

@@ -25,6 +25,7 @@ import com.haulmont.cuba.gui.screen.Screen;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+@Deprecated
 public class ScreenLookupWrapper extends AbstractLookup {
     private Screen screen;
 

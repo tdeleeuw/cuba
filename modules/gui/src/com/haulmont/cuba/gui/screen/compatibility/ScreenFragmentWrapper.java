@@ -16,35 +16,24 @@
 
 package com.haulmont.cuba.gui.screen.compatibility;
 
-import com.haulmont.cuba.gui.components.AbstractWindow;
+import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.Frame;
-import com.haulmont.cuba.gui.components.compatibility.AfterCloseListenerAdapter;
-import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.ScreenFragment;
 
 /**
  * Wrapper object for compatibility with legacy code.
  */
 @Deprecated
-public class ScreenWrapper extends AbstractWindow {
+public class ScreenFragmentWrapper extends AbstractFrame {
 
-    private Screen screen;
+    private ScreenFragment screen;
 
-    public ScreenWrapper(Screen screen) {
+    public ScreenFragmentWrapper(ScreenFragment screen) {
         this.screen = screen;
     }
 
     @Override
     public Frame getWrappedFrame() {
-        return screen.getWindow();
-    }
-
-    @Override
-    public void addListener(CloseListener listener) {
-        screen.addAfterCloseListener(new AfterCloseListenerAdapter(listener));
-    }
-
-    @Override
-    public void addCloseListener(CloseListener listener) {
-        screen.addAfterCloseListener(new AfterCloseListenerAdapter(listener));
+        return screen.getFragment();
     }
 }
