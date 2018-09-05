@@ -18,7 +18,7 @@
 /**
  * Outline color of submenu
  */
-$v-menubar-submenu-outline-color: #506d8d;
+$c-menubar-submenu-outline-color: #506d8d;
 
 @mixin havana-menubar($primary-stylename : v-menubar) {
 
@@ -54,7 +54,7 @@ $v-menubar-submenu-outline-color: #506d8d;
     background-color: $cuba-menubar-background-color;
     color: $main-menu-popup-text-color;
     margin: -2px -2px;
-    outline: solid 2px $v-menubar-submenu-outline-color;
+    outline: solid 2px $c-menubar-submenu-outline-color;
     padding: 4px 4px;
 
     .#{$primary-stylename}-menuitem {

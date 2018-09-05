@@ -18,17 +18,17 @@
 /**
  * Caption color of tab in tabSheet
  */
-$v-main-tabsheet-tab-caption-text-color: #ffffff;
+$c-main-tabsheet-tab-caption-text-color: #ffffff;
 
 /**
  * Hover color of close font-icon
  */
-$v-tabsheet-tab-close-text-color-hover: #cc3301;
+$c-tabsheet-tab-close-text-color-hover: #cc3301;
 
 /**
  * Close font-icon color of tab in tabSheet
  */
-$v-tabsheet-tab-close-text-color: #64798f;
+$c-tabsheet-tab-close-text-color: #64798f;
 
 @mixin havana-main-window {
 
@@ -39,7 +39,7 @@ $v-tabsheet-tab-close-text-color: #64798f;
     .v-tabsheet-tabitem .v-caption {
       border-color: transparent;
       background: transparent;
-      color: $v-main-tabsheet-tab-caption-text-color;
+      color: $c-main-tabsheet-tab-caption-text-color;
     }
 
     .v-tabsheet-tabitem-selected .v-caption {
@@ -54,12 +54,12 @@ $v-tabsheet-tab-close-text-color: #64798f;
     }
 
     .v-tabsheet-caption-close {
-      color: #64798f;
+      color: $c-tabsheet-tab-close-text-color;
       font-weight: 700;
     }
 
     .v-tabsheet-caption-close:hover {
-      color: $v-tabsheet-tab-close-text-color-hover;
+      color: $c-tabsheet-tab-close-text-color-hover;
       text-shadow: black 1px 1px;
     }
   }

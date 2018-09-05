@@ -15,7 +15,7 @@
  *
  */
 
-$v-border-color: #9bb3d3 !default;
+$c-border-color: #9bb3d3 !default;
 
 $v-layout-margin-top: 5px;
 $v-layout-margin-left: 5px;
@@ -43,7 +43,7 @@ $cuba-window-modal-header-font-weight: 700;
 $v-selection-color: rgb(77, 122, 178);
 $v-selection-item-selection-color: #4D7AB2;
 
-$cuba-tabsheet-tab-border-selected-color: $v-border-color !default;
+$cuba-tabsheet-tab-border-selected-color: $c-border-color !default;
 $cuba-tabsheet-tab-caption: #000000 !default;
 
 $v-textfield-border: 1px solid #A5C4E0;
@@ -57,7 +57,7 @@ $v-caption-font-size: $v-font-size;
 $v-tabsheet-caption-font-size: $v-font-size;
 
 $v-border-radius: 0px;
-$v-border: 1px solid $v-border-color !default;
+$v-border: 1px solid $c-border-color !default;
 
 $v-app-background-color: #ffffff;
 $v-panel-background-color: #ffffff;
@@ -70,7 +70,6 @@ $v-default-field-width: $v-unit-size * 7;
 $cuba-app-menubar-padding-top: 8px;
 $cuba-app-menubar-padding-bottom: 8px;
 
-$cuba-menubar-menuitem-text-color: #ffffff;
 $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
 $cuba-menubar-background-color: #315379;

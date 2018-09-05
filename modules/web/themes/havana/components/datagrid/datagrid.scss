@@ -18,7 +18,7 @@
 
   .#{$primary-stylename}-row-selected > .#{$primary-stylename}-cell {
     background-color: $cuba-table-row-selection-background-color;
-    border-color: $v-border-color;
+    border-color: $c-border-color;
     color: $cuba-table-text-color;
 
     @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%, $cuba-table-row-selection-background-color 100%);
