@@ -57,7 +57,7 @@ public class CubaNotification extends VNotification {
     protected void beforeAddNotificationToCollection() {
         for (int i = NOTIFICATIONS.size() - 1; i >= 0; i--) {
             final Element el = NOTIFICATIONS.get(i).getElement();
-            if (el.hasClassName("v-position-bottom")) {
+            if (el.hasClassName("v-position-bottom") && el.hasClassName(TRAY_STYLE)) {
                 int notificationPosition = 0;
                 try {
                     notificationPosition = Integer.valueOf(el.getStyle()
@@ -84,7 +84,7 @@ public class CubaNotification extends VNotification {
         int removedElementHeight = WidgetUtil.getRequiredHeight(removedElement);
         for (int i = removedIdx - 1; i >= 0; i--) {
             Element el = NOTIFICATIONS.get(i).getElement();
-            if (el.hasClassName("v-position-bottom")) {
+            if (el.hasClassName("v-position-bottom") && el.hasClassName(TRAY_STYLE)) {
                 int notificationPosition = 0;
                 if (i == NOTIFICATIONS.size() - 1) {
                     notificationPosition = MARGIN_SIZE;
