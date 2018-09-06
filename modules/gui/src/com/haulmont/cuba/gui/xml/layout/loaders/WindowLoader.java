@@ -18,23 +18,31 @@ package com.haulmont.cuba.gui.xml.layout.loaders;
 
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.gui.AppConfig;
 import com.haulmont.cuba.gui.DialogOptions;
 import com.haulmont.cuba.gui.GuiDevelopmentException;
+import com.haulmont.cuba.gui.components.AbstractWindow;
 import com.haulmont.cuba.gui.components.Frame;
 import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.components.Window;
+import com.haulmont.cuba.gui.logging.UIPerformanceLogger.LifeCycle;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.model.impl.ScreenDataXmlLoader;
 import com.haulmont.cuba.gui.screen.FrameOwner;
+import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.sys.CompanionDependencyInjector;
 import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
+import org.perf4j.StopWatch;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+
+import static com.haulmont.cuba.gui.logging.UIPerformanceLogger.createStopWatch;
 
 public class WindowLoader extends ContainerLoader<Window> implements ComponentRootLoader<Window> {
 
@@ -96,6 +104,41 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
 
         loadFocusedComponent(resultComponent, element);
         loadCrossFieldValidate(resultComponent, element);
+
+        Screen controller = resultComponent.getFrameOwner();
+        if (controller instanceof AbstractWindow) {
+            Element companionsElem = element.element("companions");
+            if (companionsElem != null) {
+                getContext().addInjectTask((c, w) -> {
+                    StopWatch companionStopWatch = createStopWatch(LifeCycle.COMPANION, controller.getId());
+
+                    initCompanion(companionsElem, (AbstractWindow) controller);
+
+                    companionStopWatch.stop();
+                });
+            }
+        }
+    }
+
+    protected void initCompanion(Element companionsElem, AbstractWindow window) {
+        Element element = companionsElem.element(AppConfig.getClientType().toString().toLowerCase());
+        if (element != null) {
+            String className = element.attributeValue("class");
+            if (!StringUtils.isBlank(className)) {
+                Class aClass = getScripting().loadClassNN(className);
+                Object companion;
+                try {
+                    companion = aClass.newInstance();
+                    window.setCompanion(companion);
+
+                    CompanionDependencyInjector cdi = new CompanionDependencyInjector(window, companion);
+                    cdi.setBeanLocator(beanLocator);
+                    cdi.inject();
+                } catch (Exception e) {
+                    throw new RuntimeException("Unable to init Companion", e);
+                }
+            }
+        }
     }
 
     protected void loadMessagesPack(Frame frame, Element element) {
