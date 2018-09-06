@@ -15,15 +15,20 @@
  *
  */
 
+/**
+ * Window header text color
+ */
+$c-window-header-background-color: #2b4666 !default;
+
 @mixin havana-window($primary-stylename: v-window) {
 
  .#{$primary-stylename} .#{$primary-stylename}-wrap {
 
    .#{$primary-stylename}-outerheader {
-     background: $cuba-window-header-color no-repeat left top;
+     background: $c-window-header-background-color no-repeat left top;
 
      .#{$primary-stylename}-header {
-       background: $cuba-window-header-color no-repeat right top;
+       background: $c-window-header-background-color right top;
        color: #ffffff;
      }
 

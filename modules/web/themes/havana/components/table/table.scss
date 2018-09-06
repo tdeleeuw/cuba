@@ -15,19 +15,34 @@
  *
  */
 
+/**
+ * Cell border color of selected row
+ */
+$c-table-selected-row-cell-border-color: #9bb3d3 !default;
+
+/**
+ * Background of header cell in table
+ */
+$c-table-header-background-color: #e6eaef !default;
+
+/**
+ * Hover background of header cell in table
+ */
+$c-table-header-hover-background-color: #f2f5f7 !default;
+
 @mixin havana-table($primary-stylename: v-table) {
 
   .#{$primary-stylename} {
 
     .#{$primary-stylename}-header-wrap {
-      background: $cuba-table-header-background-color;
+      background: $c-table-header-background-color;
 
       .#{$primary-stylename}-header {
 
         .#{$primary-stylename}-header-cell:hover,
         .#{$primary-stylename}-header-cell-asc:hover,
         .#{$primary-stylename}-header-cell-desc:hover {
-          background: $cuba-table-header-hover-background-color
+          background: $c-table-header-hover-background-color
         }
       }
     }
@@ -36,20 +51,20 @@
     .#{$primary-stylename}-row-odd.v-selected:hover,
     .#{$primary-stylename}-caption-row.v-selected:hover {
       .v-ie & {
-        background-color: $cuba-table-row-selection-background-color;
+        background-color: $c-row-selection-background-color;
       }
     }
 
     .#{$primary-stylename}-row.v-selected,
     .#{$primary-stylename}-row-odd.v-selected,
     .#{$primary-stylename}-caption-row.v-selected {
-      background-color: $cuba-table-row-selection-background-color;
+      background-color: $c-row-selection-background-color;
       outline-color: transparent;
 
-      @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%,$cuba-table-row-selection-background-color 100%);
+      @include linear-gradient(to bottom, $c-row-selection-background-color 0%,$c-row-selection-background-color 100%);
 
       .#{$primary-stylename}-cell-content {
-        color: $cuba-table-text-color;
+        color: $c-row-selection-text-color;
       }
     }
 
@@ -106,11 +121,11 @@
 
   .#{$primary-stylename} [class*="-row"].v-selected {
     + .v-selected {
-      background: $cuba-table-row-selection-background-color;
+      background: $c-row-selection-background-color;
     }
 
     .#{$primary-stylename}-cell-content {
-      border-color: $c-border-color;
+      border-color: $c-table-selected-row-cell-border-color;
     }
   }
 }

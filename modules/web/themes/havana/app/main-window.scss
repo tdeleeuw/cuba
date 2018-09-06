@@ -18,17 +18,22 @@
 /**
  * Caption color of tab in tabSheet
  */
-$c-main-tabsheet-tab-caption-text-color: #ffffff;
+$c-main-tabsheet-tab-caption-text-color: #ffffff !default;
 
 /**
  * Hover color of close font-icon
  */
-$c-tabsheet-tab-close-text-color-hover: #cc3301;
+$c-tabsheet-tab-close-text-color-hover: #cc3301 !default;
 
 /**
  * Close font-icon color of tab in tabSheet
  */
-$c-tabsheet-tab-close-text-color: #64798f;
+$c-tabsheet-tab-close-text-color: #64798f !default;
+
+/**
+ * Background color of application work area
+ */
+$v-app-workarea-background: #8398af !default;
 
 @mixin havana-main-window {
 

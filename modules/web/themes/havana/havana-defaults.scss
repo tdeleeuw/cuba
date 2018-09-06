@@ -15,8 +15,6 @@
  *
  */
 
-$c-border-color: #9bb3d3 !default;
-
 $v-layout-margin-top: 5px;
 $v-layout-margin-left: 5px;
 $v-layout-margin-right: 5px;
@@ -29,22 +27,16 @@ $v-font-size--h3: 14px;
 $v-table-row-height: 25px;
 $v-table-header-font-size: 12px;
 
-$cuba-table-header-background-color: #e6eaef !default;
-$cuba-table-header-hover-background-color: #f2f5f7 !default;
-$cuba-table-row-selection-background-color: #c3e1ff !default;
 $cuba-table-highlight-hover-row: true;
-$cuba-table-text-color: #1e1e0d !default;
-
 $cuba-datagrid-highlight-hover-row: true;
 
-$cuba-window-header-color: #2b4666 !default;
 $cuba-window-modal-header-font-weight: 700;
 
 $v-selection-color: rgb(77, 122, 178);
 $v-selection-item-selection-color: #4D7AB2;
 
-$cuba-tabsheet-tab-border-selected-color: $c-border-color !default;
-$cuba-tabsheet-tab-caption: #000000 !default;
+$cuba-tabsheet-tab-border-selected-color: #9bb3d3;
+$cuba-tabsheet-tab-caption: #000000;
 
 $v-textfield-border: 1px solid #A5C4E0;
 $v-textfield-background-color--readonly: rgba(229, 229, 229, 0.75);
@@ -57,7 +49,7 @@ $v-caption-font-size: $v-font-size;
 $v-tabsheet-caption-font-size: $v-font-size;
 
 $v-border-radius: 0px;
-$v-border: 1px solid $c-border-color !default;
+$v-border: 1px solid #9bb3d3 !default;
 
 $v-app-background-color: #ffffff;
 $v-panel-background-color: #ffffff;
@@ -74,7 +66,6 @@ $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
 $cuba-menubar-background-color: #315379;
 $cuba-menubar-border-color: #315379;
-$main-menu-popup-text-color: white !default;
 
 $cuba-window-modal-header-height: ceil($v-unit-size * 1.4);
 $cuba-window-modal-header-buttons-line-height: $cuba-window-modal-header-height;
@@ -83,13 +74,10 @@ $cuba-maintabsheet-tabcontainer-background-color: $v-app-background-color;
 
 $cuba-hover-color: #f5f4b9 !default;
 
-$v-app-workarea-background: #8398af !default;
-
 $v-layout-spacing-vertical: 6px;
 $v-layout-spacing-horizontal: 6px;
 
 $v-table-cell-padding-horizontal: 6px;
-
 
 $cuba-login-btn-height: $v-unit-size + $v-unit-size / 5;
 $cuba-login-caption-font-size: round($v-font-size * 1.45);
@@ -101,3 +89,13 @@ $cuba-login-username-border-radius: $v-border-radius $v-border-radius 0 0;
 $cuba-login-username-height: $v-unit-size;
 
 $v-animations-enabled: false;
+
+/**
+ * Table and DataGrid selection row color
+ */
+$c-row-selection-background-color: #c3e1ff !default;
+
+/**
+ * Table and DataGrid selection row text color
+ */
+$c-row-selection-text-color: #1e1e0d !default;

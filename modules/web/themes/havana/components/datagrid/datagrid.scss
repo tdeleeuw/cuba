@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * Cell border color of selected row
+ */
+$c-datagrid-selected-row-cell-border-color: #9bb3d3 !default;
+
 @mixin havana-datagrid($primary-stylename: v-grid) {
 
   .#{$primary-stylename}-row-selected > .#{$primary-stylename}-cell {
-    background-color: $cuba-table-row-selection-background-color;
-    border-color: $c-border-color;
-    color: $cuba-table-text-color;
+    background-color: $c-row-selection-background-color;
+    border-color: $c-datagrid-selected-row-cell-border-color;
+    color: $c-row-selection-text-color;
 
-    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%, $cuba-table-row-selection-background-color 100%);
+    @include linear-gradient(to bottom, $c-row-selection-background-color 0%, $c-row-selection-background-color 100%);
   }
 
   .#{$primary-stylename}-body .#{$primary-stylename}-row-selected:hover > td {
-    background-color: $cuba-table-row-selection-background-color;
-    color: $cuba-table-text-color;
+    background-color: $c-row-selection-background-color;
+    color: $c-row-selection-text-color;
 
-    @include linear-gradient(to bottom, $cuba-table-row-selection-background-color 0%, $cuba-table-row-selection-background-color 100%);
+    @include linear-gradient(to bottom, $c-row-selection-background-color 0%, $c-row-selection-background-color 100%);
   }
 
   .#{$primary-stylename}-cell .boolean-value-true {
