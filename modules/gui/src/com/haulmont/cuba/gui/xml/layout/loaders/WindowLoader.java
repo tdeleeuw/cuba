@@ -31,6 +31,7 @@ import com.haulmont.cuba.gui.model.impl.ScreenDataXmlLoader;
 import com.haulmont.cuba.gui.screen.FrameOwner;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.UiControllerUtils;
+import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
 import com.haulmont.cuba.gui.sys.CompanionDependencyInjector;
 import com.haulmont.cuba.gui.xml.layout.ComponentRootLoader;
 import com.haulmont.cuba.gui.xml.layout.ComponentsFactory;
@@ -54,10 +55,7 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
 
     @Override
     public void createComponent() {
-        resultComponent = createComponent(factory);
-        resultComponent.setId(windowId);
-
-        createContent(element.element("layout"));
+        throw new UnsupportedOperationException("Window cannot be created from XML element");
     }
 
     public void setResultComponent(Window window) {
@@ -79,7 +77,6 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         loadDialogOptions(resultComponent, element);
 
         assignXmlDescriptor(resultComponent, element);
-        loadMessagesPack(resultComponent, element);
         loadCaption(resultComponent, element);
         loadDescription(resultComponent, element);
         loadIcon(resultComponent, element);
@@ -109,18 +106,24 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
         if (controller instanceof AbstractWindow) {
             Element companionsElem = element.element("companions");
             if (companionsElem != null) {
-                getContext().addInjectTask((c, w) -> {
-                    StopWatch companionStopWatch = createStopWatch(LifeCycle.COMPANION, controller.getId());
+                StopWatch companionStopWatch = createStopWatch(LifeCycle.COMPANION, controller.getId());
 
-                    initCompanion(companionsElem, (AbstractWindow) controller);
+                Object companion = initCompanion(companionsElem, (AbstractWindow) controller);
 
-                    companionStopWatch.stop();
-                });
+                companionStopWatch.stop();
+
+                if (companion != null) {
+                    getContext().addInjectTask((c, w) -> {
+                        CompanionDependencyInjector cdi = new CompanionDependencyInjector((LegacyFrame) controller, companion);
+                        cdi.setBeanLocator(beanLocator);
+                        cdi.inject();
+                    });
+                }
             }
         }
     }
 
-    protected void initCompanion(Element companionsElem, AbstractWindow window) {
+    protected Object initCompanion(Element companionsElem, AbstractWindow window) {
         Element element = companionsElem.element(AppConfig.getClientType().toString().toLowerCase());
         if (element != null) {
             String className = element.attributeValue("class");
@@ -130,24 +133,20 @@ public class WindowLoader extends ContainerLoader<Window> implements ComponentRo
                 try {
                     companion = aClass.newInstance();
                     window.setCompanion(companion);
-
-                    CompanionDependencyInjector cdi = new CompanionDependencyInjector(window, companion);
-                    cdi.setBeanLocator(beanLocator);
-                    cdi.inject();
                 } catch (Exception e) {
                     throw new RuntimeException("Unable to init Companion", e);
                 }
+                return companion;
             }
         }
+        return null;
     }
 
     protected void loadMessagesPack(Frame frame, Element element) {
         String msgPack = element.attributeValue("messagesPack");
         if (msgPack != null) {
-//            frame.setMessagesPack(msgPack); todo
             setMessagesPack(msgPack);
         } else {
-//            frame.setMessagesPack(this.messagesPack); todo
             setMessagesPack(this.messagesPack);
         }
     }

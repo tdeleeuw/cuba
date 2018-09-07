@@ -29,6 +29,8 @@ import com.vaadin.ui.AbstractOrderedLayout;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static com.haulmont.cuba.web.gui.components.WebWrapperUtils.toVaadinAlignment;
+
 public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
         extends WebAbstractComponent<T> implements BoxLayout {
 
@@ -47,8 +49,9 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
             throw new IllegalStateException("Component already has parent");
         }
 
+        com.vaadin.ui.Component vComponent = childComponent.unwrapComposition(com.vaadin.ui.Component.class);
         if (ownComponents.contains(childComponent)) {
-            int existingIndex = component.getComponentIndex(WebComponentsHelper.getComposition(childComponent));
+            int existingIndex = component.getComponentIndex(vComponent);
             if (index > existingIndex) {
                 index--;
             }
@@ -56,9 +59,8 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
             remove(childComponent);
         }
 
-        com.vaadin.ui.Component vComponent = WebComponentsHelper.getComposition(childComponent);
         component.addComponent(vComponent, index);
-        component.setComponentAlignment(vComponent, WebWrapperUtils.toVaadinAlignment(childComponent.getAlignment()));
+        component.setComponentAlignment(vComponent, toVaadinAlignment(childComponent.getAlignment()));
 
         if (frame != null) {
             if (childComponent instanceof BelongToFrame
@@ -162,6 +164,12 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
     @Override
     public void expand(Component childComponent) {
         component.setExpandRatio(childComponent.unwrapComposition(com.vaadin.ui.Component.class), 1);
+
+        if (getExpandDirection() == ExpandDirection.VERTICAL) {
+            childComponent.setHeightFull();
+        } else {
+            childComponent.setWidthFull();
+        }
     }
 
     @Override
@@ -266,7 +274,7 @@ public abstract class WebAbstractBox<T extends AbstractOrderedLayout>
                             component.getId()), getFrame().getId());
         }
 
-        com.vaadin.ui.Component vComponent = WebComponentsHelper.getComposition(component);
+        com.vaadin.ui.Component vComponent = component.unwrapComposition(com.vaadin.ui.Component.class);
 
         this.component.setExpandRatio(vComponent, ratio);
     }
