@@ -151,10 +151,10 @@ public class WebGroupTable<E extends Entity> extends WebAbstractTable<CubaGroupT
         }
 
         @SuppressWarnings("unchecked")
-        List actualProperties = new ArrayList(component.getGroupProperties());
+        List groupProperties = new ArrayList(component.getGroupProperties());
 
-        for (int i = 0; i < actualProperties.size(); i++) {
-            String columnId = actualProperties.get(i).toString();
+        for (int i = 0; i < groupProperties.size(); i++) {
+            String columnId = groupProperties.get(i).toString();
 
             String settingsColumnId = settingsProperties.get(i).attributeValue("id");
 

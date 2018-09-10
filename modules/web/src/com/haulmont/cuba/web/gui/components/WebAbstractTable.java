@@ -1773,14 +1773,14 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             }
         }
 
-        String settingSortProperty = null;
-        String settingSortAscending = null;
+        String settingsSortProperty = null;
+        String settingsSortAscending = null;
 
         Element columnsElem = element.element("columns");
 
         if (columnsElem != null) {
-            settingSortProperty = columnsElem.attributeValue("sortProperty");
-            settingSortAscending = columnsElem.attributeValue("sortAscending");
+            settingsSortProperty = columnsElem.attributeValue("sortProperty");
+            settingsSortAscending = columnsElem.attributeValue("sortAscending");
         }
 
         boolean commonSettingsChanged = isCommonTableSettingsChanged(columnsElem);
@@ -1807,7 +1807,7 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             settingsChanged = true;
         }
 
-        if (isSettingSortPropertyChanged(settingSortProperty, settingSortAscending) || commonSettingsChanged) {
+        if (isSettingsSortPropertyChanged(settingsSortProperty, settingsSortAscending) || commonSettingsChanged) {
             MetaPropertyPath sortProperty = (MetaPropertyPath) component.getSortContainerPropertyId();
             if (sortProperty != null) {
                 Boolean sortAscending = component.isSortAscending();
@@ -1815,10 +1815,10 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
                 if (columnsElem != null) {
                     columnsElem.addAttribute("sortProperty", sortProperty.toString());
                     columnsElem.addAttribute("sortAscending", sortAscending.toString());
+
+                    settingsChanged = true;
                 }
             }
-
-            settingsChanged = true;
         }
 
         return settingsChanged;
@@ -1829,28 +1829,29 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             return true;
         }
 
-        List<Element> elements = columnsElem.elements("columns");
+        List<Element> settingsColumnList = columnsElem.elements("columns");
 
         Object[] visibleColumns = component.getVisibleColumns();
         for (int i = 0; i < visibleColumns.length; i++) {
-            Object column = visibleColumns[i];
-            Element settingColumn = elements.get(i);
-            String settingColumnId = settingColumn.attributeValue("id");
+            Object columnId = visibleColumns[i];
 
-            if (column.toString().equals(settingColumnId)) {
-                int columnWidth = component.getColumnWidth(column);
+            Element settingsColumn = settingsColumnList.get(i);
+            String settingsColumnId = settingsColumn.attributeValue("id");
 
-                String settWidth = settingColumn.attributeValue("width");
-                int settingColumnWidth = settWidth == null ? -1 : Integer.parseInt(settWidth);
+            if (columnId.toString().equals(settingsColumnId)) {
+                int columnWidth = component.getColumnWidth(columnId);
+
+                String settingsColumnWidth = settingsColumn.attributeValue("width");
+                int settingColumnWidth = settingsColumnWidth == null ? -1 : Integer.parseInt(settingsColumnWidth);
 
                 if (columnWidth != settingColumnWidth) {
                     return true;
                 }
 
-                boolean columnVisible = !component.isColumnCollapsed(column);
-                boolean settingColumnVisible = Boolean.parseBoolean(settingColumn.attributeValue("visible"));
+                boolean columnVisible = !component.isColumnCollapsed(columnId);
+                boolean settingsColumnVisible = Boolean.parseBoolean(settingsColumn.attributeValue("visible"));
 
-                if (columnVisible != settingColumnVisible) {
+                if (columnVisible != settingsColumnVisible) {
                     return true;
                 }
             } else {
@@ -1861,23 +1862,20 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
         return false;
     }
 
-    protected boolean isSettingSortPropertyChanged(String settingSortProperty, String settingSortAscending) {
+    protected boolean isSettingsSortPropertyChanged(String settingsSortProperty, String settingsSortAscending) {
         MetaPropertyPath sortProperty = (MetaPropertyPath) component.getSortContainerPropertyId();
 
-        if (settingSortProperty == null && sortProperty == null) {
+        if (settingsSortProperty == null && sortProperty == null) {
             return false;
         }
 
-        if (settingSortProperty == null) {
-            return true;
-        }
-
-        if (!sortProperty.toString().equals(settingSortProperty)) {
+        if (settingsSortProperty == null ||
+                !sortProperty.toString().equals(settingsSortProperty)) {
             return true;
         }
 
         Boolean sortAscending = component.isSortAscending();
-        if (!sortAscending.equals(Boolean.parseBoolean(settingSortAscending))) {
+        if (!sortAscending.equals(Boolean.parseBoolean(settingsSortAscending))) {
             return true;
         }
 
