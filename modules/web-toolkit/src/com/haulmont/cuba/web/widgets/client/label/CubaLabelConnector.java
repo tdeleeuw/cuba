@@ -31,7 +31,6 @@ import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.Icon;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.label.LabelConnector;
-import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(value = CubaLabel.class, loadStyle = Connect.LoadStyle.EAGER)
@@ -112,12 +111,12 @@ public class CubaLabelConnector extends LabelConnector {
     }
 
     protected void updateContextHelp(VLabel widget) {
-        if (isContextHelpIconEnabled()) {
+        if (isContextHelpIconEnabled(getState())) {
             Element contextHelpIcon = DOM.createSpan();
             contextHelpIcon.setInnerHTML("?");
             contextHelpIcon.setClassName(CONTEXT_HELP_CLASSNAME);
 
-            if (hasContextHelpIconListeners()) {
+            if (hasContextHelpIconListeners(getState())) {
                 contextHelpIcon.addClassName(CONTEXT_HELP_CLICKABLE_CLASSNAME);
             }
 
@@ -126,16 +125,5 @@ public class CubaLabelConnector extends LabelConnector {
             widget.getElement().appendChild(contextHelpIcon);
             DOM.sinkEvents(contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
         }
-    }
-
-    protected boolean isContextHelpIconEnabled() {
-        return hasContextHelpIconListeners()
-                || getState().contextHelpText != null
-                && !getState().contextHelpText.isEmpty();
-    }
-
-    protected boolean hasContextHelpIconListeners() {
-        return getState().registeredEventListeners != null
-                && getState().registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }

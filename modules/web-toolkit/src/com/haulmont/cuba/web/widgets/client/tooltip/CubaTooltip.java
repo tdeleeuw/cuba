@@ -170,6 +170,7 @@ public class CubaTooltip extends VTooltip {
                 element = element.getParentElement().cast();
 
                 Widget widget = WidgetUtil.findWidget(element);
+                // TODO: gg, marker interface
                 if (!(widget instanceof CubaCheckBoxWidget)
                         && !(widget instanceof VLabel)) {
                     int index = DOM.getChildIndex(element.getParentElement().cast(), element);

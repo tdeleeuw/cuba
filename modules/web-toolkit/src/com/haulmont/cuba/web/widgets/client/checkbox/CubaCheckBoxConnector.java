@@ -27,7 +27,6 @@ import com.haulmont.cuba.web.widgets.CubaCheckBox;
 import com.vaadin.client.VTooltip;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.checkbox.CheckBoxConnector;
-import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(value = CubaCheckBox.class, loadStyle = Connect.LoadStyle.EAGER)
@@ -58,13 +57,13 @@ public class CubaCheckBoxConnector extends CheckBoxConnector {
         super.onStateChanged(stateChangeEvent);
 
         if (!getWidget().captionManagedByLayout
-                && isContextHelpIconEnabled()) {
+                && isContextHelpIconEnabled(getState())) {
             if (getWidget().contextHelpIcon == null) {
                 getWidget().contextHelpIcon = DOM.createSpan();
                 getWidget().contextHelpIcon.setInnerHTML("?");
                 getWidget().contextHelpIcon.setClassName(CONTEXT_HELP_CLASSNAME);
 
-                if (hasContextHelpIconListeners()) {
+                if (hasContextHelpIconListeners(getState())) {
                     getWidget().contextHelpIcon.addClassName(CONTEXT_HELP_CLICKABLE_CLASSNAME);
                 }
 
@@ -89,20 +88,9 @@ public class CubaCheckBoxConnector extends CheckBoxConnector {
 
         Element target = Element.as(event.getNativeEvent().getEventTarget());
         if (target == getWidget().contextHelpIcon) {
-            if (hasContextHelpIconListeners()) {
+            if (hasContextHelpIconListeners(getState())) {
                 contextHelpIconClick(event);
             }
         }
-    }
-
-    protected boolean isContextHelpIconEnabled() {
-        return hasContextHelpIconListeners()
-                || getState().contextHelpText != null
-                && !getState().contextHelpText.isEmpty();
-    }
-
-    protected boolean hasContextHelpIconListeners() {
-        return getState().registeredEventListeners != null
-                && getState().registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }
