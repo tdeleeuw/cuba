@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--
+  ~ Copyright (c) 2008-2018 Haulmont.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        html,
+        body {
+          margin: 0;
+          font: 400 1em/1.5 "Helvetica Neue", Roboto, "Segoe UI", sans-serif;
+          font-size: 1.1em;
+        }
+
+        .notification {
+          text-align: center;
+          vertical-align: middle;
+          margin: 40px
+        }
+
+        .browser-item-container {
+          width: 450px;
+          display: inline-block;
+        }
+
+        .browser-item {
+          height: 70px;
+          width: 450px;
+          margin-bottom: 10px;
+          text-align: left;
+        }
+
+        .browser-item img {
+          display: inline-block;
+          width: 70px;
+          height: 70px
+        }
+
+        .browser-item p {
+          display: inline-block;
+          position: absolute;
+          line-height: 70px;
+          height: 70px;
+          margin: 0 10px;
+        }
+
+        a {
+          color: #197de1;
+          text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+<div class="notification">
+    <p>Unfortunately, you are using an <strong>outdated</strong> browser.</p>
+    <p>Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+    <p>Supported browsers:</p>
+    <div class="browser-item-container">
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/chrome.png">
+            <p><strong>Chrome</strong></p>
+        </div>
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/firefox.png">
+            <p><strong>Mozilla Firefox</strong> version 45 and later</p>
+        </div>
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/safari.png">
+            <p><strong>Safari</strong> version 4.1 and later</p>
+        </div>
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/opera.png">
+            <p><strong>Opera</strong> version 11 and later</p>
+        </div>
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/edge.png">
+            <p><strong>Microsoft Edge</strong></p>
+        </div>
+        <div class="browser-item">
+            <img src="VAADIN/themes/halo/images/browsers/explorer.png">
+            <p><strong>Internet Explorer</strong> version 11 and later</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
