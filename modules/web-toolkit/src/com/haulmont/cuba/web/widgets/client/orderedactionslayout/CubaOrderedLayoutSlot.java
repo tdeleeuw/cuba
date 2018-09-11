@@ -36,7 +36,7 @@ import com.vaadin.client.ui.Icon;
 import com.vaadin.client.ui.orderedlayout.CaptionPosition;
 import com.vaadin.client.ui.orderedlayout.Slot;
 import com.vaadin.client.ui.orderedlayout.VAbstractOrderedLayout;
-import com.vaadin.shared.AbstractFieldState;
+import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.communication.SharedState;
 
 import java.util.List;
@@ -280,6 +280,6 @@ public class CubaOrderedLayoutSlot extends Slot implements ClickHandler {
 
     protected boolean hasContextHelpIconListeners(SharedState state) {
         return state.registeredEventListeners != null
-                && state.registeredEventListeners.contains(AbstractFieldState.CONTEXT_HELP_ICON_CLICK_EVENT);
+                && state.registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }

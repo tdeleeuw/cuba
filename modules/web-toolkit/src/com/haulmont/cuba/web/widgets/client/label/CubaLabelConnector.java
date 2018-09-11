@@ -17,19 +17,28 @@
 
 package com.haulmont.cuba.web.widgets.client.label;
 
+import com.google.gwt.aria.client.Roles;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.haulmont.cuba.web.widgets.CubaLabel;
 import com.vaadin.client.Profiler;
+import com.vaadin.client.VTooltip;
 import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.Icon;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.label.LabelConnector;
+import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ui.Connect;
 
 @Connect(value = CubaLabel.class, loadStyle = Connect.LoadStyle.EAGER)
 public class CubaLabelConnector extends LabelConnector {
+
+    public static final String CONTEXT_HELP_CLASSNAME = "c-context-help-button";
+    public static final String CONTEXT_HELP_CLICKABLE_CLASSNAME = "c-context-help-button-clickable";
 
     @Override
     public boolean delegateCaptionHandling() {
@@ -82,7 +91,9 @@ public class CubaLabelConnector extends LabelConnector {
             getWidget().removeStyleDependentName("empty");
         }
 
-        updateIcon();
+        updateIcon(widget);
+
+        updateContextHelp(widget);
 
         Profiler.leave("LabelConnector.onStateChanged update content");
 
@@ -93,10 +104,38 @@ public class CubaLabelConnector extends LabelConnector {
         }
     }
 
-    protected void updateIcon() {
+    protected void updateIcon(VLabel widget) {
         Icon icon = getIcon();
         if (icon != null) {
-            getWidget().getElement().insertFirst(icon.getElement());
+            widget.getElement().insertFirst(icon.getElement());
         }
+    }
+
+    protected void updateContextHelp(VLabel widget) {
+        if (isContextHelpIconEnabled()) {
+            Element contextHelpIcon = DOM.createSpan();
+            contextHelpIcon.setInnerHTML("?");
+            contextHelpIcon.setClassName(CONTEXT_HELP_CLASSNAME);
+
+            if (hasContextHelpIconListeners()) {
+                contextHelpIcon.addClassName(CONTEXT_HELP_CLICKABLE_CLASSNAME);
+            }
+
+            Roles.getTextboxRole().setAriaHiddenState(contextHelpIcon, true);
+
+            widget.getElement().appendChild(contextHelpIcon);
+            DOM.sinkEvents(contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
+        }
+    }
+
+    protected boolean isContextHelpIconEnabled() {
+        return hasContextHelpIconListeners()
+                || getState().contextHelpText != null
+                && !getState().contextHelpText.isEmpty();
+    }
+
+    protected boolean hasContextHelpIconListeners() {
+        return getState().registeredEventListeners != null
+                && getState().registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }

@@ -66,6 +66,7 @@ public class ButtonLoader extends AbstractComponentLoader<Button> {
         loadCaption(resultComponent, element);
         loadCaptionAsHtml(resultComponent, element);
         loadDescription(resultComponent, element);
+        loadContextHelp(resultComponent, element);
         loadAction(resultComponent, element);
         loadIcon(resultComponent, element);
 

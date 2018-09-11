@@ -17,7 +17,7 @@
 package com.haulmont.cuba.gui.components;
 
 public interface Button extends Component, Component.HasCaption, Component.BelongToFrame, ActionOwner,
-                                Component.HasIcon, Component.Focusable {
+                                Component.HasIcon, Component.Focusable, HasContextHelp {
     String NAME = "button";
 
     /**

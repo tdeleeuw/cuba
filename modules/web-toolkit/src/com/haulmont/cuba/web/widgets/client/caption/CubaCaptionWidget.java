@@ -31,6 +31,7 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.HasContextHelpConnector;
 import com.vaadin.client.ui.ImageIcon;
 import com.vaadin.client.ui.aria.AriaHelper;
+import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ComponentConstants;
 import com.vaadin.shared.communication.SharedState;
 import com.vaadin.shared.ui.ComponentStateUtil;
@@ -256,14 +257,14 @@ public class CubaCaptionWidget extends VCaption implements ClickHandler {
 
     protected boolean isContextHelpIconEnabled(SharedState state) {
         return hasContextHelpIconListeners(state)
-                || (state instanceof AbstractFieldState)
-                && ((AbstractFieldState) state).contextHelpText != null
-                && !((AbstractFieldState) state).contextHelpText.isEmpty();
+                || (state instanceof AbstractComponentState)
+                && ((AbstractComponentState) state).contextHelpText != null
+                && !((AbstractComponentState) state).contextHelpText.isEmpty();
     }
 
     protected boolean hasContextHelpIconListeners(SharedState state) {
         return state.registeredEventListeners != null
-                && state.registeredEventListeners.contains(AbstractFieldState.CONTEXT_HELP_ICON_CLICK_EVENT);
+                && state.registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 
     @Override

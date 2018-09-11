@@ -20,10 +20,7 @@ import com.haulmont.bali.events.EventHub;
 import com.haulmont.bali.events.EventRouter;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.gui.components.Frame;
-import com.haulmont.cuba.gui.components.HasDebugId;
-import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.sys.EventHubOwner;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.web.AppUI;
@@ -40,11 +37,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
         extends EventHub
         implements Component, Component.Wrapper, Component.HasXmlDescriptor, Component.BelongToFrame, Component.HasIcon,
-                   Component.HasCaption, HasDebugId, EventHubOwner {
+                   Component.HasCaption, HasDebugId, EventHubOwner, HasContextHelp {
 
     public static final String ICON_STYLE = "icon";
 
@@ -363,6 +361,36 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
     @Override
     public void setXmlDescriptor(Element element) {
         this.element = element;
+    }
+
+    @Override
+    public String getContextHelpText() {
+        return ((AbstractComponent) component).getContextHelpText();
+    }
+
+    @Override
+    public void setContextHelpText(String contextHelpText) {
+        ((AbstractComponent) component).setContextHelpText(contextHelpText);
+    }
+
+    @Override
+    public boolean isContextHelpTextHtmlEnabled() {
+        return ((AbstractComponent) component).isContextHelpTextHtmlEnabled();
+    }
+
+    @Override
+    public void setContextHelpTextHtmlEnabled(boolean enabled) {
+        ((AbstractComponent) component).setContextHelpTextHtmlEnabled(enabled);
+    }
+
+    @Override
+    public Consumer<ContextHelpIconClickEvent> getContextHelpIconClickHandler() {
+        return null; // todo vaadin8
+    }
+
+    @Override
+    public void setContextHelpIconClickHandler(Consumer<ContextHelpIconClickEvent> handler) {
+        // todo vaadin8
     }
 
     @Override

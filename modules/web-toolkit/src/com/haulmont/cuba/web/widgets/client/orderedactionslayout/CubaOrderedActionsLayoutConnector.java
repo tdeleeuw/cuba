@@ -26,7 +26,7 @@ import com.vaadin.client.ui.*;
 import com.vaadin.client.ui.aria.AriaHelper;
 import com.vaadin.client.ui.orderedlayout.AbstractOrderedLayoutConnector;
 import com.vaadin.client.ui.orderedlayout.CaptionPosition;
-import com.vaadin.shared.AbstractFieldState;
+import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ComponentConstants;
 import com.vaadin.shared.communication.SharedState;
 import com.vaadin.shared.communication.URLReference;
@@ -114,13 +114,13 @@ public class CubaOrderedActionsLayoutConnector extends AbstractOrderedLayoutConn
 
     protected boolean isContextHelpIconEnabled(SharedState state) {
         return hasContextHelpIconListeners(state)
-                || (state instanceof AbstractFieldState)
-                && ((AbstractFieldState) state).contextHelpText != null
-                && !((AbstractFieldState) state).contextHelpText.isEmpty();
+                || (state instanceof AbstractComponentState)
+                && ((AbstractComponentState) state).contextHelpText != null
+                && !((AbstractComponentState) state).contextHelpText.isEmpty();
     }
 
     protected boolean hasContextHelpIconListeners(SharedState state) {
         return state.registeredEventListeners != null
-                && state.registeredEventListeners.contains(AbstractFieldState.CONTEXT_HELP_ICON_CLICK_EVENT);
+                && state.registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }

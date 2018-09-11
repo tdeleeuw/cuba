@@ -27,8 +27,8 @@ import com.haulmont.cuba.web.widgets.CubaCheckBox;
 import com.vaadin.client.VTooltip;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.checkbox.CheckBoxConnector;
+import com.vaadin.shared.AbstractComponentState;
 import com.vaadin.shared.ui.Connect;
-import com.vaadin.shared.AbstractFieldState;
 
 @Connect(value = CubaCheckBox.class, loadStyle = Connect.LoadStyle.EAGER)
 public class CubaCheckBoxConnector extends CheckBoxConnector {
@@ -103,6 +103,6 @@ public class CubaCheckBoxConnector extends CheckBoxConnector {
 
     protected boolean hasContextHelpIconListeners() {
         return getState().registeredEventListeners != null
-                && getState().registeredEventListeners.contains(AbstractFieldState.CONTEXT_HELP_ICON_CLICK_EVENT);
+                && getState().registeredEventListeners.contains(AbstractComponentState.CONTEXT_HELP_ICON_CLICK_EVENT);
     }
 }
