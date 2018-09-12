@@ -17,58 +17,50 @@
 package com.haulmont.cuba.web.sys;
 
 import com.haulmont.bali.util.ParamsMap;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.core.global.Resources;
-import com.haulmont.cuba.core.global.TemplateHelper;
+import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.web.WebConfig;
 import com.vaadin.server.*;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 public class CubaUnsupportedBrowserHandler extends UnsupportedBrowserHandler {
 
-    public static final String UNSUPPORTED_PAGE_TEMPLATE_PATH = "/com/haulmont/cuba/web/sys/unsupported-page-template.html";
-
     protected Resources resources;
     protected Messages messages;
+    protected WebConfig webConfig;
 
     public CubaUnsupportedBrowserHandler() {
         super();
 
         resources = AppBeans.get(Resources.NAME);
         messages = AppBeans.get(Messages.NAME);
+        webConfig = AppBeans.get(Configuration.class)
+                .getConfig(WebConfig.class);
     }
 
     @Override
     protected void writeBrowserTooOldPage(VaadinRequest request, VaadinResponse response) throws IOException {
-        try (Writer page = response.getWriter()) {
+        try (BufferedWriter page = new BufferedWriter(new OutputStreamWriter(
+                response.getOutputStream(), StandardCharsets.UTF_8))) {
 
             Locale locale = request.getLocale();
 
-            ParamsMap paramsMap = ParamsMap.of();
-            paramsMap.pair("captionMessage", messages.getMainMessage("unsupportedPage.captionMessage", locale));
-            paramsMap.pair("descriptionMessage", messages.getMainMessage("unsupportedPage.descriptionMessage", locale));
-            paramsMap.pair("browserListCaption", messages.getMainMessage("unsupportedPage.browserListCaption", locale));
+            ParamsMap paramsMap = ParamsMap.of()
+                    .pair("captionMessage", messages.getMainMessage("unsupportedPage.captionMessage", locale))
+                    .pair("descriptionMessage", messages.getMainMessage("unsupportedPage.descriptionMessage", locale))
+                    .pair("browserListCaption", messages.getMainMessage("unsupportedPage.browserListCaption", locale))
+                    .pair("chromeMessage", messages.getMainMessage("unsupportedPage.chromeMessage", locale))
+                    .pair("firefoxMessage", messages.getMainMessage("unsupportedPage.firefoxMessage", locale))
+                    .pair("safariMessage", messages.getMainMessage("unsupportedPage.safariMessage", locale))
+                    .pair("operaMessage", messages.getMainMessage("unsupportedPage.operaMessage", locale))
+                    .pair("edgeMessage", messages.getMainMessage("unsupportedPage.edgeMessage", locale))
+                    .pair("explorerMessage", messages.getMainMessage("unsupportedPage.explorerMessage", locale));
 
-            paramsMap.pair("chromeImagePath", messages.getMainMessage("unsupportedPage.chromeImagePath"));
-            paramsMap.pair("firefoxImagePath", messages.getMainMessage("unsupportedPage.firefoxImagePath"));
-            paramsMap.pair("safariImagePath", messages.getMainMessage("unsupportedPage.safariImagePath"));
-            paramsMap.pair("operaImagePath", messages.getMainMessage("unsupportedPage.operaImagePath"));
-            paramsMap.pair("edgeImagePath", messages.getMainMessage("unsupportedPage.edgeImagePath"));
-            paramsMap.pair("explorerImagePath", messages.getMainMessage("unsupportedPage.explorerImagePath"));
+            String template = resources.getResourceAsString(webConfig.getUnsupportedPagePath());
 
-            paramsMap.pair("chromeMessage", messages.getMainMessage("unsupportedPage.chromeMessage", locale));
-            paramsMap.pair("firefoxMessage", messages.getMainMessage("unsupportedPage.firefoxMessage", locale));
-            paramsMap.pair("safariMessage", messages.getMainMessage("unsupportedPage.safariMessage", locale));
-            paramsMap.pair("operaMessage", messages.getMainMessage("unsupportedPage.operaMessage", locale));
-            paramsMap.pair("edgeMessage", messages.getMainMessage("unsupportedPage.edgeMessage", locale));
-            paramsMap.pair("explorerMessage", messages.getMainMessage("unsupportedPage.explorerMessage", locale));
-
-            String stringTemplate = resources.getResourceAsString(UNSUPPORTED_PAGE_TEMPLATE_PATH);
-
-            String pageContent = TemplateHelper.processTemplate(stringTemplate, paramsMap.create());
+            String pageContent = TemplateHelper.processTemplate(template, paramsMap.create());
 
             page.write(pageContent);
         }
