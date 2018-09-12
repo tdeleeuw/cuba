@@ -2358,6 +2358,8 @@
         <xs:attributeGroup ref="hasEnableProp"/>
         <xs:attributeGroup ref="hasVisibility"/>
         <xs:attributeGroup ref="hasTabIndex"/>
+        <xs:attributeGroup ref="hasCaption"/>
+        <xs:attributeGroup ref="hasContextHelp"/>
     </xs:complexType>
 
     <!-- TwinColumn -->
