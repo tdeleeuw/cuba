@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <style>
@@ -67,33 +67,33 @@
 </head>
 <body>
 <div class="notification">
-    <p>Unfortunately, you are using an <strong>outdated</strong> browser.</p>
-    <p>Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
-    <p>Supported browsers:</p>
+    <p>${captionMessage}</p>
+    <p>${descriptionMessage}</p>
+    <p>${browserListCaption}</p>
     <div class="browser-item-container">
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/chrome.png">
-            <p><strong>Chrome</strong></p>
+            <img src="${chromeImagePath}">
+            <p>${chromeMessage}</p>
         </div>
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/firefox.png">
-            <p><strong>Mozilla Firefox</strong> version 45 and later</p>
+            <img src="${firefoxImagePath}">
+            <p>${firefoxMessage}</p>
         </div>
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/safari.png">
-            <p><strong>Safari</strong> version 4.1 and later</p>
+            <img src="${safariImagePath}">
+            <p>${safariMessage}</p>
         </div>
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/opera.png">
-            <p><strong>Opera</strong> version 11 and later</p>
+            <img src="${operaImagePath}">
+            <p>${operaMessage}</p>
         </div>
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/edge.png">
-            <p><strong>Microsoft Edge</strong></p>
+            <img src="${edgeImagePath}">
+            <p>${edgeMessage}</p>
         </div>
         <div class="browser-item">
-            <img src="VAADIN/themes/halo/images/browsers/explorer.png">
-            <p><strong>Internet Explorer</strong> version 11</p>
+            <img src="${explorerImagePath}">
+            <p>${explorerMessage}</p>
         </div>
     </div>
 </div>
