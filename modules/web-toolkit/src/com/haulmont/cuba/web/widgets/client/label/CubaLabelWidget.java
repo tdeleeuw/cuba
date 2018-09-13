@@ -21,26 +21,24 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.vaadin.client.ui.VLabel;
 
+import java.util.function.Consumer;
+
 /**
  * @author glebfox
  */
 public class CubaLabelWidget extends VLabel {
 
-    protected ContextHelpClickHandler contextHelpClickHandler;
     protected Element contextHelpIcon;
+    protected Consumer<Event> contextHelpClickHandler;
 
     @Override
     public void onBrowserEvent(Event event) {
-        super.onBrowserEvent(event);
-
         if (DOM.eventGetType(event) == Event.ONCLICK
                 && contextHelpClickHandler != null
                 && DOM.eventGetTarget(event) == contextHelpIcon) {
-            contextHelpClickHandler.onClick(event);
+            contextHelpClickHandler.accept(event);
+        } else {
+            super.onBrowserEvent(event);
         }
-    }
-
-    interface ContextHelpClickHandler {
-        void onClick(Event event);
     }
 }
