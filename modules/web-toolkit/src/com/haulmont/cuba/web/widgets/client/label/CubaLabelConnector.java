@@ -19,9 +19,7 @@ package com.haulmont.cuba.web.widgets.client.label;
 
 import com.google.gwt.aria.client.Roles;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.haulmont.cuba.web.widgets.CubaLabel;
