@@ -28,14 +28,12 @@ import com.haulmont.cuba.web.gui.icons.IconResolver;
 import com.vaadin.server.Resource;
 import com.vaadin.server.Sizeable;
 import com.vaadin.server.UserError;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Layout;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Element;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -55,6 +53,9 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
 
     protected Alignment alignment = Alignment.TOP_LEFT;
     protected String icon;
+
+    protected Consumer<ContextHelpIconClickEvent> contextHelpIconClickHandler;
+    protected Registration contextHelpIconClickListener;
 
     // todo remove
     private EventRouter eventRouter = null;
@@ -365,32 +366,54 @@ public abstract class WebAbstractComponent<T extends com.vaadin.ui.Component>
 
     @Override
     public String getContextHelpText() {
-        return ((AbstractComponent) component).getContextHelpText();
+        return ((AbstractComponent) getComposition()).getContextHelpText();
     }
 
     @Override
     public void setContextHelpText(String contextHelpText) {
-        ((AbstractComponent) component).setContextHelpText(contextHelpText);
+        ((AbstractComponent) getComposition()).setContextHelpText(contextHelpText);
     }
 
     @Override
     public boolean isContextHelpTextHtmlEnabled() {
-        return ((AbstractComponent) component).isContextHelpTextHtmlEnabled();
+        return ((AbstractComponent) getComposition()).isContextHelpTextHtmlEnabled();
     }
 
     @Override
     public void setContextHelpTextHtmlEnabled(boolean enabled) {
-        ((AbstractComponent) component).setContextHelpTextHtmlEnabled(enabled);
+        ((AbstractComponent) getComposition()).setContextHelpTextHtmlEnabled(enabled);
     }
 
     @Override
     public Consumer<ContextHelpIconClickEvent> getContextHelpIconClickHandler() {
-        return null; // todo vaadin8
+        return contextHelpIconClickHandler;
     }
 
     @Override
     public void setContextHelpIconClickHandler(Consumer<ContextHelpIconClickEvent> handler) {
-        // todo vaadin8
+        if (!Objects.equals(this.contextHelpIconClickHandler, handler)) {
+            this.contextHelpIconClickHandler = handler;
+
+            if (handler == null) {
+                contextHelpIconClickListener.remove();
+                contextHelpIconClickListener = null;
+            } else if (contextHelpIconClickListener == null) {
+                contextHelpIconClickListener = ((AbstractComponent) getComposition())
+                        .addContextHelpIconClickListener(this::onIconClick);
+            }
+        }
+    }
+
+    protected void onIconClick(com.vaadin.ui.Component.HasContextHelp.ContextHelpIconClickEvent e) {
+        ContextHelpIconClickEvent event = new ContextHelpIconClickEvent(WebAbstractComponent.this);
+        fireContextHelpIconClick(event);
+    }
+
+
+    protected void fireContextHelpIconClick(ContextHelpIconClickEvent event) {
+        if (contextHelpIconClickHandler != null) {
+            contextHelpIconClickHandler.accept(event);
+        }
     }
 
     @Override

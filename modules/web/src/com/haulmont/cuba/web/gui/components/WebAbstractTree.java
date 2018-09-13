@@ -124,37 +124,6 @@ public abstract class WebAbstractTree<T extends CubaTree, E extends Entity>
     }
 
     @Override
-    public String getContextHelpText() {
-        return ((AbstractComponent) getComposition()).getContextHelpText();
-    }
-
-    @Override
-    public void setContextHelpText(String contextHelpText) {
-        ((AbstractComponent) getComposition()).setContextHelpText(contextHelpText);
-    }
-
-    @Override
-    public boolean isContextHelpTextHtmlEnabled() {
-        return ((AbstractComponent) getComposition()).isContextHelpTextHtmlEnabled();
-    }
-
-    @Override
-    public void setContextHelpTextHtmlEnabled(boolean enabled) {
-        ((AbstractComponent) getComposition()).setContextHelpTextHtmlEnabled(enabled);
-    }
-
-    @Override
-    public Consumer<ContextHelpIconClickEvent> getContextHelpIconClickHandler() {
-        // todo: implement
-        return null;
-    }
-
-    @Override
-    public void setContextHelpIconClickHandler(Consumer<ContextHelpIconClickEvent> handler) {
-        // todo: implement
-    }
-
-    @Override
     public void setDescription(String description) {
         if (getComposition() instanceof AbstractComponent) {
             ((AbstractComponent) getComposition()).setDescription(description);

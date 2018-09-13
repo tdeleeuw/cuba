@@ -1844,37 +1844,6 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
     }
 
     @Override
-    public String getContextHelpText() {
-        return ((AbstractComponent) getComposition()).getContextHelpText();
-    }
-
-    @Override
-    public void setContextHelpText(String contextHelpText) {
-        ((AbstractComponent) getComposition()).setContextHelpText(contextHelpText);
-    }
-
-    @Override
-    public boolean isContextHelpTextHtmlEnabled() {
-        return ((AbstractComponent) getComposition()).isContextHelpTextHtmlEnabled();
-    }
-
-    @Override
-    public void setContextHelpTextHtmlEnabled(boolean enabled) {
-        ((AbstractComponent) getComposition()).setContextHelpTextHtmlEnabled(enabled);
-    }
-
-    @Override
-    public Consumer<ContextHelpIconClickEvent> getContextHelpIconClickHandler() {
-        // todo: implement
-        return null;
-    }
-
-    @Override
-    public void setContextHelpIconClickHandler(Consumer<ContextHelpIconClickEvent> handler) {
-        // todo: implement
-    }
-
-    @Override
     public ButtonsPanel getButtonsPanel() {
         return buttonsPanel;
     }
