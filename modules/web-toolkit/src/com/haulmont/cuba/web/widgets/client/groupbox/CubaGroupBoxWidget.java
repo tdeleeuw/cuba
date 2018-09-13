@@ -43,6 +43,8 @@ public class CubaGroupBoxWidget extends VPanel implements HasEnabled {
     public Element captionWrap;
     public Element expander = DOM.createSpan();
 
+    protected Element contextHelpIcon;
+
     public Element captionStartDeco = DOM.createDiv();
     public Element captionEndDeco = DOM.createDiv();
     public Element captionTextNode;
