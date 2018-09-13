@@ -21,6 +21,7 @@ import com.google.gwt.aria.client.Roles;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.PreElement;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.haulmont.cuba.web.widgets.CubaLabel;
@@ -45,6 +46,11 @@ public class CubaLabelConnector extends LabelConnector {
     }
 
     @Override
+    public CubaLabelWidget getWidget() {
+        return (CubaLabelWidget) super.getWidget();
+    }
+
+    @Override
     public void onStateChanged(StateChangeEvent stateChangeEvent) {
         // CAUTION copied from superclass
         // todo rework! extract extenstion points
@@ -52,7 +58,7 @@ public class CubaLabelConnector extends LabelConnector {
 
         boolean sinkOnloads = false;
         Profiler.enter("LabelConnector.onStateChanged update content");
-        VLabel widget = getWidget();
+        CubaLabelWidget widget = getWidget();
         switch (getState().contentMode) {
             case PREFORMATTED:
                 PreElement preElement = Document.get().createPreElement();
@@ -110,20 +116,23 @@ public class CubaLabelConnector extends LabelConnector {
         }
     }
 
-    protected void updateContextHelp(VLabel widget) {
+    protected void updateContextHelp(CubaLabelWidget widget) {
         if (isContextHelpIconEnabled(getState())) {
-            Element contextHelpIcon = DOM.createSpan();
-            contextHelpIcon.setInnerHTML("?");
-            contextHelpIcon.setClassName(CONTEXT_HELP_CLASSNAME);
+            widget.contextHelpIcon = DOM.createSpan();
+            widget.contextHelpIcon.setInnerHTML("?");
+            widget.contextHelpIcon.setClassName(CONTEXT_HELP_CLASSNAME);
 
             if (hasContextHelpIconListeners(getState())) {
-                contextHelpIcon.addClassName(CONTEXT_HELP_CLICKABLE_CLASSNAME);
+                widget.contextHelpIcon.addClassName(CONTEXT_HELP_CLICKABLE_CLASSNAME);
             }
 
-            Roles.getTextboxRole().setAriaHiddenState(contextHelpIcon, true);
+            Roles.getTextboxRole().setAriaHiddenState(widget.contextHelpIcon, true);
 
-            widget.getElement().appendChild(contextHelpIcon);
-            DOM.sinkEvents(contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
+            widget.getElement().appendChild(widget.contextHelpIcon);
+            DOM.sinkEvents(widget.contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
+
+            widget.contextHelpClickHandler =
+                    this::contextHelpIconClick;
         }
     }
 }
