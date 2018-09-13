@@ -198,6 +198,8 @@ public class CubaGroupBoxConnector extends PanelConnector {
 
                 getWidget().captionNode.appendChild(getWidget().contextHelpIcon);
                 DOM.sinkEvents(getWidget().contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
+
+                getWidget().contextHelpClickHandler = this::contextHelpIconClick;
             } else {
                 getWidget().contextHelpIcon.getStyle().clearDisplay();
 
