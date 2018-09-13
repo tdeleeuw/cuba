@@ -127,7 +127,6 @@ public class CubaLabelConnector extends LabelConnector {
             Roles.getTextboxRole().setAriaHiddenState(widget.contextHelpIcon, true);
 
             widget.getElement().appendChild(widget.contextHelpIcon);
-            DOM.sinkEvents(widget.contextHelpIcon, VTooltip.TOOLTIP_EVENTS | Event.ONCLICK);
 
             widget.contextHelpClickHandler =
                     this::contextHelpIconClick;
