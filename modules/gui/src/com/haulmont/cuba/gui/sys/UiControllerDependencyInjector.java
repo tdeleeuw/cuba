@@ -39,6 +39,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.model.ScreenData;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
+import com.haulmont.cuba.gui.sys.UiControllerReflectionInspector.AnnotatedMethod;
 import com.haulmont.cuba.gui.sys.UiControllerReflectionInspector.InjectElement;
 import com.haulmont.cuba.gui.theme.ThemeConstants;
 import com.haulmont.cuba.gui.theme.ThemeConstantsManager;
@@ -60,9 +61,12 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.reflect.Proxy.newProxyInstance;
+import static org.apache.commons.lang3.reflect.MethodUtils.getAccessibleMethod;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
 
 /**
@@ -100,7 +104,83 @@ public class UiControllerDependencyInjector {
 
         initSubscribeListeners(frameOwner);
 
+        initProvideObjects(frameOwner);
+
         initUiEventListeners(frameOwner);
+    }
+
+    protected void initProvideObjects(FrameOwner frameOwner) {
+        Class<? extends FrameOwner> clazz = frameOwner.getClass();
+
+        List<AnnotatedMethod<Provide>> provideMethods = reflectionInspector.getAnnotatedProvideMethods(clazz);
+
+        for (AnnotatedMethod<Provide> annotatedMethod : provideMethods) {
+            Provide annotation = annotatedMethod.getAnnotation();
+
+            String target = ScreenDescriptorUtils.getInferredProvideId(annotation);
+            Frame frame = UiControllerUtils.getFrame(frameOwner);
+
+            Object targetInstance;
+            if (Strings.isNullOrEmpty(target)) {
+                if (annotation.target() == Target.COMPONENT // if kept default value
+                        || annotation.target() == Target.CONTROLLER) {
+                    targetInstance = frameOwner;
+                } else if (annotation.target() == Target.FRAME) {
+                    targetInstance = frame;
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            } else {
+                // todo column generators, field generators, etc
+                targetInstance = frame.getComponent(target);
+
+                if (targetInstance == null) {
+                    throw new DevelopmentException(
+                            String.format("Unable to find @Provide target %s in %s", target, frame.getId()));
+                }
+            }
+
+            String targetMethodName;
+            if (Strings.isNullOrEmpty(annotation.subject()) && annotation.type() == Object.class) {
+                // todo default target method
+                targetMethodName = null;
+            } else if (annotation.type() != Object.class) {
+                targetMethodName = "set" + annotation.type().getSimpleName();
+            } else {
+                targetMethodName = "set" + StringUtils.capitalize(annotation.subject());
+            }
+
+            Class<?> instanceClass = targetInstance.getClass();
+            Method method = annotatedMethod.getMethod();
+
+            Method targetMethod = getAccessibleMethod(instanceClass, targetMethodName);
+            if (targetMethod == null) {
+                throw new DevelopmentException(
+                        String.format("Unable to find @Provide target method %s in %s", targetMethodName, frame.getId())
+                );
+            }
+
+            if (targetMethod.getParameterCount() != 1) {
+                throw new DevelopmentException("Target method of @Provide must have 1 parameter");
+            }
+
+            Class<?> targetObjectType = targetMethod.getParameterTypes()[0];
+            if (!targetObjectType.isInterface()) {
+                throw new DevelopmentException("@Provide target method parameter must be an interface");
+            }
+
+            // todo provide optimized version for Function
+            ClassLoader classLoader = getClass().getClassLoader();
+            Object proxy = newProxyInstance(classLoader, new Class[]{targetObjectType},
+                    new ProvideInvocationHandler(targetInstance, method)
+            );
+
+            try {
+                targetMethod.invoke(targetInstance, proxy);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Unable to set declarative @Provide handler for " + method, e);
+            }
+        }
     }
 
     protected void injectValues(FrameOwner frameOwner) {
@@ -133,7 +213,7 @@ public class UiControllerDependencyInjector {
                         || annotation.target() == Target.CONTROLLER) {
                     // controller event
                     UiControllerUtils.addListener(frameOwner, parameterType, listener);
-                } else if (annotation.target() == Target.WINDOW) {
+                } else if (annotation.target() == Target.FRAME) {
                     // window or fragment event
                     Frame frame = UiControllerUtils.getFrame(frameOwner);
                     ((EventTarget) frame).addListener(parameterType, listener);
@@ -141,7 +221,6 @@ public class UiControllerDependencyInjector {
             } else {
                 // component event
                 EventTarget component = findEventTarget(frameOwner, target);
-
                 component.addListener(parameterType, listener);
             }
         }
@@ -459,6 +538,36 @@ public class UiControllerDependencyInjector {
                     "owner=" + owner.getClass() +
                     ", method=" + method +
                     '}';
+        }
+    }
+
+    public static class ProvideInvocationFunction implements Function {
+        private final Object targetInstance;
+        private final Method method;
+
+        public ProvideInvocationFunction(Object targetInstance, Method method) {
+            this.targetInstance = targetInstance;
+            this.method = method;
+        }
+
+        @Override
+        public Object apply(Object o) {
+            return null;
+        }
+    }
+
+    public static class ProvideInvocationHandler implements InvocationHandler {
+        private final Object targetInstance;
+        private final Method method;
+
+        public ProvideInvocationHandler(Object targetInstance, Method method) {
+            this.targetInstance = targetInstance;
+            this.method = method;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return null;
         }
     }
 }

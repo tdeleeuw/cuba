@@ -25,6 +25,7 @@ import com.haulmont.cuba.gui.components.AbstractEditor;
 import com.haulmont.cuba.gui.components.AbstractFrame;
 import com.haulmont.cuba.gui.components.AbstractLookup;
 import com.haulmont.cuba.gui.components.AbstractWindow;
+import com.haulmont.cuba.gui.screen.Provide;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -76,6 +77,20 @@ public class UiControllerReflectionInspector {
                             return getAnnotatedSubscribeMethodsNotCached(concreteClass);
                         }
                     });
+
+    protected final LoadingCache<Class<?>, List<AnnotatedMethod<Provide>>> provideMethodsCache =
+            CacheBuilder.newBuilder()
+                    .weakKeys()
+                    .build(new CacheLoader<Class<?>, List<AnnotatedMethod<Provide>>>() {
+                        @Override
+                        public List<AnnotatedMethod<Provide>> load(@Nonnull Class<?> concreteClass) {
+                            return getAnnotatedProvideMethodsNotCached(concreteClass);
+                        }
+                    });
+
+    public List<AnnotatedMethod<Provide>> getAnnotatedProvideMethods(Class<?> clazz) {
+        return provideMethodsCache.getUnchecked(clazz);
+    }
 
     public List<Method> getAnnotatedSubscribeMethods(Class<?> clazz) {
         return subscribeMethodsCache.getUnchecked(clazz);
@@ -178,6 +193,26 @@ public class UiControllerReflectionInspector {
                     }
                 })
                 .collect(ImmutableList.toImmutableList());
+    }
+
+    protected List<AnnotatedMethod<Provide>> getAnnotatedProvideMethodsNotCached(Class<?> clazz) {
+        Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(clazz);
+
+        List<AnnotatedMethod<Provide>> annotatedMethods = new ArrayList<>();
+
+        for (Method m : methods) {
+            if (m.getReturnType() != Void.TYPE) {
+                Provide provideAnnotation = findMergedAnnotation(m, Provide.class);
+                if (provideAnnotation != null) {
+                    if (!m.isAccessible()) {
+                        m.setAccessible(true);
+                    }
+                    annotatedMethods.add(new AnnotatedMethod<>(provideAnnotation, m));
+                }
+            }
+        }
+
+        return ImmutableList.copyOf(annotatedMethods);
     }
 
     protected List<Method> getAnnotatedSubscribeMethodsNotCached(Class<?> clazz) {
@@ -324,6 +359,25 @@ public class UiControllerReflectionInspector {
                     "element=" + element +
                     ", annotationClass=" + annotationClass +
                     '}';
+        }
+    }
+
+    public static class AnnotatedMethod<T> {
+
+        private final T annotation;
+        private final Method method;
+
+        public AnnotatedMethod(T annotation, Method method) {
+            this.annotation = annotation;
+            this.method = method;
+        }
+
+        public T getAnnotation() {
+            return annotation;
+        }
+
+        public Method getMethod() {
+            return method;
         }
     }
 }

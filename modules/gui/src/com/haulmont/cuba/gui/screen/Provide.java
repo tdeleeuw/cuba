@@ -16,15 +16,26 @@
 
 package com.haulmont.cuba.gui.screen;
 
-/**
- * JavaDoc
- */
-public enum Target {
-    /**
-     * Default option.
-     */
-    COMPONENT,
+import org.springframework.core.annotation.AliasFor;
 
-    CONTROLLER,
-    FRAME
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@java.lang.annotation.Target(ElementType.METHOD)
+public @interface Provide {
+    Target target() default Target.COMPONENT;
+
+    @AliasFor("to")
+    String value() default "";
+
+    @AliasFor("value")
+    String to() default "";
+
+    Class type() default Object.class;
+
+    String subject() default "";
 }
