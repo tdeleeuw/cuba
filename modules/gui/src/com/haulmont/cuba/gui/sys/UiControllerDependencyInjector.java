@@ -60,13 +60,13 @@ import java.lang.reflect.*;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.lang.reflect.Proxy.newProxyInstance;
-import static org.apache.commons.lang3.reflect.MethodUtils.getAccessibleMethod;
 import static org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation;
 
 /**
@@ -117,69 +117,156 @@ public class UiControllerDependencyInjector {
         for (AnnotatedMethod<Provide> annotatedMethod : provideMethods) {
             Provide annotation = annotatedMethod.getAnnotation();
 
-            String target = ScreenDescriptorUtils.getInferredProvideId(annotation);
             Frame frame = UiControllerUtils.getFrame(frameOwner);
 
-            Object targetInstance;
-            if (Strings.isNullOrEmpty(target)) {
-                if (annotation.target() == Target.COMPONENT // if kept default value
-                        || annotation.target() == Target.CONTROLLER) {
-                    targetInstance = frameOwner;
-                } else if (annotation.target() == Target.FRAME) {
-                    targetInstance = frame;
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            } else {
-                // todo column generators, field generators, etc
-                targetInstance = frame.getComponent(target);
-
-                if (targetInstance == null) {
-                    throw new DevelopmentException(
-                            String.format("Unable to find @Provide target %s in %s", target, frame.getId()));
-                }
-            }
-
-            String targetMethodName;
-            if (Strings.isNullOrEmpty(annotation.subject()) && annotation.type() == Object.class) {
-                // todo default target method
-                targetMethodName = null;
-            } else if (annotation.type() != Object.class) {
-                targetMethodName = "set" + annotation.type().getSimpleName();
-            } else {
-                targetMethodName = "set" + StringUtils.capitalize(annotation.subject());
-            }
+            Object targetInstance = getProvideTargetInstance(frameOwner, annotation, frame);
 
             Class<?> instanceClass = targetInstance.getClass();
-            Method method = annotatedMethod.getMethod();
+            Method provideMethod = annotatedMethod.getMethod();
 
-            Method targetMethod = getAccessibleMethod(instanceClass, targetMethodName);
-            if (targetMethod == null) {
-                throw new DevelopmentException(
-                        String.format("Unable to find @Provide target method %s in %s", targetMethodName, frame.getId())
-                );
-            }
+            Method targetSetterMethod = getProvideTargetSetterMethod(annotation, frame, instanceClass, provideMethod);
+            Class<?> targetParameterType = targetSetterMethod.getParameterTypes()[0];
 
-            if (targetMethod.getParameterCount() != 1) {
-                throw new DevelopmentException("Target method of @Provide must have 1 parameter");
-            }
-
-            Class<?> targetObjectType = targetMethod.getParameterTypes()[0];
-            if (!targetObjectType.isInterface()) {
-                throw new DevelopmentException("@Provide target method parameter must be an interface");
-            }
-
-            // todo provide optimized version for Function
-            ClassLoader classLoader = getClass().getClassLoader();
-            Object proxy = newProxyInstance(classLoader, new Class[]{targetObjectType},
-                    new ProvideInvocationHandler(targetInstance, method)
-            );
+            Object handler = createProvideHandler(frameOwner, provideMethod, targetParameterType);
 
             try {
-                targetMethod.invoke(targetInstance, proxy);
+                targetSetterMethod.invoke(targetInstance, handler);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("Unable to set declarative @Provide handler for " + method, e);
+                throw new RuntimeException("Unable to set declarative @Provide handler for " + provideMethod, e);
             }
+        }
+    }
+
+    protected Method getProvideTargetSetterMethod(Provide annotation, Frame frame, Class<?> instanceClass, Method provideMethod) {
+        String subjectProperty;
+        if (Strings.isNullOrEmpty(annotation.subject()) && annotation.type() == Object.class) {
+            ProvideSubject provideSubjectAnnotation = findMergedAnnotation(instanceClass, ProvideSubject.class);
+            if (provideSubjectAnnotation != null) {
+                subjectProperty = provideSubjectAnnotation.value();
+            } else {
+                throw new DevelopmentException(
+                        String.format("Unable to determine @Provide subject of %s in %s", provideMethod, frame.getId())
+                );
+            }
+        } else if (annotation.type() != Object.class) {
+            subjectProperty = StringUtils.uncapitalize(annotation.type().getSimpleName());
+        } else {
+            subjectProperty = annotation.subject();
+        }
+
+        String subjectSetterName = "set" + StringUtils.capitalize(subjectProperty);
+        Method targetSetterMethod = reflectionInspector.getProvideTargetMethod(instanceClass, subjectSetterName);
+
+        if (targetSetterMethod == null) {
+            throw new DevelopmentException(
+                    String.format("Unable to find @Provide target method %s in %s", subjectProperty, instanceClass)
+            );
+        }
+
+        if (targetSetterMethod.getParameterCount() != 1) {
+            throw new DevelopmentException("Target method of @Provide must have 1 parameter: " + targetSetterMethod);
+        }
+
+        Class<?> targetParameterType = targetSetterMethod.getParameterTypes()[0];
+        if (!targetParameterType.isInterface()) {
+            throw new DevelopmentException("@Provide target method parameter must be an interface");
+        }
+
+        return targetSetterMethod;
+    }
+
+    protected Object getProvideTargetInstance(FrameOwner frameOwner, Provide annotation, Frame frame) {
+        Object targetInstance;
+        String target = ScreenDescriptorUtils.getInferredProvideId(annotation);
+        if (Strings.isNullOrEmpty(target)) {
+
+            switch (annotation.target()) {
+                // if kept default value
+                case COMPONENT:
+                case CONTROLLER:
+                    targetInstance = frameOwner;
+                    break;
+
+                case FRAME:
+                    targetInstance = frame;
+                    break;
+
+                case PARENT_CONTROLLER:
+                    if (frameOwner instanceof Screen) {
+                        throw new DevelopmentException(
+                                String.format("Screen %s cannot use @Provide with target = PARENT_CONTROLLER",
+                                        frame.getId())
+                        );
+                    }
+                    targetInstance = ((ScreenFragment) frameOwner).getParentController();
+                    break;
+
+                default:
+                    throw new UnsupportedOperationException("Unsupported @Provide target " + annotation.target());
+            }
+        } else {
+            targetInstance = findProvideTarget(target, frame);
+
+            if (targetInstance == null) {
+                throw new DevelopmentException(
+                        String.format("Unable to find @Provide target %s in %s", target, frame.getId()));
+            }
+        }
+        return targetInstance;
+    }
+
+    protected Object findProvideTarget(String target, Frame frame) {
+        String[] elements = ValuePathHelper.parse(target);
+        if (elements.length == 1) {
+            Object part = frame.getSubPart(target);
+            if (part != null) {
+                return part;
+            }
+
+            Component component = frame.getComponent(target);
+            if (component != null) {
+                return component;
+            }
+        } else if (elements.length > 1) {
+            String id = elements[elements.length - 1];
+
+            String[] subPath = ArrayUtils.subarray(elements, 0, elements.length - 1);
+            Component component = frame.getComponent(ValuePathHelper.format(subPath));
+
+            if (component != null) {
+                if (component instanceof HasSubParts) {
+                    Object part = ((HasSubParts) component).getSubPart(id);
+                    if (part != null) {
+                        return part;
+                    }
+                }
+
+                if (component instanceof ComponentContainer) {
+                    Component childComponent = ((ComponentContainer) component).getComponent(id);
+                    if (childComponent != null) {
+                        return childComponent;
+                    }
+                }
+            }
+        }
+
+        throw new DevelopmentException(String.format("Unable to find @Provide target %s in %s", target, frame.getId()));
+    }
+
+    protected Object createProvideHandler(FrameOwner frameOwner, Method method, Class<?> targetObjectType) {
+        if (targetObjectType == Function.class) {
+            return new ProvideInvocationFunction(frameOwner, method);
+        } else if (targetObjectType == Consumer.class) {
+            return new ProvideInvocationConsumer(frameOwner, method);
+        } else if (targetObjectType == Supplier.class) {
+            return new ProvideInvocationSupplier(frameOwner, method);
+        } else if (targetObjectType == BiFunction.class) {
+            return new ProvideInvocationBiFunction(frameOwner, method);
+        } else {
+            ClassLoader classLoader = getClass().getClassLoader();
+            return newProxyInstance(classLoader, new Class[]{targetObjectType},
+                    new ProvideInvocationProxyHandler(frameOwner, method)
+            );
         }
     }
 
@@ -195,11 +282,11 @@ public class UiControllerDependencyInjector {
     protected void initSubscribeListeners(FrameOwner frameOwner) {
         Class<? extends FrameOwner> clazz = frameOwner.getClass();
 
-        List<Method> eventListenerMethods = reflectionInspector.getAnnotatedSubscribeMethods(clazz);
+        List<AnnotatedMethod<Subscribe>> eventListenerMethods = reflectionInspector.getAnnotatedSubscribeMethods(clazz);
 
-        for (Method method : eventListenerMethods) {
-            Subscribe annotation = findMergedAnnotation(method, Subscribe.class);
-            checkState(annotation != null);
+        for (AnnotatedMethod<Subscribe> annotatedMethod : eventListenerMethods) {
+            Method method = annotatedMethod.getMethod();
+            Subscribe annotation = annotatedMethod.getAnnotation();
 
             Consumer listener = new DeclarativeSubscribeExecutor(frameOwner, method);
 
@@ -208,27 +295,43 @@ public class UiControllerDependencyInjector {
             Parameter parameter = method.getParameters()[0];
             Class<?> parameterType = parameter.getType();
 
+            Frame frame = UiControllerUtils.getFrame(frameOwner);
+
             if (Strings.isNullOrEmpty(target)) {
-                if (annotation.target() == Target.COMPONENT // if kept default value
-                        || annotation.target() == Target.CONTROLLER) {
-                    // controller event
-                    UiControllerUtils.addListener(frameOwner, parameterType, listener);
-                } else if (annotation.target() == Target.FRAME) {
-                    // window or fragment event
-                    Frame frame = UiControllerUtils.getFrame(frameOwner);
-                    ((EventTarget) frame).addListener(parameterType, listener);
+                switch (annotation.target()) {
+                    // if kept default value
+                    case COMPONENT:
+                    case CONTROLLER:
+                        UiControllerUtils.addListener(frameOwner, parameterType, listener);
+                        break;
+
+                    case FRAME:
+                        ((EventTarget) frame).addListener(parameterType, listener);
+                        break;
+
+                    case PARENT_CONTROLLER:
+                        if (frameOwner instanceof Screen) {
+                            throw new DevelopmentException(
+                                    String.format("Screen %s cannot use @Subscribe with target = PARENT_CONTROLLER",
+                                            frame.getId())
+                            );
+                        }
+                        FrameOwner parentController = ((ScreenFragment) frameOwner).getParentController();
+                        UiControllerUtils.addListener(parentController, parameterType, listener);
+                        break;
+
+                    default:
+                        throw new UnsupportedOperationException("Unsupported @Subscribe target " + annotation.target());
                 }
             } else {
                 // component event
-                EventTarget component = findEventTarget(frameOwner, target);
+                EventTarget component = findEventTarget(frame, target);
                 component.addListener(parameterType, listener);
             }
         }
     }
 
-    protected EventTarget findEventTarget(FrameOwner frameOwner, String target) {
-        Frame frame = UiControllerUtils.getFrame(frameOwner);
-
+    protected EventTarget findEventTarget(Frame frame, String target) {
         String[] elements = ValuePathHelper.parse(target);
         if (elements.length > 1) {
             String id = elements[elements.length - 1];
@@ -237,10 +340,10 @@ public class UiControllerDependencyInjector {
             Component component = frame.getComponent(ValuePathHelper.format(subPath));
 
             if (component != null) {
-                if (component instanceof ActionsHolder) {
-                    Action action = ((ActionsHolder) component).getAction(id);
-                    if (action instanceof EventTarget) {
-                        return (EventTarget) action;
+                if (component instanceof HasSubParts) {
+                    Object part = ((HasSubParts) component).getSubPart(id);
+                    if (part instanceof EventTarget) {
+                        return (EventTarget) part;
                     }
                 }
 
@@ -252,9 +355,9 @@ public class UiControllerDependencyInjector {
                 }
             }
         } else if (elements.length == 1) {
-            Action action = frame.getAction(target);
-            if (action instanceof EventTarget) {
-                return (EventTarget) action;
+            Object part = frame.getSubPart(target);
+            if (part instanceof EventTarget) {
+                return (EventTarget) part;
             }
 
             Component component = frame.getComponent(target);
@@ -542,32 +645,152 @@ public class UiControllerDependencyInjector {
     }
 
     public static class ProvideInvocationFunction implements Function {
-        private final Object targetInstance;
+        private final FrameOwner frameOwner;
         private final Method method;
 
-        public ProvideInvocationFunction(Object targetInstance, Method method) {
-            this.targetInstance = targetInstance;
+        public ProvideInvocationFunction(FrameOwner frameOwner, Method method) {
+            this.frameOwner = frameOwner;
             this.method = method;
         }
 
         @Override
         public Object apply(Object o) {
-            return null;
+            try {
+                return method.invoke(frameOwner, o);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Exception on @Provide invocation", e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ProvideInvocationFunction{" +
+                    "frameOwner=" + frameOwner.getClass() +
+                    ", method=" + method +
+                    '}';
         }
     }
 
-    public static class ProvideInvocationHandler implements InvocationHandler {
-        private final Object targetInstance;
+    public static class ProvideInvocationConsumer implements Consumer {
+        private final FrameOwner frameOwner;
         private final Method method;
 
-        public ProvideInvocationHandler(Object targetInstance, Method method) {
-            this.targetInstance = targetInstance;
+        public ProvideInvocationConsumer(FrameOwner frameOwner, Method method) {
+            this.frameOwner = frameOwner;
             this.method = method;
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            return null;
+        public void accept(Object o) {
+            try {
+                method.invoke(frameOwner, o);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Exception on @Provide invocation", e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ProvideInvocationConsumer{" +
+                    "frameOwner=" + frameOwner.getClass() +
+                    ", method=" + method +
+                    '}';
+        }
+    }
+
+    public static class ProvideInvocationSupplier implements Supplier {
+        private final FrameOwner frameOwner;
+        private final Method method;
+
+        public ProvideInvocationSupplier(FrameOwner frameOwner, Method method) {
+            this.frameOwner = frameOwner;
+            this.method = method;
+        }
+
+        @Override
+        public Object get() {
+            try {
+                return method.invoke(frameOwner);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Exception on @Provide invocation", e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ProvideInvocationSupplier{" +
+                    "target=" + frameOwner.getClass() +
+                    ", method=" + method +
+                    '}';
+        }
+    }
+
+    public static class ProvideInvocationBiFunction implements BiFunction {
+        private final FrameOwner frameOwner;
+        private final Method method;
+
+        public ProvideInvocationBiFunction(FrameOwner frameOwner, Method method) {
+            this.frameOwner = frameOwner;
+            this.method = method;
+        }
+
+        @Override
+        public Object apply(Object o1, Object o2) {
+            try {
+                return method.invoke(frameOwner, o1, o2);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Exception on @Provide invocation", e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ProvideInvocationBiFunction{" +
+                    "frameOwner=" + frameOwner.getClass() +
+                    ", method=" + method +
+                    '}';
+        }
+    }
+
+    public static class ProvideInvocationProxyHandler implements InvocationHandler {
+        private final FrameOwner frameOwner;
+        private final Method method;
+
+        public ProvideInvocationProxyHandler(FrameOwner frameOwner, Method method) {
+            this.frameOwner = frameOwner;
+            this.method = method;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method invokedMethod, Object[] args) throws Throwable {
+            if ("toString".equals(invokedMethod.getName())) {
+                return this.toString();
+            }
+            if ("equals".equals(invokedMethod.getName())) {
+                return args.length == 1 && args[0] == proxy;
+            }
+            if ("hashCode".equals(invokedMethod.getName())) {
+                return this.hashCode();
+            }
+
+            if (invokedMethod.getName().equals(method.getName())
+                    && invokedMethod.getParameterCount() == method.getParameterCount()) {
+                try {
+                    return this.method.invoke(frameOwner, args);
+                } catch (InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
+            }
+
+            throw new UnsupportedOperationException("ProvideInvocationProxyHandler does not support method " + invokedMethod);
+        }
+
+        @Override
+        public String toString() {
+            return "ProvideInvocationProxyHandler{" +
+                    "frameOwner=" + frameOwner.getClass() +
+                    ", method=" + method +
+                    '}';
         }
     }
 }

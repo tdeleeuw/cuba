@@ -41,7 +41,7 @@ import static com.haulmont.cuba.gui.components.MouseEventDetails.MouseButton;
 
 public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtonsPanel, Component.HasCaption,
         Component.HasIcon, HasContextHelp, HasRowsCount, HasSettings,
-        LookupComponent, Component.Focusable {
+        LookupComponent, Component.Focusable, HasSubParts {
 
     String NAME = "dataGrid";
 
@@ -2386,6 +2386,17 @@ public interface DataGrid<E extends Entity> extends ListComponent<E>, HasButtons
      * @return row count
      */
     int getFooterRowCount();
+
+    @Nullable
+    @Override
+    default Object getSubPart(String name) {
+        Column<E> column = getColumn(name);
+        if (column != null) {
+            return column;
+        }
+
+        return getAction(name);
+    }
 
     /**
      * A column in the DataGrid.
