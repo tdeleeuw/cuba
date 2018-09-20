@@ -138,6 +138,9 @@ public class CubaScrollTableConnector extends TableConnector {
         if (stateChangeEvent.hasPropertyChanged("tableSortDescendingLabel")) {
             getWidget()._delegate.tableSortDescendingLabel = getState().tableSortDescendingLabel;
         }
+        if (stateChangeEvent.hasPropertyChanged("captionAsHtml")) {
+            getWidget().setCaptionAsHtml(getState().captionAsHtml);
+        }
     }
 
     @Override

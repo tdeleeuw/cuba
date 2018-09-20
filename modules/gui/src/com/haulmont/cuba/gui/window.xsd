@@ -809,6 +809,13 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:simpleType name="tableCaptionContentMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="PLAIN"/>
+            <xs:enumeration value="HTML"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <!-- Interfaces -->
 
     <xs:attributeGroup name="hasId">
@@ -982,6 +989,7 @@
         <xs:attribute name="presentations" type="xs:boolean"/>
         <xs:attribute name="contextMenuEnabled" type="xs:boolean"/>
         <xs:attribute name="multiLineCells" type="xs:boolean"/>
+        <xs:attribute name="captionContentMode" type="tableCaptionContentMode"/>
     </xs:attributeGroup>
 
     <xs:attributeGroup name="isLayoutComponent">

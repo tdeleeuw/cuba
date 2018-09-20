@@ -279,6 +279,36 @@ public interface Table<E extends Entity>
         return getAction(name);
     }
 
+    /**
+     * Sets whether HTML is allowed in column captions or not.
+     * <p>
+     * {@link Table.CaptionContentMode#PLAIN} is the default.
+     *
+     * @param mode caption content mode
+     */
+    void setCaptionContentMode(CaptionContentMode mode);
+
+    /**
+     * @return whether HTML is allowed in column captions or not
+     */
+    CaptionContentMode getCaptionContentMode();
+
+    /**
+     * Defines whether HTML is allowed in column captions or not.
+     */
+    enum CaptionContentMode {
+
+        /**
+         * Captions are interpreted as a plain text.
+         */
+        PLAIN,
+
+        /**
+         * Captions are interpreted as HTML content.
+         */
+        HTML
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**

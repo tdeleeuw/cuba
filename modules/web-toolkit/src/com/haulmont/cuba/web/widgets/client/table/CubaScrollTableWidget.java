@@ -55,6 +55,7 @@ import static com.haulmont.cuba.web.widgets.client.tableshared.TableWidgetDelega
 public class CubaScrollTableWidget extends VScrollTable implements TableWidget {
 
     public TableWidgetDelegate _delegate = new TableWidgetDelegate(this, this);
+    protected boolean captionAsHtml = false;
 
     protected CubaScrollTableWidget() {
         // handle shortcuts
@@ -344,6 +345,10 @@ public class CubaScrollTableWidget extends VScrollTable implements TableWidget {
         return rowRequestHandler;
     }
 
+    public void setCaptionAsHtml(boolean captionAsHtml) {
+        this.captionAsHtml = captionAsHtml;
+    }
+
     protected class CubaScrollTableHead extends TableHead {
 
         protected final SimplePanel presentationsEditIcon = GWT.create(SimplePanel.class);
@@ -428,11 +433,16 @@ public class CubaScrollTableWidget extends VScrollTable implements TableWidget {
 
         @Override
         public void setText(String headerText) {
-            if ("".equals(headerText) || headerText == null) {
-                headerText = "&nbsp;";
+            if (headerText == null || "".equals(headerText)) {
+                super.setText("&nbsp;");
+                return;
             }
 
-            super.setText(headerText);
+            if (captionAsHtml) {
+                DOM.setInnerHTML(captionContainer, headerText);
+            } else {
+                DOM.setInnerText(captionContainer, headerText);
+            }
         }
 
         @Override

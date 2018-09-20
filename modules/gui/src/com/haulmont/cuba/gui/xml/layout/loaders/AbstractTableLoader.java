@@ -97,6 +97,8 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         loadTextSelectionEnabled(resultComponent, element);
         loadResponsive(resultComponent, element);
 
+        loadCaptionContentMode(resultComponent, element);
+
         Element columnsElement = element.element("columns");
         Element rowsElement = element.element("rows");
 
@@ -200,6 +202,14 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         String multiselect = element.attributeValue("multiselect");
         if (StringUtils.isNotEmpty(multiselect)) {
             resultComponent.setMultiSelect(Boolean.parseBoolean(multiselect));
+        }
+    }
+
+    protected void loadCaptionContentMode(Table component, Element element) {
+        String ccm = element.attributeValue("captionContentMode");
+        if (ccm != null && !ccm.isEmpty()) {
+            Table.CaptionContentMode captionContentMode = Table.CaptionContentMode.valueOf(ccm);
+            component.setCaptionContentMode(captionContentMode);
         }
     }
 
