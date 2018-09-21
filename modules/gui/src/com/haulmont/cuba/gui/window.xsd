@@ -809,13 +809,6 @@
         </xs:restriction>
     </xs:simpleType>
 
-    d<xs:simpleType name="tableHeaderContentMode">
-        <xs:restriction base="xs:string">
-            <xs:enumeration value="PLAIN"/>
-            <xs:enumeration value="HTML"/>
-        </xs:restriction>
-    </xs:simpleType>
-
     <!-- Interfaces -->
 
     <xs:attributeGroup name="hasId">
@@ -989,7 +982,6 @@
         <xs:attribute name="presentations" type="xs:boolean"/>
         <xs:attribute name="contextMenuEnabled" type="xs:boolean"/>
         <xs:attribute name="multiLineCells" type="xs:boolean"/>
-        <xs:attribute name="headerContentMode" type="tableHeaderContentMode"/>
     </xs:attributeGroup>
 
     <xs:attributeGroup name="isLayoutComponent">
@@ -2045,6 +2037,7 @@
         <xs:attribute name="sortable" type="xs:boolean"/>
         <xs:attribute name="maxTextLength" type="xs:integer"/>
         <xs:attribute name="align" type="columnAlignment"/>
+        <xs:attribute name="captionAsHtml" type="xs:boolean"/>
 
         <!-- Show entity reference as clickable link -->
         <xs:attribute name="link" type="xs:boolean"/>

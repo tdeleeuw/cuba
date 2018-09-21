@@ -429,6 +429,8 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
 
         setColumnHeader(columnId, getColumnCaption(columnId, column));
 
+        component.setColumnCaptionAsHtml(columnId, column.getCaptionAsHtml());
+
         column.setOwner(this);
 
         MetaPropertyPath propertyPath = column.getBoundProperty();
@@ -2165,6 +2167,43 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
         setColumnWidth(column, width);
     }
 
+    @Override
+    public void setColumnCaptionAsHtml(String columnId, boolean captionAsHtml) {
+        Column<E> column = getColumn(columnId);
+        if (column == null) {
+            throw new IllegalStateException(String.format("Column with id '%s' not found", columnId));
+        }
+
+        setColumnCaptionAsHtml(column, captionAsHtml);
+    }
+
+    @Override
+    public void setColumnCaptionAsHtml(Column column, boolean captionAsHtml) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        if (column.getCaptionAsHtml() != captionAsHtml) {
+            column.setCaptionAsHtml(captionAsHtml);
+        }
+        component.setColumnCaptionAsHtml(column.getId(), captionAsHtml);
+    }
+
+    @Override
+    public boolean getColumnCaptionAsHtml(String columnId) {
+        Column<E> column = getColumn(columnId);
+        if (column == null) {
+            throw new IllegalStateException(String.format("Column with id '%s' not found", columnId));
+        }
+
+        return getColumnCaptionAsHtml(column);
+    }
+
+    @Override
+    public boolean getColumnCaptionAsHtml(Column column) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        return component.getColumnCaptionAsHtml(column.getId());
+    }
+
     @Deprecated
     @Override
     public void refresh() {
@@ -2699,17 +2738,5 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
             currentInstance = currentValue instanceof Instance ? (Instance) currentValue : null;
         }
         return currentValue;
-    }
-
-    @Override
-    public void setHeaderContentMode(HeaderContentMode mode) {
-        Preconditions.checkNotNullArgument(mode, "Header content mode cannot be null");
-
-        component.setCaptionAsHtml(mode == HeaderContentMode.HTML);
-    }
-
-    @Override
-    public HeaderContentMode getHeaderContentMode() {
-        return component.isCaptionAsHtml() ? HeaderContentMode.HTML : HeaderContentMode.PLAIN;
     }
 }

@@ -199,6 +199,36 @@ public interface Table<E extends Entity>
     boolean getColumnSortable(Column column);
 
     /**
+     * Sets whether caption of column with the given {@code columnId} should be interpreted as HTML or not.
+     *
+     * @param columnId      column id
+     * @param captionAsHtml interpret caption as HTML or not
+     */
+    void setColumnCaptionAsHtml(String columnId, boolean captionAsHtml);
+
+    /**
+     * Sets whether caption of the given {@code column} should be interpreted as HTML or not.
+     *
+     * @param column        column
+     * @param captionAsHtml interpret caption as HTML or not
+     */
+    void setColumnCaptionAsHtml(Table.Column column, boolean captionAsHtml);
+
+    /**
+     * @param columnId column id
+     *
+     * @return whether caption of column with the given {@code columnId} should be interpreted as HTML or not
+     */
+    boolean getColumnCaptionAsHtml(String columnId);
+
+    /**
+     * @param column column
+     *
+     * @return whether caption of the given {@code column} should be interpreted as HTML or not
+     */
+    boolean getColumnCaptionAsHtml(Table.Column column);
+
+    /**
      * Set focus on inner field of editable/generated column.
      *
      * @param entity   entity
@@ -277,36 +307,6 @@ public interface Table<E extends Entity>
         }
 
         return getAction(name);
-    }
-
-    /**
-     * Sets whether HTML is allowed in table header or not.
-     * <p>
-     * {@link HeaderContentMode#PLAIN} is the default.
-     *
-     * @param mode header content mode
-     */
-    void setHeaderContentMode(HeaderContentMode mode);
-
-    /**
-     * @return whether HTML is allowed in table header or not
-     */
-    HeaderContentMode getHeaderContentMode();
-
-    /**
-     * Defines whether HTML is allowed in table header or not.
-     */
-    enum HeaderContentMode {
-
-        /**
-         * Column captions are interpreted as a plain text.
-         */
-        PLAIN,
-
-        /**
-         * Column captions are interpreted as HTML content.
-         */
-        HTML
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -733,6 +733,7 @@ public interface Table<E extends Entity>
         protected boolean calculatable;
         protected Integer maxTextLength;
         protected ColumnAlignment alignment;
+        protected boolean captionAsHtml;
 
         protected Function<T, Object> valueProvider; // todo
 
@@ -1000,6 +1001,25 @@ public interface Table<E extends Entity>
         @Override
         public String toString() {
             return id == null ? super.toString() : id.toString();
+        }
+
+        /**
+         * Sets whether column caption should be interpreted as HTML or not.
+         *
+         * @param captionAsHtml interpret caption as HTML
+         */
+        public void setCaptionAsHtml(boolean captionAsHtml) {
+            this.captionAsHtml = captionAsHtml;
+            if (owner != null) {
+                owner.setColumnCaptionAsHtml(this, captionAsHtml);
+            }
+        }
+
+        /**
+         * @return whether column caption should be interpreted as HTML or not
+         */
+        public boolean getCaptionAsHtml() {
+            return captionAsHtml;
         }
     }
 

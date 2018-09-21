@@ -162,8 +162,7 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
 
     protected List<LookupSelectionChangeListener> lookupSelectionChangeListeners = new ArrayList<>();
 
-    // just stub
-    protected HeaderContentMode headerContentMode = HeaderContentMode.PLAIN;
+    protected Set<Object> htmlCaptionColumnIds; // lazily initialized set
 
     protected DesktopAbstractTable() {
         shortcutsDelegate.setAllowEnterShortcut(false);
@@ -1735,6 +1734,56 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
         setColumnWidth(column, width);
     }
 
+    // just stub
+    @Override
+    public void setColumnCaptionAsHtml(String columnId, boolean captionAsHtml) {
+        Column column = getColumn(columnId);
+        if (column == null) {
+            throw new IllegalStateException(String.format("Column with id '%s' not found", columnId));
+        }
+
+        setColumnCaptionAsHtml(column, captionAsHtml);
+    }
+
+    // just stub
+    @Override
+    public void setColumnCaptionAsHtml(Column column, boolean captionAsHtml) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        if (column.getCaptionAsHtml() != captionAsHtml) {
+            column.setCaptionAsHtml(captionAsHtml);
+        }
+
+        if (htmlCaptionColumnIds == null) {
+            htmlCaptionColumnIds = new HashSet<>();
+        }
+
+        if (captionAsHtml) {
+            htmlCaptionColumnIds.add(column.getId());
+        } else {
+            htmlCaptionColumnIds.remove(column.getId());
+        }
+    }
+
+    // just stub
+    @Override
+    public boolean getColumnCaptionAsHtml(String columnId) {
+        Column column = getColumn(columnId);
+        if (column == null) {
+            throw new IllegalStateException(String.format("Column with id '%s' not found", columnId));
+        }
+
+        return getColumnCaptionAsHtml(column);
+    }
+
+    // just stub
+    @Override
+    public boolean getColumnCaptionAsHtml(Column column) {
+        checkNotNullArgument(column, "Column must be non null");
+
+        return htmlCaptionColumnIds == null || htmlCaptionColumnIds.contains(column.getId());
+    }
+
     @Override
     public void addPrintable(String columnId, Printable<? super E, ?> printable) {
         printables.put(columnId, printable);
@@ -2468,20 +2517,6 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
     @Override
     public void removeLookupValueChangeListener(LookupSelectionChangeListener listener) {
         lookupSelectionChangeListeners.remove(listener);
-    }
-
-    // just stub
-    @Override
-    public void setHeaderContentMode(HeaderContentMode mode) {
-        Preconditions.checkNotNullArgument(mode, "Header content mode cannot be null");
-
-        headerContentMode = mode;
-    }
-
-    // just stub
-    @Override
-    public HeaderContentMode getHeaderContentMode() {
-        return headerContentMode;
     }
 
     /**

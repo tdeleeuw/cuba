@@ -97,8 +97,6 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         loadTextSelectionEnabled(resultComponent, element);
         loadResponsive(resultComponent, element);
 
-        loadHeaderContentMode(resultComponent, element);
-
         Element columnsElement = element.element("columns");
         Element rowsElement = element.element("rows");
 
@@ -202,14 +200,6 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         String multiselect = element.attributeValue("multiselect");
         if (StringUtils.isNotEmpty(multiselect)) {
             resultComponent.setMultiSelect(Boolean.parseBoolean(multiselect));
-        }
-    }
-
-    protected void loadHeaderContentMode(Table component, Element element) {
-        String hcm = element.attributeValue("headerContentMode");
-        if (hcm != null && !hcm.isEmpty()) {
-            Table.HeaderContentMode headerContentMode = Table.HeaderContentMode.valueOf(hcm);
-            component.setHeaderContentMode(headerContentMode);
         }
     }
 
@@ -486,8 +476,16 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         loadAggregation(column, element);
         loadCalculatable(column, element);
         loadMaxTextLength(column, element);
+        loadCaptionAsHtml(column, element);
 
         return column;
+    }
+
+    protected void loadCaptionAsHtml(Table.Column component, Element element) {
+        String captionAsHtml = element.attributeValue("captionAsHtml");
+        if (captionAsHtml != null && !captionAsHtml.isEmpty()) {
+            component.setCaptionAsHtml(Boolean.parseBoolean(captionAsHtml));
+        }
     }
 
     protected void loadAggregation(Table.Column column, Element columnElement) {
