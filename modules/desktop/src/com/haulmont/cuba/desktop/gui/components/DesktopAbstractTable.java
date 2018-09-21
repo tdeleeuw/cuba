@@ -163,7 +163,7 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
     protected List<LookupSelectionChangeListener> lookupSelectionChangeListeners = new ArrayList<>();
 
     // just stub
-    protected CaptionContentMode captionContentMode = CaptionContentMode.PLAIN;
+    protected HeaderContentMode headerContentMode = HeaderContentMode.PLAIN;
 
     protected DesktopAbstractTable() {
         shortcutsDelegate.setAllowEnterShortcut(false);
@@ -2472,16 +2472,16 @@ public abstract class DesktopAbstractTable<C extends JXTable, E extends Entity>
 
     // just stub
     @Override
-    public void setCaptionContentMode(CaptionContentMode mode) {
-        Preconditions.checkNotNullArgument(mode, "Caption content mode cannot be null");
+    public void setHeaderContentMode(HeaderContentMode mode) {
+        Preconditions.checkNotNullArgument(mode, "Header content mode cannot be null");
 
-        captionContentMode = mode;
+        headerContentMode = mode;
     }
 
     // just stub
     @Override
-    public CaptionContentMode getCaptionContentMode() {
-        return captionContentMode;
+    public HeaderContentMode getHeaderContentMode() {
+        return headerContentMode;
     }
 
     /**

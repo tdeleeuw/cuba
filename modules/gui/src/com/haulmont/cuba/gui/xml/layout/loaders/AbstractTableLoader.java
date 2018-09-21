@@ -97,7 +97,7 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         loadTextSelectionEnabled(resultComponent, element);
         loadResponsive(resultComponent, element);
 
-        loadCaptionContentMode(resultComponent, element);
+        loadHeaderContentMode(resultComponent, element);
 
         Element columnsElement = element.element("columns");
         Element rowsElement = element.element("rows");
@@ -205,11 +205,11 @@ public abstract class AbstractTableLoader<T extends Table> extends ActionsHolder
         }
     }
 
-    protected void loadCaptionContentMode(Table component, Element element) {
-        String ccm = element.attributeValue("captionContentMode");
-        if (ccm != null && !ccm.isEmpty()) {
-            Table.CaptionContentMode captionContentMode = Table.CaptionContentMode.valueOf(ccm);
-            component.setCaptionContentMode(captionContentMode);
+    protected void loadHeaderContentMode(Table component, Element element) {
+        String hcm = element.attributeValue("headerContentMode");
+        if (hcm != null && !hcm.isEmpty()) {
+            Table.HeaderContentMode headerContentMode = Table.HeaderContentMode.valueOf(hcm);
+            component.setHeaderContentMode(headerContentMode);
         }
     }
 

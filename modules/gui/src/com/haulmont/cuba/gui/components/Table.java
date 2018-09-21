@@ -280,31 +280,31 @@ public interface Table<E extends Entity>
     }
 
     /**
-     * Sets whether HTML is allowed in column captions or not.
+     * Sets whether HTML is allowed in table header or not.
      * <p>
-     * {@link Table.CaptionContentMode#PLAIN} is the default.
+     * {@link HeaderContentMode#PLAIN} is the default.
      *
-     * @param mode caption content mode
+     * @param mode header content mode
      */
-    void setCaptionContentMode(CaptionContentMode mode);
+    void setHeaderContentMode(HeaderContentMode mode);
 
     /**
-     * @return whether HTML is allowed in column captions or not
+     * @return whether HTML is allowed in table header or not
      */
-    CaptionContentMode getCaptionContentMode();
+    HeaderContentMode getHeaderContentMode();
 
     /**
-     * Defines whether HTML is allowed in column captions or not.
+     * Defines whether HTML is allowed in table header or not.
      */
-    enum CaptionContentMode {
+    enum HeaderContentMode {
 
         /**
-         * Captions are interpreted as a plain text.
+         * Column captions are interpreted as a plain text.
          */
         PLAIN,
 
         /**
-         * Captions are interpreted as HTML content.
+         * Column captions are interpreted as HTML content.
          */
         HTML
     }

@@ -2702,14 +2702,14 @@ public abstract class WebAbstractTable<T extends com.vaadin.v7.ui.Table & CubaEn
     }
 
     @Override
-    public void setCaptionContentMode(CaptionContentMode mode) {
-        Preconditions.checkNotNullArgument(mode, "Caption content mode cannot be null");
+    public void setHeaderContentMode(HeaderContentMode mode) {
+        Preconditions.checkNotNullArgument(mode, "Header content mode cannot be null");
 
-        component.setCaptionAsHtml(mode == CaptionContentMode.HTML);
+        component.setCaptionAsHtml(mode == HeaderContentMode.HTML);
     }
 
     @Override
-    public CaptionContentMode getCaptionContentMode() {
-        return component.isCaptionAsHtml() ? CaptionContentMode.HTML : CaptionContentMode.PLAIN;
+    public HeaderContentMode getHeaderContentMode() {
+        return component.isCaptionAsHtml() ? HeaderContentMode.HTML : HeaderContentMode.PLAIN;
     }
 }

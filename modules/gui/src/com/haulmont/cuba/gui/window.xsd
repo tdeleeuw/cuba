@@ -809,7 +809,7 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:simpleType name="tableCaptionContentMode">
+    d<xs:simpleType name="tableHeaderContentMode">
         <xs:restriction base="xs:string">
             <xs:enumeration value="PLAIN"/>
             <xs:enumeration value="HTML"/>
@@ -989,7 +989,7 @@
         <xs:attribute name="presentations" type="xs:boolean"/>
         <xs:attribute name="contextMenuEnabled" type="xs:boolean"/>
         <xs:attribute name="multiLineCells" type="xs:boolean"/>
-        <xs:attribute name="captionContentMode" type="tableCaptionContentMode"/>
+        <xs:attribute name="headerContentMode" type="tableHeaderContentMode"/>
     </xs:attributeGroup>
 
     <xs:attributeGroup name="isLayoutComponent">
