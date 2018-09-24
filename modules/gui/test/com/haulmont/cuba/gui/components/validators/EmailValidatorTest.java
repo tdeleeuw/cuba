@@ -17,22 +17,38 @@
 
 package com.haulmont.cuba.gui.components.validators;
 
+import com.haulmont.cuba.gui.components.ValidationException;
 import junit.framework.TestCase;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 public class EmailValidatorTest extends TestCase {
+    protected ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
+    private EmailValidator instance = new EmailValidator();
 
-    private Pattern pattern = Pattern.compile(EmailValidator.EMAIL_PATTERN);
+    /**
+     * Sets up the fixture, for example, open a network connection.
+     * This method is called before a test is executed.
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+    // Some examples are taken from Wikipedia https://en.wikipedia.org/wiki/Email_address
 
-    public void testValidate() throws Exception {
+    public void testValidate() {
         String[] validEmails = {
+                "\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com",
+                "\"()<>[]:,;@\\\"!#$%&'-/=?^_`{}| ~.a#\"@example.org",
+                "\" \"@example.org",
                 "selenium@google.com",
+                "selenium#@google.com",
                 "a@mail.ru",
+                "Jhon.Doe+cuba.platform@gmail.com",
                 "test@pegas.travel",
                 "yuriy.pavlov@r7.com",
                 "yuriy-p@mail.ru",
+                "yuriy-@mail.ru",
                 "test@int64.ru",
                 "y_pavlov@mail.ru",
                 "abc@hotmail.co.uk",
@@ -52,43 +68,72 @@ public class EmailValidatorTest extends TestCase {
                 "admin@tes-t.mg.gov.com",
                 "admin@tes-t.mg.g-o-v.com",
                 "admin@te-st.m-g.gov.com",
+                "test@pegas.travelersessolong",
+                "simple@example.com",
+                "very.common@example.com",
+                "disposable.style.email.with+symbol@example.com",
+                "_pavlov@mail.ru",
+                "other.email-with-hyphen@example.com",
+                "fully-qualified-domain@example.com",
+                "user.name+tag+sorting@example.com",
+                "x@example.com",
+                "example-indeed@strange-example.com",
+                "admin@mailserver1",
+                "#!$%&'*+-/=?^_`{}|~@example.org",
+                "example@s.example",
+                "user@[2001:DB8::1]",
+                "test@i--i.ru",
                 "admin@t-est.m-g.go-v.com"
         };
 
         for (String validEmail : validEmails) {
-            assertTrue("Invalid: " + validEmail, pattern.matcher(validEmail).matches());
+            try {
+                instance.validate(validEmail);
+            } catch (ValidationException ve) {
+                fail("email '" + validEmail + "' is incorrectly reported invalid");
+            }
         }
     }
 
-    public void testValidateFail() throws Exception {
+    public void testValidateFail() {
         String[] invalidEmails = {
-                "selenium#@google.com",
                 "@mail.ru",
-                "test@pegas.travelersessolong",
+                ".test@mail.ru",
+                "test..test@mail.ru",
+                "test.test.@mail.ru",
                 "yuriy.@mail.ru",
-                "yuriy-@mail.ru",
-                "_pavlov@mail.ru",
                 "Abc.example.com",
-                "just\"not\"right@example.com",
                 "_pavlov@-mail.ru",
+                "just\"not\"right@example.com",
                 "pavlov@mail-.ru",
                 "pavlov@-mail-.ru",
                 "test@-i.com",
                 "test@i-.ru",
                 "test@-i-.com",
-                "test@i--i.ru",
                 ".email@test.com",
                 "email.@test.com",
                 ".email.@test.com",
                 "admin@test-.mg.gov.com",
                 "admin@tes-t.-mg.g--ov.com",
                 "admin@te-st.m-g.-gov-.com",
+                "Abc.example.com",
+                "A @b@c@example.com",
+                "a\"b(c)d,e:f;g<h>i[j\\k]l@example.com",
+                "this is\"not\\allowed@example.com",
+                "this\\ still\\\"not\\\\allowed@example.com",
+                "1234567890123456789012345678901234567890123456789012345678901234+x@example.com",
+                "john..doe@example.com",
+                "john.doe@example..com",
                 "admin@t-est.m-g-.go-v.com"
         };
 
         for (String invalidEmail : invalidEmails) {
-            Matcher m = pattern.matcher(invalidEmail);
-            assertFalse("Valid: " + invalidEmail, m.matches());
+            try {
+                instance.validate(invalidEmail);
+                fail("email '" + invalidEmail + "' is incorrectly reported valid");
+            } catch (ValidationException ve) {
+                // This is expected
+            }
         }
     }
 }
