@@ -40,6 +40,7 @@ public class EmailValidatorTest extends TestCase {
         String[] validEmails = {
                 "\"very.(),:;<>[]\\\".VERY.\\\"very@\\\\ \\\"very\\\".unusual\"@strange.example.com",
                 "\"()<>[]:,;@\\\"!#$%&'-/=?^_`{}| ~.a#\"@example.org",
+                "\"(Test) \"@example.org",
                 "\" \"@example.org",
                 "selenium@google.com",
                 "selenium#@google.com",
@@ -97,6 +98,12 @@ public class EmailValidatorTest extends TestCase {
 
     public void testValidateFail() {
         String[] invalidEmails = {
+                "\"(Test)test) \"@example.org",
+                "\"Test) \"@example.org",
+                "\"(Test \"@example.org",
+                "\"(Test \"@example.org",
+                "\"(etetst(Test) \"@example.org",
+                "\"Invalid escape \\t\"@example.org",
                 "@mail.ru",
                 ".test@mail.ru",
                 "test..test@mail.ru",

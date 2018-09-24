@@ -198,7 +198,7 @@ public class EmailValidator implements Field.Validator {
             }
         }
 
-        return true;
+        return parenthesisCount == 0;
     }
 
     /**
